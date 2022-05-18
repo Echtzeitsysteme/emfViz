@@ -2,6 +2,8 @@ package graphVisualization;
 
 import java.awt.Frame;
 import java.awt.Point;
+import java.awt.Polygon;
+import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
@@ -262,11 +264,7 @@ public class Visualizer {
 				System.out.println("Node grid position not found");
 				nearestGridPoint = new mxPoint(position.x, position.y);						
 			}
-					
-			//System.out.println("Final pos: " + nearestGridPoint.toString());
-			
-			
-			//System.out.println("Old geom: " + c.getGeometry().toString() + " With rectangle: "+ c.getGeometry().getRectangle().toString());
+	
 			
 			Object[] cellsToMove = {cell};				
 			graph.moveCells(cellsToMove,  nearestGridPoint.getX() - geom.getX(), nearestGridPoint.getY() - geom.getY());
@@ -426,6 +424,136 @@ public class Visualizer {
 			
 		}
 		
+	}
+	
+	
+	private class EdgePlannerThread extends Thread{
+		
+		private double workingAreaHeightMargin = 30;
+		private double workingAreaWidthMargin = 60;
+		
+		private List<Area> activeAreas;
+		private HashMap<String, ArrayList<mxPoint>> plottedEdges;
+		
+		private mxGraphModel graphModel;
+		private Grid nodeGrid;
+		private Grid edgeGrid;
+		private mxICell node;
+		
+		public EdgePlannerThread(mxGraphModel graphModel, Grid nodeGrid, Grid edgeGrid, mxICell cell, HashMap<String, ArrayList<mxPoint>> plottedEdges, List<Area> activeAreas) {
+			this.graphModel = graphModel;
+			this.nodeGrid = nodeGrid;
+			this.edgeGrid = edgeGrid;
+			this.node = cell;
+			
+			this.plottedEdges = plottedEdges;
+			this.activeAreas = activeAreas;
+			
+		}
+		
+		public void run() {
+			
+			//EdgePlanner edgePlanner = new EdgePlanner(sourceCenter, targetCenter, source.getGeometry(), terminal.getGeometry(), edgeGrid);
+			
+			for(int i = 0; i < node.getEdgeCount(); i++) {
+				
+				mxICell edgeGraph = node.getEdgeAt(i);
+				
+				mxICell source = edgeGraph.getTerminal(true);
+				mxICell terminal = edgeGraph.getTerminal(false);
+				
+				mxGeometry geometry = edgeGraph.getGeometry();
+				if (geometry == null)
+				{
+					geometry = new mxGeometry();
+					geometry.setRelative(true);
+				}
+				else
+				{
+					geometry = (mxGeometry) geometry.clone();
+				}
+				
+				//ID: HospitalExample.impl.NurseImpl@2ca923bb (name: Stefanie Jones, staffID: 7)worksHospitalExample.impl.DepartmentImpl@64ec96c6 (dID: 2, maxRoomCount: 4)
+				
+				String edgeId = source.getId().toString()+edgeGraph.getValue().toString()+terminal.getId().toString();
+				
+				
+				Edge edge = null;
+				
+				for(Edge outgoingEdge : dataLoader.edges.get(source.getId())){
+									
+					if(outgoingEdge.id.equals(edgeId)) {
+						edge = outgoingEdge;
+						break;
+					}
+				}
+				
+				
+				if(edge.oppositeId != null) {
+							
+					
+					if(plottedEdges.containsKey(edge.oppositeId)) { 						
+						ArrayList<mxPoint> oppositePlot = (ArrayList<mxPoint>) plottedEdges.get(edge.oppositeId).clone();					
+						Collections.reverse(oppositePlot);		
+						geometry.setPoints(oppositePlot);
+						graphModel.setGeometry(edgeGraph, geometry);
+
+						continue;
+					}
+
+				}
+
+				
+				int[] xcords = new int[4];
+				int[] ycords = new int[4]:
+				
+				Point sourceCenter = new Point();
+				sourceCenter.x = (int) source.getGeometry().getCenterX();
+				sourceCenter.y = (int) source.getGeometry().getCenterY();
+				
+				Point targetCenter = new Point();
+				targetCenter.x = (int) terminal.getGeometry().getCenterX();
+				targetCenter.y = (int)terminal.getGeometry().getCenterY();
+				
+				xcords[0] = (int) source.getGeometry().getRectangle().getMinX();
+				ycords[0] = (int) source.getGeometry().getRectangle().getMinY();
+				
+				xcords[1] = (int) source.getGeometry().getRectangle().getMaxX();
+				ycords[1] = (int) source.getGeometry().getRectangle().getMaxY();
+				
+				xcords[2] = (int) terminal.getGeometry().getRectangle().getMinX();
+				ycords[2] = (int) terminal.getGeometry().getRectangle().getMinY();
+				
+				xcords[3] = (int) terminal.getGeometry().getRectangle().getMaxX();
+				ycords[3] = (int) terminal.getGeometry().getRectangle().getMaxY();
+				
+				Polygon s = new Polygon(xcords,ycords, 4);
+				Area activeArea = new Area(s);
+				
+				
+				EdgePlanner edgePlanner = new EdgePlanner(sourceCenter, targetCenter, source.getGeometry(), terminal.getGeometry(), edgeGrid); 
+				
+				ArrayList<Point> edgePath = edgePlanner.planEdge();
+				
+				if(edgePath == null)
+					continue;
+				
+				ArrayList<mxPoint> points = new ArrayList<mxPoint>();
+				
+				for(Point p : edgePath) {
+					points.add(new mxPoint(p.x, p.y));
+				}
+						
+				geometry.setPoints(points);
+				graphModel.setGeometry(edgeGraph, geometry);
+				
+				plottedEdges.put(edgeId, points);
+
+
+			}
+			
+			
+		}
 	}
 	
 }
