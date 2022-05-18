@@ -31,7 +31,7 @@ public class LabelPlanner {
 		
 		this.edgePath = edgePath;
 		currentLabelBounds = labelBounds.getRectangle();
-		finalPosition = edgePath.get(edgePath.size()-1);
+		finalPosition = edgePath.get(edgePath.size()-2);
 		
 		for(int i = edgePath.size()-1; i >= 1; i--) {
 		
@@ -63,7 +63,7 @@ public class LabelPlanner {
 			
 		}
 		
-		System.out.println("Not good Place");
+		//System.out.println("Not good Place");
 		return finalPosition;
 	}
 	
@@ -76,7 +76,7 @@ public class LabelPlanner {
 		Point gridP = entityGrid.primeGridSearch(new Point2D.Double(xPotential,yPotential));
 				
 		if(entityGrid.getCostForArea(currentLabelBounds, gridP.x, gridP.y, true) < 1) {
-			System.out.println("Good Place");
+			//System.out.println("Good Place");
 			finalPosition = new mxPoint(xPotential, yPotential);
 			return true;
 		}

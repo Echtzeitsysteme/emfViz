@@ -40,6 +40,8 @@ public class EdgePlanner {
 	
 	public ArrayList<Point> fullPath;
 	
+	private int pathCutoff = 3;
+	
 	public EdgePlanner(Point nodeOrigin, Point nodeTarget, mxGeometry cellBoundsOrigin, mxGeometry cellBoundsTarget, Grid edgeGrid){//RTree<String, Rectangle> blockTree) {
 		
 		this.centerTarget = nodeTarget;
@@ -273,8 +275,15 @@ public class EdgePlanner {
 			Point[] derivate = getSecondDerivate(fullPath);
 			
 			ArrayList<Integer> interestingIndices = findCurves(derivate);
-			interestingIndices.add(0,3);
-			interestingIndices.add(fullPath.size()-3);
+			
+			if(fullPath.size() > 2 * pathCutoff) {
+				interestingIndices.add(0, pathCutoff - 1);
+				interestingIndices.add(fullPath.size()-pathCutoff);
+			}
+			else {
+				interestingIndices.add(0, 0);
+				interestingIndices.add(fullPath.size()-1);
+			}
 
 			
 			ArrayList<Point> reducedPath = new ArrayList<Point>();

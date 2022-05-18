@@ -101,8 +101,8 @@ public class Visualizer {
 		
 		defaultNodePosition = new Point2D.Double(((double) shellBounds.width) * 0.4 - defaultNodeWidth *0.5, ((double) shellBounds.height) * 0.4- defaultNodeHeight *0.5);
 		//defaultNodePosition = new Point2D.Double(shellBounds.width, shellBounds.height);
-		System.out.println("Shell bounds:" + shell.getBounds().toString());
-		System.out.println("Default Position:" + defaultNodePosition.toString());
+		//System.out.println("Shell bounds:" + shell.getBounds().toString());
+		//System.out.println("Default Position:" + defaultNodePosition.toString());
 		
 		addStyles();
 		insertDataIntoGraph();
@@ -164,8 +164,8 @@ public class Visualizer {
 		centerX = graph.getGraphBounds().getCenterX();
 		centerY = graph.getGraphBounds().getCenterY();
 		
-		System.out.println("Center X: " + String.valueOf(centerX));
-		System.out.println("Center Y: " + String.valueOf(centerY));
+		//System.out.println("Center X: " + String.valueOf(centerX));
+		//System.out.println("Center Y: " + String.valueOf(centerY));
 	}
 	
 	private void setUpLayout() {
@@ -178,13 +178,13 @@ public class Visualizer {
 		
 		org.eclipse.swt.graphics.Rectangle shellBounds = shell.getBounds();
 		
-		System.out.println("Shellbounds: " + shellBounds.toString());
+		//System.out.println("Shellbounds: " + shellBounds.toString());
 		
 		double hWRatio = (double) shellBounds.height / (double)shellBounds.width;
 		
 		int baseSize = Math.min(dataLoader.nodes.size() * dataLoader.nodes.size(), shellBounds.height * shellBounds.width);
 		
-		System.out.println("baseSize: " + String.valueOf(baseSize));
+		//System.out.println("baseSize: " + String.valueOf(baseSize));
 		
 		int sizeX = (int) Math.ceil(Math.sqrt(baseSize));
 		int sizeY = (int) Math.ceil(Math.sqrt(baseSize));
@@ -218,9 +218,14 @@ public class Visualizer {
 		preLayout.execute(graph.getDefaultParent());
 		
 		blockedAreas.clear();
+		
+		System.out.println("Placing nodes");
 		placeNodes();
+		System.out.println("Routing edges");
 		placeEdges();
+		System.out.println("Placing edge labels");
 		placeLabels();
+		System.out.println("Ready");
 		
 	}
 	
@@ -261,18 +266,17 @@ public class Visualizer {
 			//System.out.println("Final pos: " + nearestGridPoint.toString());
 			
 			
-			System.out.println("Old geom: " + c.getGeometry().toString() + " With rectangle: "+ c.getGeometry().getRectangle().toString());
+			//System.out.println("Old geom: " + c.getGeometry().toString() + " With rectangle: "+ c.getGeometry().getRectangle().toString());
 			
 			Object[] cellsToMove = {cell};				
 			graph.moveCells(cellsToMove,  nearestGridPoint.getX() - geom.getX(), nearestGridPoint.getY() - geom.getY());
 			
-			System.out.println("New geom: " + c.getGeometry().toString() + " With rectangle: " + c.getGeometry().getRectangle().toString());
+			//System.out.println("New geom: " + c.getGeometry().toString() + " With rectangle: " + c.getGeometry().getRectangle().toString());
 			blockedAreas.add(c.getGeometry());
 			
 		}
 		
 		for(mxGeometry g : blockedAreas) {
-			System.out.println("Block Area:");
 			edgeGrid.setGridValues(g.getRectangle(), Double.MAX_VALUE);
 		}
 		
@@ -291,7 +295,7 @@ public class Visualizer {
 				continue;
 			
 			
-			System.out.println("Node: " + node.getId());
+			//System.out.println("Node: " + node.getId());
 			
 			for(int i = 0; i < node.getEdgeCount(); i++) {
 				
@@ -408,10 +412,10 @@ public class Visualizer {
 			
 			mxRectangle labelBounds = edgeState.getLabelBounds();
 			
-			System.out.println("EdgePath " + edgePath.toString());
+			//System.out.println("EdgePath " + edgePath.toString());
 			mxPoint pos = lP.planLabel(labelBounds, edgePath);
 			
-			System.out.println("New Pos: " + String.valueOf(pos.getX()) + " , " + String.valueOf(pos.getY()));
+			//System.out.println("New Pos: " + String.valueOf(pos.getX()) + " , " + String.valueOf(pos.getY()));
 			
 			labelBounds.setX(pos.getX());
 			labelBounds.setY(pos.getY());

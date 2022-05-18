@@ -66,8 +66,6 @@ public class Grid {
 		
 		calculateGraphBounds();
 		
-		//horizontalGridDist = (int) Math.floor((double)shellBounds.width / (double)sizeX);
-		//verticalGridDist = (int) Math.floor((double)shellBounds.height / (double)sizeY);
 		horizontalGridDist =  Math.max((double)(1-margin )* shellBounds.width / (double)sizeX , 1);
 		verticalGridDist = Math.max((double)(1-margin )* shellBounds.height / (double)sizeY, 1);
 		
@@ -90,8 +88,8 @@ public class Grid {
 		visXCap = visX + (1- 3*margin )* shellBounds.width;
 		visYCap = visY + (1-3*margin )* shellBounds.height;
 		
-		System.out.println("Vis X cap: " + String.valueOf(visXCap));
-		System.out.println("Vis Y cap: " + String.valueOf(visYCap));
+		//System.out.println("Vis X cap: " + String.valueOf(visXCap));
+		//System.out.println("Vis Y cap: " + String.valueOf(visYCap));
 		
 		defaultNodePosition = new Point2D.Double();
 		defaultNodePosition.x = visX + 0.5 * visWidth;
@@ -163,13 +161,7 @@ public class Grid {
 	
 	public mxPoint getFreeGridPosition(Point2D.Double initialPosition, java.awt.Rectangle geometry){
 		
-		//System.out.println("Orginal pos: " + initialPosition.toString());
-		
-		
 		Point origin = primeGridSearch(initialPosition);
-		
-		//System.out.println("Primed: " + String.valueOf(origin.x * horizontalGridDist + visXOffset) + " , " + String.valueOf(origin.y * verticalGridDist + visYOffset));
-		
 		java.awt.Rectangle includedArea =  (Rectangle) geometry.clone();
 				
 		

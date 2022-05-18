@@ -58,8 +58,6 @@ public class InstanceDiagrammLoader extends DataLoader {
 					}
 					edges.get(content.toString()).add(visEdge);
 					
-					if(f.getName() == "staff")
-						System.out.println("Edge: " + visEdge.targetNID);
 
 				}
 				else {
@@ -77,9 +75,6 @@ public class InstanceDiagrammLoader extends DataLoader {
 					}
 					
 					edges.get(content.toString()).add(visEdge);
-					
-					if(f.getName() == "staff")
-						System.out.println("Edge: " + visEdge.targetNID);
 
 				}
 			}	
