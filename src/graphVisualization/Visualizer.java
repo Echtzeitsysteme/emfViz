@@ -2,7 +2,6 @@ package graphVisualization;
 
 import java.awt.Frame;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -275,7 +274,7 @@ public class Visualizer {
 				continue;
 			
 			
-			//System.out.println("Node: " + node.getId());
+			System.out.println("Node: " + node.getValue());
 			
 			for(int i = 0; i < node.getEdgeCount(); i++) {
 				
