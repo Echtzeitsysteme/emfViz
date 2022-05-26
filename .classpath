@@ -6,10 +6,9 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/Marek/Downloads/org.eclipse.jface-3.6.0.jar/org.eclipse.jface-3.6.0.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Marek/Downloads/org.eclipse.swt-3.1.jar/org.eclipse.swt-3.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Marek/Downloads/jgraphx.jar" sourcepath="C:/Users/Marek/Downloads/jgraphx-1.4.0.2-sources.jar/jgraphx-1.4.0.2-sources.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Marek/.p2/pool/plugins/org.eclipse.emf.ecore_2.25.0.v20210816-0937.jar" sourcepath="C:/Users/Marek/.p2/pool/plugins/org.eclipse.emf.ecore_2.25.0.v20210816-0937.jar">
+	<classpathentry kind="lib" path="C:/Users/Marek/eclipse-workspace/emfViz/external jars/org.eclipse.jface-3.6.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Marek/eclipse-workspace/emfViz/external jars/org.eclipse.swt-3.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Marek/eclipse-workspace/emfViz/external jars/org.eclipse.emf.ecore_2.25.0.v20210816-0937.jar" sourcepath="C:/Users/Marek/.p2/pool/plugins/org.eclipse.emf.ecore_2.25.0.v20210816-0937.jar">
 		<accessrules>
 			<accessrule kind="accessible" pattern="org/eclipse/emf/ecore/*"/>
 			<accessrule kind="accessible" pattern="org/eclipse/emf/ecore/impl/*"/>
@@ -27,7 +26,7 @@
 			<accessrule ignoreifbetter="true" kind="nonaccessible" pattern="**/*"/>
 		</accessrules>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/Marek/.p2/pool/plugins/org.emoflon.smartemf_1.0.0.202202281619.jar" sourcepath="C:/Users/Marek/.p2/pool/plugins/org.emoflon.smartemf_1.0.0.202202281619.jar">
+	<classpathentry kind="lib" path="C:/Users/Marek/eclipse-workspace/emfViz/external jars/org.emoflon.smartemf_1.0.0.202202281619.jar" sourcepath="C:/Users/Marek/.p2/pool/plugins/org.emoflon.smartemf_1.0.0.202202281619.jar">
 		<accessrules>
 			<accessrule kind="accessible" pattern="org/emoflon/smartemf/*"/>
 			<accessrule kind="accessible" pattern="org/emoflon/smartemf/persistence/*"/>
@@ -40,7 +39,7 @@
 			<accessrule ignoreifbetter="true" kind="nonaccessible" pattern="**/*"/>
 		</accessrules>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/Marek/.p2/pool/plugins/org.eclipse.emf.common_2.23.0.v20210924-1718.jar" sourcepath="C:/Users/Marek/.p2/pool/plugins/org.eclipse.emf.common_2.23.0.v20210924-1718.jar">
+	<classpathentry kind="lib" path="C:/Users/Marek/eclipse-workspace/emfViz/external jars/org.eclipse.emf.common_2.23.0.v20210924-1718.jar" sourcepath="C:/Users/Marek/.p2/pool/plugins/org.eclipse.emf.common_2.23.0.v20210924-1718.jar">
 		<accessrules>
 			<accessrule kind="accessible" pattern="org/eclipse/emf/common/*"/>
 			<accessrule kind="accessible" pattern="org/eclipse/emf/common/archive/*"/>
@@ -51,7 +50,7 @@
 			<accessrule ignoreifbetter="true" kind="nonaccessible" pattern="**/*"/>
 		</accessrules>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/Marek/.p2/pool/plugins/hipe.dependencies_1.0.0.202111031933/akka-actor_2.12-2.5.19.jar">
+	<classpathentry kind="lib" path="C:/Users/Marek/eclipse-workspace/emfViz/external jars/akka-actor_2.12-2.5.19.jar">
 		<accessrules>
 			<accessrule kind="accessible" pattern="akka/*"/>
 			<accessrule kind="accessible" pattern="akka/actor/*"/>
@@ -166,10 +165,6 @@
 			<accessrule ignoreifbetter="true" kind="nonaccessible" pattern="**/*"/>
 		</accessrules>
 	</classpathentry>
-	<classpathentry combineaccessrules="false" kind="src" path="/HospitalExample">
-		<attributes>
-			<attribute name="module" value="true"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Marek/eclipse-workspace/emfViz/external jars/jgraphx-4.2.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
