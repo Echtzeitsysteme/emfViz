@@ -28,6 +28,7 @@ public class EdgePlanner {
 	private int aStarStepsize = 2;
 	private double minInterPointDist = 10;
 	private double minCurveStrength =2;
+	private int maxIterations = 1000;
 	
 	private Grid edgeGrid;
 	
@@ -160,7 +161,7 @@ public class EdgePlanner {
 	}
 	
 	private ArrayList<Point> constructPath(Point start, Point endPoint){
-		
+
 		ArrayList<Point> path = new ArrayList<Point>();
 		
 		Point p = endPoint;
@@ -171,8 +172,7 @@ public class EdgePlanner {
 			p = cameFrom.get(p);
 		}
 		
-		path.add(0, start);
-		
+		path.add(0, start);	
 		return path;
 		
 	}
@@ -192,22 +192,25 @@ public class EdgePlanner {
 		fscore = new HashMap<Point, Double>();
 		fscore.put(start, null);
 		
+		cameFrom.put(start,start);
 		
 		while (!openSet.isEmpty()) {
 			
+			
 			Point current = openSet.remove();
 			
-			
-			if(intersectsRectangle(targetGeom.getRectangle(), current))
+			if(intersectsRectangle(targetGeom.getRectangle(), current)) {
 				return constructPath(start, cameFrom.get(current));
+			}
 			
 			List<Point> neighbours = getNeighbours(current);
 			
 			for(Point neighbour : neighbours){
-				
+
 				double t_gscore = gscore.getOrDefault(current, Double.MAX_VALUE) + d(current, neighbour) + velocityPenality(current, neighbour);
 				
 				if (t_gscore < gscore.getOrDefault(neighbour, Double.MAX_VALUE)) {
+					
 					
 					cameFrom.put(neighbour, current);
 					gscore.put(neighbour, t_gscore);
@@ -215,11 +218,13 @@ public class EdgePlanner {
 					
 					if(!openSet.contains(neighbour)) 
 						openSet.add(neighbour);
+
+					
 					
 				}
 								
 			}
-			
+
 		}
 		
 		return null;

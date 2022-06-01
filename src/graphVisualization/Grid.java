@@ -77,8 +77,10 @@ public class Grid {
 	
 	private void calculateGraphBounds() {
 		
-		int visX = shellBounds.x;
-		int visY = shellBounds.y;
+		int visX =  0;//shellBounds.x;
+		int visY = 0;//shellBounds.y;
+		
+		
 		visWidth = (1-margin)*shellBounds.width;
 		visHeight = (1-margin)*shellBounds.height;
 		
@@ -86,7 +88,7 @@ public class Grid {
 		visYOffset = visY + margin * 0.5 * shellBounds.height;
 		
 		visXCap = visX + (1- 3*margin )* shellBounds.width;
-		visYCap = visY + (1-3*margin )* shellBounds.height;
+		visYCap = visY + (1- 3*margin )* shellBounds.height;
 		
 		//System.out.println("Vis X cap: " + String.valueOf(visXCap));
 		//System.out.println("Vis Y cap: " + String.valueOf(visYCap));

@@ -5,8 +5,6 @@ import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,30 +12,16 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.resource.ContentHandler;
-import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
-import org.eclipse.jface.util.Geometry;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.emoflon.smartemf.persistence.SmartEMFResourceFactoryImpl;
-import org.eclipse.emf.ecore.EPackage;
-import org.emoflon.smartemf.runtime.SmartPackage;
+import org.eclipse.swt.widgets.Composite;
 
 import com.mxgraph.layout.mxFastOrganicLayout;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.model.mxICell;
-import com.mxgraph.model.mxIGraphModel;
-import com.mxgraph.shape.mxDoubleRectangleShape;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxPoint;
@@ -45,11 +29,6 @@ import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxStylesheet;
-
-
-
-import HospitalExample.HospitalExamplePackage;
-import HospitalExample.Hospital;
 
 public class Visualizer {
 	
@@ -97,7 +76,7 @@ public class Visualizer {
 		graph = new mxGraph();
 		graphModel = ((mxGraphModel)graph.getModel());
 		
-		Rectangle shellBounds = shell.getBounds();
+		org.eclipse.swt.graphics.Rectangle shellBounds = shell.getBounds();
 		
 		//System.out.println("Monitor bounds:" + monitorBounds.toString());
 		
@@ -293,7 +272,7 @@ public class Visualizer {
 				continue;
 			
 			
-			//System.out.println("Node: " + node.getId());
+			System.out.println("Node: " + node.getValue());
 			
 			for(int i = 0; i < node.getEdgeCount(); i++) {
 				
@@ -505,7 +484,7 @@ public class Visualizer {
 
 				
 				int[] xcords = new int[4];
-				int[] ycords = new int[4]:
+				int[] ycords = new int[4];
 				
 				Point sourceCenter = new Point();
 				sourceCenter.x = (int) source.getGeometry().getCenterX();
