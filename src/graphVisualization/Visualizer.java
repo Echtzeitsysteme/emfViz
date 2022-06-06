@@ -262,7 +262,11 @@ public class Visualizer {
 	private void placeEdges() {
 		
 		HashMap<String, ArrayList<mxPoint>> plottedEdges = new HashMap<String, ArrayList<mxPoint>>();
-		Map<String,Object> cells = graphModel.getCells();	
+		Map<String,Object> cells = graphModel.getCells();
+		
+		ArrayList<EdgePlannerThread> activeThreads = new ArrayList<EdgePlannerThread>();
+		ArrayList<Area> activeAreas = new ArrayList<Area>();
+		List<Area> activeAreasSyn = Collections.synchronizedList(activeAreas);
 		
 		for(Object cell : cells.values()) {
 			
@@ -271,6 +275,10 @@ public class Visualizer {
 			if(node.isEdge())
 				continue;
 			
+			//public EdgePlannerThread(mxGraphModel graphModel, Grid nodeGrid, Grid edgeGrid, mxICell cell, HashMap<String, ArrayList<mxPoint>> plottedEdges, List<Area> activeAreas) {
+			EdgePlannerThread newThread = new EdgePlannerThread(graphModel, nodeGrid, edgeGrid, node, plottedEdges, activeAreasSyn);
+			
+			newThread.start();
 			
 			System.out.println("Node: " + node.getValue());
 			
@@ -412,6 +420,7 @@ public class Visualizer {
 		private double workingAreaWidthMargin = 60;
 		
 		private List<Area> activeAreas;
+		private Area ownArea;
 		private HashMap<String, ArrayList<mxPoint>> plottedEdges;
 		
 		private mxGraphModel graphModel;
@@ -507,8 +516,17 @@ public class Visualizer {
 				ycords[3] = (int) terminal.getGeometry().getRectangle().getMaxY();
 				
 				Polygon s = new Polygon(xcords,ycords, 4);
-				Area activeArea = new Area(s);
+				ownArea = new Area(s);
 				
+				while(blocked()) {
+					try {
+						this.sleep(20);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				
+				activeAreas.add(ownArea);
 				
 				EdgePlanner edgePlanner = new EdgePlanner(sourceCenter, targetCenter, source.getGeometry(), terminal.getGeometry(), edgeGrid); 
 				
@@ -527,10 +545,27 @@ public class Visualizer {
 				graphModel.setGeometry(edgeGraph, geometry);
 				
 				plottedEdges.put(edgeId, points);
-
+				
+				activeAreas.remove(ownArea);
 
 			}
 			
+			
+		}
+		
+		private boolean blocked() {
+			
+			for(Area a : activeAreas) {
+				
+				Area copy = (Area) a.clone();
+				
+				copy.intersect(ownArea);
+				
+				if(!copy.isEmpty())
+					return true;
+			}
+			
+			return false;
 			
 		}
 	}
