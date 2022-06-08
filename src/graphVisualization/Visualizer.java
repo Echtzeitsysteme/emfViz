@@ -266,7 +266,8 @@ public class Visualizer {
 		
 		ArrayList<EdgePlannerThread> activeThreads = new ArrayList<EdgePlannerThread>();
 		ArrayList<Area> activeAreas = new ArrayList<Area>();
-		List<Area> activeAreasSyn = Collections.synchronizedList(activeAreas);
+		synchronizedWorkingAreas synAreas = new synchronizedWorkingAreas(activeAreas);
+		//List<Area> activeAreasSyn = Collections.synchronizedList(activeAreas);
 		
 		for(Object cell : cells.values()) {
 			
@@ -276,13 +277,14 @@ public class Visualizer {
 				continue;
 			
 			//public EdgePlannerThread(mxGraphModel graphModel, Grid nodeGrid, Grid edgeGrid, mxICell cell, HashMap<String, ArrayList<mxPoint>> plottedEdges, List<Area> activeAreas) {
-			EdgePlannerThread newThread = new EdgePlannerThread(graphModel, nodeGrid, edgeGrid, node, plottedEdges, activeAreasSyn);
+			EdgePlannerThread newThread = new EdgePlannerThread(graphModel, nodeGrid, edgeGrid, node, plottedEdges, synAreas);
 			
 			newThread.start();
+			activeThreads.add(newThread);
 			
 			System.out.println("Node: " + node.getValue());
 			
-			for(int i = 0; i < node.getEdgeCount(); i++) {
+			/*for(int i = 0; i < node.getEdgeCount(); i++) {
 				
 				mxICell edgeGraph = node.getEdgeAt(i);
 				
@@ -358,11 +360,20 @@ public class Visualizer {
 				graphModel.setGeometry(edgeGraph, geometry);
 				
 				plottedEdges.put(edgeId, points);
+				
 
-
-			}
+			}*/
 			
 
+		}
+		
+		for(EdgePlannerThread t : activeThreads) {
+			try {
+				t.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -419,7 +430,7 @@ public class Visualizer {
 		private double workingAreaHeightMargin = 30;
 		private double workingAreaWidthMargin = 60;
 		
-		private List<Area> activeAreas;
+		private synchronizedWorkingAreas activeAreas;
 		private Area ownArea;
 		private HashMap<String, ArrayList<mxPoint>> plottedEdges;
 		
@@ -428,7 +439,7 @@ public class Visualizer {
 		private Grid edgeGrid;
 		private mxICell node;
 		
-		public EdgePlannerThread(mxGraphModel graphModel, Grid nodeGrid, Grid edgeGrid, mxICell cell, HashMap<String, ArrayList<mxPoint>> plottedEdges, List<Area> activeAreas) {
+		public EdgePlannerThread(mxGraphModel graphModel, Grid nodeGrid, Grid edgeGrid, mxICell cell, HashMap<String, ArrayList<mxPoint>> plottedEdges, synchronizedWorkingAreas activeAreas) {
 			this.graphModel = graphModel;
 			this.nodeGrid = nodeGrid;
 			this.edgeGrid = edgeGrid;
@@ -442,6 +453,8 @@ public class Visualizer {
 		public void run() {
 			
 			//EdgePlanner edgePlanner = new EdgePlanner(sourceCenter, targetCenter, source.getGeometry(), terminal.getGeometry(), edgeGrid);
+			
+			System.out.println("Thread " + String.valueOf(this.getId()) + " started. Plotting " + node.getValue()); 
 			
 			for(int i = 0; i < node.getEdgeCount(); i++) {
 				
@@ -518,15 +531,26 @@ public class Visualizer {
 				Polygon s = new Polygon(xcords,ycords, 4);
 				ownArea = new Area(s);
 				
-				while(blocked()) {
-					try {
-						this.sleep(20);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
+				boolean allocated = false;
+				while(true) {
+					
+					allocated = activeAreas.allocateWorkingArea(ownArea);
+					
+					
+					if(!allocated) {
+						try {
+							Thread.sleep(30);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+					
+					else {
+						break;
 					}
 				}
 				
-				activeAreas.add(ownArea);
+				System.out.println("Allocated: " + String.valueOf(this.getId())); 
 				
 				EdgePlanner edgePlanner = new EdgePlanner(sourceCenter, targetCenter, source.getGeometry(), terminal.getGeometry(), edgeGrid); 
 				
@@ -546,20 +570,51 @@ public class Visualizer {
 				
 				plottedEdges.put(edgeId, points);
 				
-				activeAreas.remove(ownArea);
+				System.out.println("Plot Edge: " + String.valueOf(this.getId())); 
+				
+				activeAreas.deallocateWorkingArea(ownArea);
 
 			}
 			
-			
+			System.out.println("Terminating: " + String.valueOf(this.getId())); 
 		}
 		
-		private boolean blocked() {
+		
+	}
+	
+	public class synchronizedWorkingAreas{
+		
+		private ArrayList<Area> activeAreas;
+	
+		
+		public synchronizedWorkingAreas(ArrayList<Area> areas) {
+			activeAreas = areas;
+		}
+		
+		public synchronized boolean allocateWorkingArea(Area threadArea) {
+			
+			//System.out.println("Allocated areas: " + String.valueOf(activeAreas.size()));
+			
+			if(blocked(threadArea))
+				return false;
+			else {
+				activeAreas.add(threadArea);
+			}
+			
+			return true;
+		}
+		
+		public synchronized void deallocateWorkingArea(Area threadArea) {
+			activeAreas.remove(threadArea);
+		}
+		
+		private synchronized boolean blocked(Area threadArea) {
 			
 			for(Area a : activeAreas) {
 				
 				Area copy = (Area) a.clone();
 				
-				copy.intersect(ownArea);
+				copy.intersect(threadArea);
 				
 				if(!copy.isEmpty())
 					return true;
