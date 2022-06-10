@@ -37,7 +37,8 @@ public class Grid {
 	private double visWidth;
 	private double visHeight;
 	
-	private org.eclipse.swt.graphics.Rectangle shellBounds;
+	//private org.eclipse.swt.graphics.Rectangle shellBounds;
+	private Rectangle shellBounds;
 	
 	double visXOffset;
 	double visYOffset;
@@ -56,9 +57,9 @@ public class Grid {
 	
 	private int maxDistanceToOrigin = 4;
 	
-	public Grid(org.eclipse.swt.graphics.Rectangle shellBounds, int sizeX, int sizeY, double blockMargin) {
+	public Grid(Rectangle shellBounds2, int sizeX, int sizeY, double blockMargin) {
 		
-		this.shellBounds = shellBounds;
+		this.shellBounds = shellBounds2;
 		
 		grid = new double[sizeX][sizeY];
 		maxXindx = sizeX -1;
@@ -66,8 +67,8 @@ public class Grid {
 		
 		calculateGraphBounds();
 		
-		horizontalGridDist =  Math.max((double)(1-margin )* shellBounds.width / (double)sizeX , 1);
-		verticalGridDist = Math.max((double)(1-margin )* shellBounds.height / (double)sizeY, 1);
+		horizontalGridDist =  Math.max((double)(1-margin )* shellBounds2.width / (double)sizeX , 1);
+		verticalGridDist = Math.max((double)(1-margin )* shellBounds2.height / (double)sizeY, 1);
 		
 		this.blockMarginX = (int) Math.ceil(blockMargin / horizontalGridDist);
 		this.blockMarginY = (int) Math.ceil(blockMargin / verticalGridDist);
