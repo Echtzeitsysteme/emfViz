@@ -5,6 +5,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 
@@ -14,10 +15,10 @@ import com.mxgraph.model.mxGeometry;
 
 public class EdgePlanner {
 
-	private ArrayList<Point> targetPoints;
+	private LinkedList<Point> targetPoints;
 	private Point centerTarget;
 	
-	private ArrayList<Point> possibleOrigins;
+	private LinkedList<Point> possibleOrigins;
 	
 	private HashMap<Point,Point> cameFrom;
 	private HashMap<Point, Double> gscore;
@@ -30,16 +31,16 @@ public class EdgePlanner {
 	private double minCurveStrength =2;
 	private int maxIterations = 1000;
 	
-	private Grid edgeGrid;
 	
-	//private RTree<String, Rectangle> blockTree;
-	private ArrayList<mxGeometry> blockedAreas;
+	private boolean log;
+	
+	private Grid edgeGrid;
 	
 	private mxGeometry targetGeom;
 	private mxGeometry originGeom;
 	//private double[][] edgeGrid;
 	
-	public ArrayList<Point> fullPath;
+	public LinkedList<Point> fullPath;
 	
 	private int pathCutoff = 3;
 	
@@ -60,14 +61,16 @@ public class EdgePlanner {
 		
 		edgeGrid.setGridValues(cellBoundsTarget.getRectangle(), 0);
 		edgeGrid.setGridValues(originGeom.getRectangle(), 0);
+		
+		this.log = log;
 
 	}
 	
 	
-	private ArrayList<Point> getCellBorderPoints(Point nodePosition, mxGeometry cellBounds) {
+	private LinkedList<Point> getCellBorderPoints(Point nodePosition, mxGeometry cellBounds) {
 		
 		
-		ArrayList<Point> borderPoints = new ArrayList<Point>();
+		LinkedList<Point> borderPoints = new LinkedList<Point>();
 
 		
 		Point topLeft = new Point();
@@ -135,9 +138,9 @@ public class EdgePlanner {
 		return velocityPenalty* (Math.abs(velXCurrent - velXPrev) + Math.abs(velYCurrent- velYPrev));
 	}
 	
-	private ArrayList<Point> getNeighbours(Point p){
+	private LinkedList<Point> getNeighbours(Point p){
 		
-		ArrayList<Point> neighbours = new ArrayList<Point>();
+		LinkedList<Point> neighbours = new LinkedList<Point>();
 		
 		
 		for(int i = -aStarStepsize; i <= aStarStepsize; i += aStarStepsize) {
@@ -160,24 +163,24 @@ public class EdgePlanner {
 		return neighbours;
 	}
 	
-	private ArrayList<Point> constructPath(Point start, Point endPoint){
+	private LinkedList<Point> constructPath(Point start, Point endPoint){
 
-		ArrayList<Point> path = new ArrayList<Point>();
+		LinkedList<Point> path = new LinkedList<Point>();
 		
 		Point p = endPoint;
 		
 		
 		while(p != start) {
-			path.add(0, p);
+			path.addFirst(p);
 			p = cameFrom.get(p);
 		}
 		
-		path.add(0, start);	
+		path.addFirst(start);	
 		return path;
 		
 	}
 	
-	private ArrayList<Point> AStar(Point start, List<Point> targets){
+	private LinkedList<Point> AStar(Point start, List<Point> targets){
 		
 		
 		fscoreComparator comp = new fscoreComparator();
@@ -196,8 +199,13 @@ public class EdgePlanner {
 		
 		while (!openSet.isEmpty()) {
 			
+			//edgeGrid.setGridValues(targetGeom.getRectangle(), 0);
+			//edgeGrid.setGridValues(originGeom.getRectangle(), 0);
 			
 			Point current = openSet.remove();
+			
+			//if(log)
+			//	System.out.println(current.toString());
 			
 			if(intersectsRectangle(targetGeom.getRectangle(), current)) {
 				return constructPath(start, cameFrom.get(current));
@@ -261,7 +269,7 @@ public class EdgePlanner {
 		}
 	
 
-	public ArrayList<Point> planEdge(){
+	public LinkedList<Point> planEdge(){
 		
 		euclidComparator comp = new euclidComparator(centerTarget);
 		possibleOrigins.sort(comp);
@@ -279,19 +287,18 @@ public class EdgePlanner {
 
 			Point[] derivate = getSecondDerivate(fullPath);
 			
-			ArrayList<Integer> interestingIndices = findCurves(derivate);
+			LinkedList<Integer> interestingIndices = findCurves(derivate);
 			
 			if(fullPath.size() > 2 * pathCutoff) {
-				interestingIndices.add(0, pathCutoff - 1);
+				interestingIndices.addFirst(pathCutoff - 1);
 				interestingIndices.add(fullPath.size()-pathCutoff);
 			}
 			else {
-				interestingIndices.add(0, 0);
+				interestingIndices.addFirst(0);
 				interestingIndices.add(fullPath.size()-1);
 			}
-
 			
-			ArrayList<Point> reducedPath = new ArrayList<Point>();
+			LinkedList<Point> reducedPath = new LinkedList<Point>();
 			
 			for(int idx: interestingIndices) {
 				
@@ -314,7 +321,7 @@ public class EdgePlanner {
 	}
 	
 	
-	private void reduceWayPoints(ArrayList<Point> fullPath){
+	private void reduceWayPoints(LinkedList<Point> fullPath){
 		
 		for(int i = 0; i < fullPath.size() -1; i++){
 			
@@ -331,7 +338,7 @@ public class EdgePlanner {
 	}
 	
 	
-	private Point[] getSecondDerivate(ArrayList<Point> valueList) {
+	private Point[] getSecondDerivate(LinkedList<Point> valueList) {
 
 		Point[] derivate = new Point[valueList.size()];
 		Point[] valueArr = valueList.toArray(new Point[0]);
@@ -350,9 +357,9 @@ public class EdgePlanner {
 		
 	}
 	
-	private ArrayList<Integer> findCurves(Point[] derivate){
+	private LinkedList<Integer> findCurves(Point[] derivate){
 		
-		ArrayList<Integer> foundIdx = new ArrayList<Integer>();
+		LinkedList<Integer> foundIdx = new LinkedList<Integer>();
 		
 		for(int i = 2; i < derivate.length-3; i++) {
 			

@@ -8,14 +8,17 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 
 import com.mxgraph.layout.mxFastOrganicLayout;
 import com.mxgraph.model.mxCell;
@@ -261,14 +264,16 @@ public class Visualizer {
 	
 	private void placeEdges() {
 		
-		HashMap<String, ArrayList<mxPoint>> plottedEdges = new HashMap<String, ArrayList<mxPoint>>();
+		HashMap<String, LinkedList<mxPoint>> plottedEdges = new HashMap<String,LinkedList<mxPoint>>();
 		Map<String,Object> cells = graphModel.getCells();
 		
 		ArrayList<EdgePlannerThread> activeThreads = new ArrayList<EdgePlannerThread>();
-		ArrayList<Area> activeAreas = new ArrayList<Area>();
+		LinkedList<Area> activeAreas = new LinkedList<Area>();
 		synchronizedWorkingAreas synAreas = new synchronizedWorkingAreas(activeAreas);
 		//List<Area> activeAreasSyn = Collections.synchronizedList(activeAreas);
 		
+		Set<Object> copy = new HashSet<Object>(cells.values());
+
 		for(Object cell : cells.values()) {
 			
 			mxCell node = (mxCell) cell;
@@ -277,12 +282,12 @@ public class Visualizer {
 				continue;
 			
 			//public EdgePlannerThread(mxGraphModel graphModel, Grid nodeGrid, Grid edgeGrid, mxICell cell, HashMap<String, ArrayList<mxPoint>> plottedEdges, List<Area> activeAreas) {
-			EdgePlannerThread newThread = new EdgePlannerThread(graphModel, nodeGrid, edgeGrid, node, plottedEdges, synAreas);
+			EdgePlannerThread newThread = new EdgePlannerThread(graphModel, nodeGrid, edgeGrid,node, plottedEdges, synAreas);
 			
 			newThread.start();
 			activeThreads.add(newThread);
 			
-			System.out.println("Node: " + node.getValue());
+			//System.out.println("Node: " + node.getValue());
 			
 			/*for(int i = 0; i < node.getEdgeCount(); i++) {
 				
@@ -366,8 +371,30 @@ public class Visualizer {
 			
 
 		}
+		/*int counter = 0;
+		while(counter < 500) {
+			
+			//synAreas.printStatus();
+			
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			
+			
+			if(counter % 100 == 0) {
+			for(EdgePlannerThread t : activeThreads) {
+				System.out.println("Thread state " + t.getId() + " : " + t.getState().toString());
+			}
+			}
+			
+			counter++;
+		}*/
+		
 		
 		for(EdgePlannerThread t : activeThreads) {
+
 			try {
 				t.join();
 			} catch (InterruptedException e) {
@@ -427,19 +454,19 @@ public class Visualizer {
 	
 	private class EdgePlannerThread extends Thread{
 		
-		private double workingAreaHeightMargin = 30;
-		private double workingAreaWidthMargin = 60;
+		private int workingAreaHeightMargin = 30;
+		private int workingAreaWidthMargin = 60;
 		
 		private synchronizedWorkingAreas activeAreas;
 		private Area ownArea;
-		private HashMap<String, ArrayList<mxPoint>> plottedEdges;
+		private HashMap<String, LinkedList<mxPoint>> plottedEdges;
 		
 		private mxGraphModel graphModel;
 		private Grid nodeGrid;
 		private Grid edgeGrid;
 		private mxICell node;
 		
-		public EdgePlannerThread(mxGraphModel graphModel, Grid nodeGrid, Grid edgeGrid, mxICell cell, HashMap<String, ArrayList<mxPoint>> plottedEdges, synchronizedWorkingAreas activeAreas) {
+		public EdgePlannerThread(mxGraphModel graphModel, Grid nodeGrid, Grid edgeGrid, mxICell cell, HashMap<String,LinkedList<mxPoint>> plottedEdges, synchronizedWorkingAreas activeAreas) {
 			this.graphModel = graphModel;
 			this.nodeGrid = nodeGrid;
 			this.edgeGrid = edgeGrid;
@@ -454,14 +481,22 @@ public class Visualizer {
 			
 			//EdgePlanner edgePlanner = new EdgePlanner(sourceCenter, targetCenter, source.getGeometry(), terminal.getGeometry(), edgeGrid);
 			
-			System.out.println("Thread " + String.valueOf(this.getId()) + " started. Plotting " + node.getValue()); 
+			//System.out.println("Thread " + String.valueOf(this.getId()) + " started. Plotting " + node.getValue()); 
 			
 			for(int i = 0; i < node.getEdgeCount(); i++) {
 				
 				mxICell edgeGraph = node.getEdgeAt(i);
 				
+				
+				
 				mxICell source = edgeGraph.getTerminal(true);
 				mxICell terminal = edgeGraph.getTerminal(false);
+				
+				if(!source.getId().toString().equals(node.getId().toString())) {
+					continue;
+				}
+				
+				//System.out.println("Source: " + node.getValue() + " " + String.valueOf(this.getId()) );
 				
 				mxGeometry geometry = edgeGraph.getGeometry();
 				if (geometry == null)
@@ -494,7 +529,7 @@ public class Visualizer {
 							
 					
 					if(plottedEdges.containsKey(edge.oppositeId)) { 						
-						ArrayList<mxPoint> oppositePlot = (ArrayList<mxPoint>) plottedEdges.get(edge.oppositeId).clone();					
+						LinkedList<mxPoint> oppositePlot = (LinkedList<mxPoint>) plottedEdges.get(edge.oppositeId).clone();					
 						Collections.reverse(oppositePlot);		
 						geometry.setPoints(oppositePlot);
 						graphModel.setGeometry(edgeGraph, geometry);
@@ -505,8 +540,8 @@ public class Visualizer {
 				}
 
 				
-				int[] xcords = new int[4];
-				int[] ycords = new int[4];
+				int[] xcords = new int[8];
+				int[] ycords = new int[8];
 				
 				Point sourceCenter = new Point();
 				sourceCenter.x = (int) source.getGeometry().getCenterX();
@@ -516,50 +551,69 @@ public class Visualizer {
 				targetCenter.x = (int) terminal.getGeometry().getCenterX();
 				targetCenter.y = (int)terminal.getGeometry().getCenterY();
 				
-				xcords[0] = (int) source.getGeometry().getRectangle().getMinX();
-				ycords[0] = (int) source.getGeometry().getRectangle().getMinY();
+				xcords[0] = (int) source.getGeometry().getRectangle().getMinX() - workingAreaWidthMargin;
+				ycords[0] = (int) source.getGeometry().getRectangle().getMinY() - workingAreaHeightMargin;
 				
-				xcords[1] = (int) source.getGeometry().getRectangle().getMaxX();
-				ycords[1] = (int) source.getGeometry().getRectangle().getMaxY();
+				xcords[1] = (int) source.getGeometry().getRectangle().getMaxX() + workingAreaWidthMargin;
+				ycords[1] = (int) source.getGeometry().getRectangle().getMinY() - workingAreaHeightMargin;
 				
-				xcords[2] = (int) terminal.getGeometry().getRectangle().getMinX();
-				ycords[2] = (int) terminal.getGeometry().getRectangle().getMinY();
+				xcords[2] = (int) source.getGeometry().getRectangle().getMinX() - workingAreaWidthMargin;
+				ycords[2] = (int) source.getGeometry().getRectangle().getMaxY() + workingAreaHeightMargin;
 				
-				xcords[3] = (int) terminal.getGeometry().getRectangle().getMaxX();
-				ycords[3] = (int) terminal.getGeometry().getRectangle().getMaxY();
+				xcords[3] = (int) source.getGeometry().getRectangle().getMaxX() + workingAreaWidthMargin;
+				ycords[3] = (int) source.getGeometry().getRectangle().getMaxY() + workingAreaHeightMargin;
 				
-				Polygon s = new Polygon(xcords,ycords, 4);
+				xcords[4] = (int) terminal.getGeometry().getRectangle().getMinX() - workingAreaWidthMargin;
+				ycords[4] = (int) terminal.getGeometry().getRectangle().getMinY() - workingAreaHeightMargin;
+				
+				xcords[5] = (int) terminal.getGeometry().getRectangle().getMaxX() + workingAreaWidthMargin;
+				ycords[5] = (int) terminal.getGeometry().getRectangle().getMinY() - workingAreaHeightMargin;
+				
+				xcords[6] = (int) terminal.getGeometry().getRectangle().getMinX() - workingAreaWidthMargin;
+				ycords[6] = (int) terminal.getGeometry().getRectangle().getMaxY() + workingAreaHeightMargin;
+				
+				xcords[7] = (int) terminal.getGeometry().getRectangle().getMaxX() + workingAreaWidthMargin;
+				ycords[7] = (int) terminal.getGeometry().getRectangle().getMaxY() + workingAreaHeightMargin;
+				
+				Polygon s = new Polygon(xcords,ycords, 8);
+			
 				ownArea = new Area(s);
 				
 				boolean allocated = false;
-				while(true) {
+				while(!allocated) {
 					
 					allocated = activeAreas.allocateWorkingArea(ownArea);
 					
+					if(allocated)
+						break;
 					
-					if(!allocated) {
+					synchronized(activeAreas) {
 						try {
-							Thread.sleep(30);
+							activeAreas.wait();
 						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
+						
+					
 					}
 					
-					else {
-						break;
-					}
+					
 				}
 				
-				System.out.println("Allocated: " + String.valueOf(this.getId())); 
-				
+				boolean log = false;
+
+							
 				EdgePlanner edgePlanner = new EdgePlanner(sourceCenter, targetCenter, source.getGeometry(), terminal.getGeometry(), edgeGrid); 
 				
-				ArrayList<Point> edgePath = edgePlanner.planEdge();
+				LinkedList<Point> edgePath = edgePlanner.planEdge();
 				
-				if(edgePath == null)
+				if(edgePath == null) {
+					activeAreas.deallocateWorkingArea(ownArea);
 					continue;
+				}
 				
-				ArrayList<mxPoint> points = new ArrayList<mxPoint>();
+				LinkedList<mxPoint> points = new LinkedList<mxPoint>();
 				
 				for(Point p : edgePath) {
 					points.add(new mxPoint(p.x, p.y));
@@ -570,13 +624,17 @@ public class Visualizer {
 				
 				plottedEdges.put(edgeId, points);
 				
-				System.out.println("Plot Edge: " + String.valueOf(this.getId())); 
+				//System.out.println("Deallocate" + String.valueOf(this.getId())); 
 				
 				activeAreas.deallocateWorkingArea(ownArea);
 
 			}
 			
-			System.out.println("Terminating: " + String.valueOf(this.getId())); 
+			//if(activeAreas.isActive(this.getId()))
+			//	System.out.println("Terminating: " + String.valueOf(this.getId())); 
+			//System.out.println("Terminating: " + String.valueOf(this.getId()));
+			//if(node.getValue().equals("Hospital"))
+			//	activeAreas.printStatus();
 		}
 		
 		
@@ -584,28 +642,62 @@ public class Visualizer {
 	
 	public class synchronizedWorkingAreas{
 		
-		private ArrayList<Area> activeAreas;
+		private List<Area> activeAreas;
+		private List<Long> activeThreads;
+		//private List<Long> waitingThreads;
 	
 		
-		public synchronizedWorkingAreas(ArrayList<Area> areas) {
+		public synchronizedWorkingAreas(LinkedList<Area> areas) {
 			activeAreas = areas;
+			activeThreads = new LinkedList<Long>();
+			//waitingThreads = new LinkedList<Long>();
 		}
 		
 		public synchronized boolean allocateWorkingArea(Area threadArea) {
 			
-			//System.out.println("Allocated areas: " + String.valueOf(activeAreas.size()));
+			//System.out.println("Trying to allocate: " + String.valueOf(threadID));
+			//System.out.println("Active threads: " + String.valueOf(activeThreads.toString()));
 			
-			if(blocked(threadArea))
+			if(blocked(threadArea)) {
+				
+				//waitingThreads.add(callingThread);
+				//if(!waitingThreads.contains(callingThreadID))
+				//waitingThreads.add(callingThreadID);
 				return false;
+			}
 			else {
 				activeAreas.add(threadArea);
+				//activeThreads.add(callingThreadID);
+
+				//waitingThreads.remove(callingThread);
+				
+				
 			}
 			
 			return true;
 		}
 		
 		public synchronized void deallocateWorkingArea(Area threadArea) {
+			
 			activeAreas.remove(threadArea);
+			//activeThreads.remove(threadID);
+			
+			/*for(Thread t : Thread.getAllStackTraces().keySet()) {
+				
+				boolean found =	waitingThreads.remove(t.getId());
+					
+				if(found) {
+					synchronized(t){
+					t.notify();
+					}
+					
+				}
+					
+			}*/
+			
+			this.notifyAll();
+			//printStatus();
+
 		}
 		
 		private synchronized boolean blocked(Area threadArea) {
@@ -622,6 +714,22 @@ public class Visualizer {
 			
 			return false;
 			
+		}
+		
+		
+		private synchronized void printStatus() {
+			System.out.println("Active Threads : " + activeThreads.toString());
+			//System.out.println("Allocated Areas : ");
+			
+			//for(Area a : activeAreas) {
+			//	System.out.println(a.getBounds().toString());
+			//}
+			
+			System.out.println("Waiting Threads : ");
+			
+			/*for(long id : waitingThreads) {
+				System.out.print(id + ", ");
+			}*/
 		}
 	}
 	
