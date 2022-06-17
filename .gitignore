@@ -2,5 +2,5 @@
 emfViz/bin/
 MyEmfViz/bin/
 .DS_Store
-
+*.class
 
