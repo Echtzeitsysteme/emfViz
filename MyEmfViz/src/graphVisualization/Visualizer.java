@@ -18,6 +18,8 @@ import java.util.Map;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.RowData;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Composite;
 
@@ -38,8 +40,9 @@ public class Visualizer {
 	
 	private Shell shell;
 	private Composite composite;
+	private Composite compositeUserCtrl;
 	private Frame frame;
-	private Frame frameTarget;
+	private Frame frameUserCtrl;
 	
 	private mxGraph graph;
 	private mxGraphModel graphModel;
@@ -78,6 +81,8 @@ public class Visualizer {
 		dataLoader.loadData();
 		
 		this.shell = shell;
+			
+		
 		composite = new Composite(shell, SWT.EMBEDDED | SWT.NO_BACKGROUND);
 		composite.setVisible(true);
 		frame = SWT_AWT.new_Frame(composite);
@@ -125,8 +130,30 @@ public class Visualizer {
 		
 		
 		this.shell = shell;
+		
+		
+		//set sehll layout
+		
+		//layout for user control widgets
+		compositeUserCtrl = new Composite(shell, SWT.EMBEDDED | SWT.BACKGROUND);
+		compositeUserCtrl.setVisible(true);
+		compositeUserCtrl.setLayoutData(new RowData(shell.getSize().x, (int) (shell.getSize().y * 0.1)));
+		
+		frameUserCtrl = SWT_AWT.new_Frame(compositeUserCtrl);
+		frameUserCtrl.setLayout(new BorderLayout());
+		
+		
+		Panel panelUserCtrl	= new Panel();
+		panelUserCtrl.setBackground(Color.WHITE);
+		//panelUserCtrl.setSize(shell.getSize().x, (int) (shell.getSize().y * 0.1));
+		
+		frameUserCtrl.add(panelUserCtrl);
+
+		
+		//graph visualisation window
 		composite = new Composite(shell, SWT.EMBEDDED | SWT.NO_BACKGROUND);
 		composite.setVisible(true);
+		composite.setLayoutData(new RowData(shell.getSize().x, (int) (shell.getSize().y * 0.9-30)));
 		
 		frame = SWT_AWT.new_Frame(composite);
 		frame.setLayout(new GridLayout());
@@ -134,13 +161,13 @@ public class Visualizer {
 		/* generate two panels to display the graphs*/
 		Panel panelSrc	= new Panel();
 		panelSrc.setLayout(new BorderLayout());
-		panelSrc.setBackground(Color.BLUE);
-		panelSrc.setSize((int) (shell.getSize().x * 0.5), shell.getSize().y);
+		panelSrc.setBackground(Color.GRAY);
+		panelSrc.setSize((int) (shell.getSize().x * 0.5), (int) (shell.getSize().y * 0.9-30));
 		
 		Panel panelTrg	= new Panel();
 		panelTrg.setLayout(new BorderLayout());
 		panelTrg.setBackground(Color.GRAY);
-		panelTrg.setSize((int) (shell.getSize().x * 0.5), shell.getSize().y);
+		panelTrg.setSize((int) (shell.getSize().x * 0.5), (int) (shell.getSize().y * 0.9-30));
 		
 		/*add panels to frame*/
 		frame.add(panelSrc);
@@ -171,6 +198,7 @@ public class Visualizer {
 		System.out.println("Panel Trg bounds:" + panelTrg.getBounds().toString());
 		*/
 		
+		
 		/*src graph*/
 		addStyles();
 		insertDataIntoGraph(graph, dataLoader);
@@ -190,6 +218,7 @@ public class Visualizer {
 		/* add trg graph to trg panel*/
 		graphComponentTarget = new mxGraphComponent(graphTarget);
 		panelTrg.add(graphComponentTarget);
+		
 	}
 	
 	private void addStyles() {
