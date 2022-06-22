@@ -196,7 +196,7 @@ public class Visualizer {
 		
 		preLayout = new mxFastOrganicLayout(graph);
 		preLayout.setForceConstant(150);
-		preLayout.setMinDistanceLimit(8);
+		preLayout.setMinDistanceLimit(4);
 		preLayout.setUseInputOrigin(false);
 		preLayout.setDisableEdgeStyle(false);
 		
@@ -237,7 +237,7 @@ public class Visualizer {
 		
 		//angepasst da nun nur halber Platz pro Graph zur Verfügung steht - betrifft nur x Dimension
 		xStretch = (shell.getMonitor().getClientArea().width * 0.5 *(1-nodeGrid.margin))/graphWidth;
-		yStretch = (shell.getMonitor().getClientArea().height*(1-nodeGrid.margin))/graphHeight;
+		yStretch = (shell.getMonitor().getClientArea().height*(1-nodeGrid.margin)*0.9-30)/graphHeight;
 		
 	}
 	
@@ -344,6 +344,12 @@ public class Visualizer {
 				}
 				
 				//ID: HospitalExample.impl.NurseImpl@2ca923bb (name: Stefanie Jones, staffID: 7)worksHospitalExample.impl.DepartmentImpl@64ec96c6 (dID: 2, maxRoomCount: 4)
+				
+				
+				// Added by JL
+				/*if (source == null || edgeGraph == null || terminal == null){
+					continue;
+				}*/
 				
 				String edgeId = source.getId().toString()+edgeGraph.getValue().toString()+terminal.getId().toString();
 				
