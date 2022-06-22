@@ -18,6 +18,8 @@ import java.util.Map;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.RowData;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Composite;
 
@@ -34,12 +36,13 @@ import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxStylesheet;
 
+import userInterface.MainWindow;
+
 public class Visualizer {
 	
 	private Shell shell;
-	private Composite composite;
-	private Frame frame;
-	private Frame frameTarget;
+	private Panel panelSrc;
+	private Panel panelTrg;
 	
 	private mxGraph graph;
 	private mxGraphModel graphModel;
@@ -72,45 +75,6 @@ public class Visualizer {
 	
 	
 	
-	public Visualizer(Shell shell, DataLoader dataLoader) {
-		
-		this.dataLoader = dataLoader;
-		dataLoader.loadData();
-		
-		this.shell = shell;
-		composite = new Composite(shell, SWT.EMBEDDED | SWT.NO_BACKGROUND);
-		composite.setVisible(true);
-		frame = SWT_AWT.new_Frame(composite);
-		
-		/* create panel and add it to frame*/
-		Panel panel	= new Panel();
-		panel.setLayout(new BorderLayout());
-		panel.setBackground(Color.WHITE);
-		panel.setSize(shell.getBounds().width, shell.getBounds().height);
-		frame.add(panel);
-		
-		graph = new mxGraph();
-		graphModel = ((mxGraphModel)graph.getModel());
-		
-		org.eclipse.swt.graphics.Rectangle shellBounds = shell.getBounds();
-		
-		//System.out.println("Monitor bounds:" + monitorBounds.toString());
-		
-		defaultNodePosition = new Point2D.Double(((double) shellBounds.width) * 0.4 - defaultNodeWidth *0.5, ((double) shellBounds.height) * 0.4- defaultNodeHeight *0.5);
-		//defaultNodePosition = new Point2D.Double(shellBounds.width, shellBounds.height);
-		//System.out.println("Shell bounds:" + shell.getBounds().toString());
-		//System.out.println("Default Position:" + defaultNodePosition.toString());
-		
-		addStyles();
-		insertDataIntoGraph(graph, dataLoader);
-		setUpLayout(graph, panel);
-		runLayout(graph, graphModel);
-		
-		graphComponent = new mxGraphComponent(graph);
-		panel.add(graphComponent);
-		
-	}
-	
 	public Visualizer(Shell shell, DataLoader dataLoader, DataLoader dataLoaderTarget) {
 		
 		System.out.println("overload constructor...");
@@ -125,26 +89,14 @@ public class Visualizer {
 		
 		
 		this.shell = shell;
-		composite = new Composite(shell, SWT.EMBEDDED | SWT.NO_BACKGROUND);
-		composite.setVisible(true);
 		
-		frame = SWT_AWT.new_Frame(composite);
-		frame.setLayout(new GridLayout());
 		
-		/* generate two panels to display the graphs*/
-		Panel panelSrc	= new Panel();
-		panelSrc.setLayout(new BorderLayout());
-		panelSrc.setBackground(Color.BLUE);
-		panelSrc.setSize((int) (shell.getSize().x * 0.5), shell.getSize().y);
+		//initialize shell layout
 		
-		Panel panelTrg	= new Panel();
-		panelTrg.setLayout(new BorderLayout());
-		panelTrg.setBackground(Color.GRAY);
-		panelTrg.setSize((int) (shell.getSize().x * 0.5), shell.getSize().y);
+		MainWindow graphVisualizer = new MainWindow(this.shell);
 		
-		/*add panels to frame*/
-		frame.add(panelSrc);
-		frame.add(panelTrg);
+		panelSrc = graphVisualizer.panelSrc;
+		panelTrg = graphVisualizer.panelTrg;
 		
 		
 		/* source graph*/
@@ -156,20 +108,13 @@ public class Visualizer {
 		graphModelTarget = ((mxGraphModel)graphTarget.getModel()); 
 		
 		
-		org.eclipse.swt.graphics.Rectangle shellBounds = shell.getBounds();
+		org.eclipse.swt.graphics.Rectangle shellBounds = this.shell.getBounds();
 		
 		//System.out.println("Monitor bounds:" + monitorBounds.toString());
 		
 		//nur noch 0.5 mal so viel zu vor in x-Dimension
 		defaultNodePosition = new Point2D.Double(((double) shellBounds.width) * 0.5 * 0.4 - defaultNodeWidth *0.5, ((double) shellBounds.height) * 0.4- defaultNodeHeight *0.5);
 		
-		//only for debugging
-		/* 
-		System.out.println("Shell bounds:" + shell.getBounds().toString());
-		System.out.println("Default Position:" + defaultNodePosition.toString());
-		System.out.println("Panel Src bounds:" + panelSrc.getBounds().toString());
-		System.out.println("Panel Trg bounds:" + panelTrg.getBounds().toString());
-		*/
 		
 		/*src graph*/
 		addStyles();
@@ -190,6 +135,7 @@ public class Visualizer {
 		/* add trg graph to trg panel*/
 		graphComponentTarget = new mxGraphComponent(graphTarget);
 		panelTrg.add(graphComponentTarget);
+		
 	}
 	
 	private void addStyles() {
@@ -250,7 +196,7 @@ public class Visualizer {
 		
 		preLayout = new mxFastOrganicLayout(graph);
 		preLayout.setForceConstant(150);
-		preLayout.setMinDistanceLimit(8);
+		preLayout.setMinDistanceLimit(4);
 		preLayout.setUseInputOrigin(false);
 		preLayout.setDisableEdgeStyle(false);
 		
@@ -291,7 +237,7 @@ public class Visualizer {
 		
 		//angepasst da nun nur halber Platz pro Graph zur Verfügung steht - betrifft nur x Dimension
 		xStretch = (shell.getMonitor().getClientArea().width * 0.5 *(1-nodeGrid.margin))/graphWidth;
-		yStretch = (shell.getMonitor().getClientArea().height*(1-nodeGrid.margin))/graphHeight;
+		yStretch = (shell.getMonitor().getClientArea().height*(1-nodeGrid.margin)*0.9-30)/graphHeight;
 		
 	}
 	
@@ -398,6 +344,12 @@ public class Visualizer {
 				}
 				
 				//ID: HospitalExample.impl.NurseImpl@2ca923bb (name: Stefanie Jones, staffID: 7)worksHospitalExample.impl.DepartmentImpl@64ec96c6 (dID: 2, maxRoomCount: 4)
+				
+				
+				// Added by JL
+				/*if (source == null || edgeGraph == null || terminal == null){
+					continue;
+				}*/
 				
 				String edgeId = source.getId().toString()+edgeGraph.getValue().toString()+terminal.getId().toString();
 				

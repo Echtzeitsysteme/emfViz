@@ -13,5 +13,5 @@ Require-Bundle: org.eclipse.emf.common;bundle-version="2.24.0",
  org.eclipse.emf.ecore;bundle-version="2.26.0",
  org.eclipse.jface;bundle-version="3.25.0",
  org.eclipse.swt.cocoa.macosx.x86_64.source;bundle-version="3.119.0",
- org.emoflon.smartemf;bundle-version="1.0.0"
-Export-Package: graphVisualization
+ org.emoflon.smartemf;bundle-version="1.0.0",
+ Hospital2Administration;bundle-version="0.0.1"
