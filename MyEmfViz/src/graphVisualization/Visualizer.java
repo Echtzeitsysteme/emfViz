@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -392,7 +393,7 @@ public class Visualizer {
 				
 				EdgePlanner edgePlanner = new EdgePlanner(sourceCenter, targetCenter, source.getGeometry(), terminal.getGeometry(), edgeGrid); 
 				
-				ArrayList<Point> edgePath = edgePlanner.planEdge();
+				LinkedList<Point> edgePath = edgePlanner.planEdge();
 				
 				if(edgePath == null)
 					continue;
