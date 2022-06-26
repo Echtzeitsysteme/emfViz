@@ -1,11 +1,7 @@
 package Vis;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.ContentHandler;
@@ -14,14 +10,10 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.swt.SWT;
 //Imports require org.eclipse.swt
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridLayout;
+
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGENStopCriterion;
-import org.emoflon.ibex.tgg.operational.strategies.modules.TGGResourceHandler;
-import org.emoflon.ibex.tgg.run.hospital2administration.debug.MODELGEN_App;
 import org.emoflon.smartemf.persistence.SmartEMFResourceFactoryImpl;
 //import CompanyLanguage.CompanyLanguagePackage;
 
@@ -104,7 +96,7 @@ public class MyMain {
 		InstanceDiagrammLoader data = new InstanceDiagrammLoader(instanceModel);
 		
 		
-		InstanceDiagrammLoader dataTarget = new InstanceDiagrammLoader(instanceModel);
+		InstanceDiagrammLoader dataTarget = new InstanceDiagrammLoader(null);
 		
 		
         
@@ -127,6 +119,7 @@ public class MyMain {
         
 		//Visualizer vis = new Visualizer(shell, data);
 		Visualizer vis = new Visualizer(shell, data, dataTarget);
+		
         
         shell.open();
         while (!shell.isDisposed()) {

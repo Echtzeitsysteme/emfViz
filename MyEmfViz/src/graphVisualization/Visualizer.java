@@ -1,9 +1,6 @@
 package graphVisualization;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Frame;
-import java.awt.GridLayout;
+
 import java.awt.Panel;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -16,13 +13,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.awt.SWT_AWT;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.RowData;
-import org.eclipse.swt.layout.RowLayout;
+
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 
 import com.mxgraph.layout.mxFastOrganicLayout;
 import com.mxgraph.model.mxCell;
@@ -41,6 +34,7 @@ import userInterface.MainWindow;
 
 public class Visualizer {
 	
+
 	private Shell shell;
 	private Panel panelSrc;
 	private Panel panelTrg;
@@ -78,23 +72,54 @@ public class Visualizer {
 	
 	public Visualizer(Shell shell, DataLoader dataLoader, DataLoader dataLoaderTarget) {
 		
-		System.out.println("overload constructor...");
-		
-		/*source dataModel*/
+		/*source data model*/
 		this.dataLoader = dataLoader;
 		dataLoader.loadData();
+
 		
-		/*target dataModel*/
-		this.dataLoaderTarget = dataLoaderTarget;
-		dataLoaderTarget.loadData();
+		//just for debugging
+		/*
+		for (int i = 0; i < dataLoader.nodes.size(); i++) {
+			System.out.println(dataLoader.nodes.get(i).toString());
+			
+		}
+		
+		for (ArrayList<Edge> e : dataLoader.edges.values()) {
+			for (Edge edge : e) {
+				System.out.println(edge.toString());
+			}
+			
+		}*/
+		
+		/*target data model*/
+		if (((InstanceDiagrammLoader) dataLoaderTarget).getInstanceModel() != null) {
+			this.dataLoaderTarget = dataLoaderTarget;
+			dataLoaderTarget.loadData();
+		}
+		
+		
+		//just for debugging
+		/*
+		for (int i = 0; i < dataLoaderTarget.nodes.size(); i++) {
+			System.out.println(dataLoaderTarget.nodes.get(i).toString());
+			
+		}
+		
+		for (ArrayList<Edge> e : dataLoaderTarget.edges.values()) {
+			for (Edge edge : e) {
+				System.out.println(edge.toString());
+			}
+			
+		}
+		*/
 		
 		
 		this.shell = shell;
 		
-		
 		//initialize shell layout
 		
-		MainWindow graphVisualizer = new MainWindow(this.shell);
+		MainWindow graphVisualizer = new MainWindow(this, this.shell);
+		graphVisualizer.createMainWindow();
 		
 		panelSrc = graphVisualizer.panelSrc;
 		panelTrg = graphVisualizer.panelTrg;
@@ -117,11 +142,14 @@ public class Visualizer {
 		defaultNodePosition = new Point2D.Double(((double) shellBounds.width) * 0.5 * 0.4 - defaultNodeWidth *0.5, ((double) shellBounds.height) * 0.4- defaultNodeHeight *0.5);
 		
 		
-		/*src graph*/
 		addStyles();
+		
+		
+		/*src graph*/
 		insertDataIntoGraph(graph, dataLoader);
 		setUpLayout(graph, panelSrc);
 		runLayout(graph, graphModel);
+	
 		
 		/*add src graph to src panel*/
 		graphComponent = new mxGraphComponent(graph);
@@ -129,13 +157,15 @@ public class Visualizer {
 		
 		
 		/*trg graph*/
-		insertDataIntoGraph(graphTarget, dataLoaderTarget);
-		setUpLayout(graphTarget, panelTrg);
-		runLayout(graphTarget, graphModelTarget);
-		
-		/* add trg graph to trg panel*/
-		graphComponentTarget = new mxGraphComponent(graphTarget);
-		panelTrg.add(graphComponentTarget);
+		if (this.dataLoaderTarget != null) {
+			insertDataIntoGraph(graphTarget, this.dataLoaderTarget);
+			setUpLayout(graphTarget, panelTrg);
+			runLayout(graphTarget, graphModelTarget);
+			
+			/* add trg graph to trg panel*/
+			graphComponentTarget = new mxGraphComponent(graphTarget);
+			panelTrg.add(graphComponentTarget);
+		}
 		
 	}
 	
@@ -460,6 +490,33 @@ public class Visualizer {
 			nodeGrid.setGridValues(labelBounds.getRectangle(), Double.MAX_VALUE);
 			
 		}
+		
+	}
+	
+	// needed for button functions
+	
+	public void addTargetModelToGraphView (DataLoader dataLoader) {
+		Display.getDefault().asyncExec(new Runnable() {
+		    public void run() {
+		    	panelTrg.removeAll();
+				
+				dataLoader.loadData();
+				
+				mxGraph graph = new mxGraph();
+				mxGraphModel graphModel = ((mxGraphModel)graph.getModel()); 
+				
+				insertDataIntoGraph(graph, dataLoader);
+				setUpLayout(graph, panelTrg);
+				runLayout(graph, graphModel);
+				
+				mxGraphComponent graphComponent = new mxGraphComponent(graph);
+				panelTrg.add(graphComponent);
+				
+				
+				
+				//shell.redraw();
+		    }
+		});
 		
 	}
 	
