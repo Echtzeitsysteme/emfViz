@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.ContentHandler;
@@ -38,55 +40,34 @@ public class MyMain {
 		Display display = new Display();
 		 
         Shell shell = new Shell(display);
-      
+        shell.setFullScreen(true);
         
         //shell.setLayout(new FillLayout(SWT.VERTICAL));
         RowLayout rowLayout = new RowLayout(SWT.VERTICAL);
-        rowLayout.wrap = true;
-        rowLayout.pack = true;
-        rowLayout.justify = true;
+        rowLayout.marginHeight	= 0;
+        rowLayout.marginBottom = 0;
+        rowLayout.marginTop = 0;
+        rowLayout.marginLeft = 0;
+        rowLayout.marginRight = 0;
+        rowLayout.marginWidth = 0;
         
         shell.setLayout(rowLayout);
        
         //Visualization is optimized for this shell size
-        shell.setSize(shell.getMonitor().getClientArea().width, shell.getMonitor().getClientArea().height);
+        //shell.setSize(shell.getMonitor().getClientArea().width, shell.getMonitor().getClientArea().height);
         
         
         Resource sourceInstance = null;
-        Resource targetInstance = null;
-        
-        /*
-        
-        Resource sourceInstance = null;
-        Resource targetInstance = null;
-        
-        try {
-			MODELGEN_App app = new MODELGEN_App();
-			
-			TGGResourceHandler myResourceHandler = app.getResourceHandler();
-			
-			myResourceHandler.loadModels();
-			
-			sourceInstance = myResourceHandler.getSourceResource();
-			targetInstance = myResourceHandler.getTargetResource();
-			
-			
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-        
-        
-        */
-         
-       
+        Resource targetInstance = null;       
         
         
         //Example for loading an instance model diagram
-        URI base = URI.createPlatformResourceURI("/", true);
+       // URI base = URI.createPlatformResourceURI("/", true);
+       
         
         //Assuming your instance model is contained in a .xmi file, path can be adjusted accordingly
-		URI uri =  URI.createURI("Hospital2Administration/instances/trg.xmi");
+		//URI uri =  URI.createURI("/Hospital2Administration/instances/trg.xmi");
+        URI uri =  URI.createURI("/Users/jordanlischka/Documents/runtime-Test_Workspace_2022-05-26/git/emoflon-ibex-tutorial/Hospital2Administration/instances/src.xmi");
 		
 		
 		

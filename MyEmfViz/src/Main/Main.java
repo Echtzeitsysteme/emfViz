@@ -50,6 +50,13 @@ public class Main {
         	generator.setStopCriterion(stop);
         	generator.run();
         	
+        	
+        	
+        	/*
+        	generator.saveModels();
+        	generator.getResourceHandler().loadModels();
+        	*/
+        	
         	instanceModelSrc = generator.getResourceHandler().getSourceResource();
         	instanceModelTrg = generator.getResourceHandler().getTargetResource();
         	
@@ -61,6 +68,8 @@ public class Main {
         		
         InstanceDiagrammLoader dataSrc = new InstanceDiagrammLoader(instanceModelSrc);
 		InstanceDiagrammLoader dataTarget = new InstanceDiagrammLoader(instanceModelTrg);
+		
+	
 		
 		Visualizer vis = new Visualizer(shell, dataSrc, dataTarget);
         

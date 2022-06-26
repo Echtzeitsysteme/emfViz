@@ -34,12 +34,35 @@ public class MainWindow {
 	public MainWindow (Shell shell) {
 		
 		this.shell = shell;
-		this.shellSizeX = shell.getSize().x;
-		this.shellSizeY = shell.getSize().y;
+		//this.shellSizeX = this.shell.getSize().x;
+		//this.shellSizeY = this.shell.getSize().y;
+		
+		this.shellSizeX = shell.getMonitor().getClientArea().width;
+		this.shellSizeY = shell.getMonitor().getClientArea().height;
+		
+		/* BASIC LAYOUT
+		 * 
+		 * 				shellSizeX
+		 * 	_________________________________
+		 *	|		//area for buttons		|	
+		 * 	|								|	ShellSizeY * 0.1
+		 * 	|_______________________________|
+		 * 	|				|				|
+		 * 	|				|				|
+		 * 	|				|				|	ShellSizeY
+		 * 	|	//graph		|	//graph		|	
+		 * 	|	//sourc		|	//target	|	
+		 * 	|				|				|
+		 * 	|				|				|
+		 * 	|				|				|
+		 * 	|_______________|_______________|
+		 * 
+		 * 
+		 */
 		
 		
 		//layout for user control widgets
-		compositeUserCtrl = new Composite(shell, SWT.EMBEDDED | SWT.BACKGROUND);
+		compositeUserCtrl = new Composite(this.shell, SWT.EMBEDDED | SWT.BACKGROUND);
 		compositeUserCtrl.setVisible(true);
 		compositeUserCtrl.setLayoutData(new RowData(shellSizeX, (int) (shellSizeY * 0.1)));
 		
@@ -49,15 +72,16 @@ public class MainWindow {
 		
 		panelUserCtrl = new Panel();
 		panelUserCtrl.setBackground(Color.WHITE);
+		panelUserCtrl.setSize(shellSizeX, (int) (shellSizeY * 0.1));
 		
 		/*add panel to frame*/
 		userCtrlFrame.add(panelUserCtrl);
 
 	
 		//graph visualization window
-		compositeGraph = new Composite(shell, SWT.EMBEDDED | SWT.NO_BACKGROUND);
+		compositeGraph = new Composite(this.shell, SWT.EMBEDDED | SWT.NO_BACKGROUND);
 		compositeGraph.setVisible(true);
-		compositeGraph.setLayoutData(new RowData(shellSizeX, (int) (shellSizeY  * 0.9 - 30)));
+		compositeGraph.setLayoutData(new RowData(shellSizeX, (int) (shellSizeY  - panelUserCtrl.getSize().height)));
 		
 		graphFrame = SWT_AWT.new_Frame(compositeGraph);
 		graphFrame.setLayout(new GridLayout());
@@ -66,12 +90,12 @@ public class MainWindow {
 		panelSrc = new Panel();
 		panelSrc.setLayout(new BorderLayout());
 		panelSrc.setBackground(Color.GRAY);
-		panelSrc.setSize((int) (shellSizeX * 0.5), (int) (shellSizeY  * 0.9-30));
+		panelSrc.setSize((int) (shellSizeX * 0.5), (int) (shellSizeY  - panelUserCtrl.getSize().height));
 		
 		panelTrg = new Panel();
 		panelTrg.setLayout(new BorderLayout());
 		panelTrg.setBackground(Color.GRAY);
-		panelTrg.setSize((int) (shellSizeX * 0.5), (int) (shellSizeY  * 0.9-30));
+		panelTrg.setSize((int) (shellSizeX * 0.5), (int) (shellSizeY  - panelUserCtrl.getSize().height));
 		
 		
 		/*add panels to frame*/
