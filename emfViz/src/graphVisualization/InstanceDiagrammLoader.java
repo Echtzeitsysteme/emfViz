@@ -15,11 +15,16 @@ import com.mxgraph.view.mxGraph;
 public class InstanceDiagrammLoader extends DataLoader {
 	
 	private Resource instanceModel;
+	private boolean internalEdgesOnly;
 
-	public InstanceDiagrammLoader(Resource loadedResource) {
+	public InstanceDiagrammLoader(Resource loadedResource, boolean internalEdgesOnly) {
 		super();
 		
 		instanceModel = loadedResource;
+		this.internalEdgesOnly = internalEdgesOnly;
+		
+		System.out.println("Instance Model: " + instanceModel.getURI().toString());
+	
 	}
 
 	@Override
@@ -38,14 +43,21 @@ public class InstanceDiagrammLoader extends DataLoader {
 		
 		for(EStructuralFeature f : ((EClassImpl)content.eClass()).getEAllStructuralFeatures()) {
 			
+			
 			if(f instanceof EReference) {
-					
+				
 				if(!edges.containsKey(content.toString())) {						
 					ArrayList<Edge> outgoingEdges = new ArrayList<Edge>();
 					edges.put(content.toString(), outgoingEdges);
 				}
 				
 				if(!f.isMany()) {
+
+					if(internalEdgesOnly) {						
+						if(! ((EObject) content.eGet(f)).eResource().getURI().equals(instanceModel.getURI()))
+								continue;
+					}
+					
 					
 					Edge visEdge = new Edge(f.getName(), "defaultEdge", content.toString(), ((EObject) content.eGet(f)).toString());
 					
@@ -66,6 +78,11 @@ public class InstanceDiagrammLoader extends DataLoader {
 				EReference opp = ((EReference) f).getEOpposite();
 				
 				for(EObject oMulti : values) {
+					
+					if(internalEdgesOnly) {						
+						if(! oMulti.eResource().getURI().equals(instanceModel.getURI()) )
+								continue;
+					}
 					
 					
 					Edge visEdge = new Edge(f.getName(), "defaultEdge", content.toString(), oMulti.toString());
