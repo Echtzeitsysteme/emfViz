@@ -1,7 +1,6 @@
 package graphVisualization;
 
 
-import java.awt.Color;
 import java.awt.Panel;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -13,10 +12,6 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Display;
 
 import com.mxgraph.layout.mxFastOrganicLayout;
 import com.mxgraph.model.mxCell;
@@ -31,12 +26,11 @@ import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxStylesheet;
 
-import userInterface.MainWindow;
+
 
 public class Visualizer {
 	
 
-	private Shell shell;
 	private Panel panel;
 	
 	private mxGraph graph;
@@ -431,38 +425,6 @@ public class Visualizer {
 		}
 		
 	}
-	
-	// needed for button functions
-	
-	public void addTargetModelToGraphView (DataLoader dataLoader) {
-		Display.getDefault().asyncExec(new Runnable() {
-		    public void run() {
-		    	panel.removeAll();
-				
-				dataLoader.loadData();
-				
-				mxGraph graph = new mxGraph();
-				mxGraphModel graphModel = ((mxGraphModel)graph.getModel()); 
-				
-				addStyles();
-				insertDataIntoGraph();
-				setUpLayout();
-				runLayout();
-				
-				mxGraphComponent graphComponent = new mxGraphComponent(graph);
-				panel.add(graphComponent);
-				
-				panel.repaint();
-				
-				//repaint();
-				//panelTrg.setBackground(Color.BLACK);
-				
-				//shell.redraw();
-		    }
-		});
-		
-	}
-	
 }
 	
 	

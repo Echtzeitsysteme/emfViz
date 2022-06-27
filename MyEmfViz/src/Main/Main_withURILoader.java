@@ -47,7 +47,7 @@ public class Main_withURILoader {
         
         shell.setLayout(rowLayout);
        
-        MainWindow graphVisualizer = new MainWindow(null, shell);
+        MainWindow graphVisualizer = new MainWindow(shell, null);
   		graphVisualizer.createMainWindow();
   		
   		Panel panelSrc = graphVisualizer.panelSrc;

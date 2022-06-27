@@ -10,17 +10,13 @@ import graphVisualization.InstanceDiagrammLoader;
 import graphVisualization.Visualizer;
 import userInterface.MainWindow;
 
-import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGENStopCriterion;
-import org.emoflon.ibex.tgg.run.hospital2administration.MODELGEN_App;
-
 import Main.ModelLoader.ResourceType;
 
 import java.awt.Panel;
-import java.io.IOException;
-
-import org.eclipse.emf.ecore.resource.Resource;
 
 public class Main_withResourceHandler {
+	
+	
 
 	public static void main(String[] args) {
 	
@@ -41,15 +37,18 @@ public class Main_withResourceHandler {
         shell.setLayout(rowLayout);
       
 		
-  		MainWindow graphVisualizer = new MainWindow(null, shell);
+  		MainWindow graphVisualizer = new MainWindow(shell, null);
   		graphVisualizer.createMainWindow();
   		
   		Panel panelSrc = graphVisualizer.panelSrc;
 		Panel panelTrg = graphVisualizer.panelTrg;
         
-     
-        InstanceDiagrammLoader dataSrc = new InstanceDiagrammLoader(ModelLoader.loadModelWithResourceHandler(ResourceType.Source), true);
-		InstanceDiagrammLoader dataTarget = new InstanceDiagrammLoader(ModelLoader.loadModelWithResourceHandler(ResourceType.Target), true);
+		ModelLoader modelLoader = new ModelLoader();
+		
+		graphVisualizer.setModelLoader(modelLoader);
+		
+        InstanceDiagrammLoader dataSrc = new InstanceDiagrammLoader(modelLoader.loadModelWithResourceHandler(ResourceType.Source), true);
+		InstanceDiagrammLoader dataTarget = new InstanceDiagrammLoader(modelLoader.loadModelWithResourceHandler(ResourceType.Target), true);
 		
 		
 		Visualizer visSrc = new Visualizer(dataSrc, panelSrc);
