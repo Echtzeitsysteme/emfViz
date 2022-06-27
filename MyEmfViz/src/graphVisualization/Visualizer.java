@@ -1,9 +1,7 @@
 package graphVisualization;
 
-import java.awt.BorderLayout;
+
 import java.awt.Color;
-import java.awt.Frame;
-import java.awt.GridLayout;
 import java.awt.Panel;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -16,13 +14,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.awt.SWT_AWT;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.RowData;
-import org.eclipse.swt.layout.RowLayout;
+
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 
 import com.mxgraph.layout.mxFastOrganicLayout;
 import com.mxgraph.model.mxCell;
@@ -41,19 +35,15 @@ import userInterface.MainWindow;
 
 public class Visualizer {
 	
+
 	private Shell shell;
-	private Panel panelSrc;
-	private Panel panelTrg;
+	private Panel panel;
 	
 	private mxGraph graph;
 	private mxGraphModel graphModel;
 	private mxGraphComponent graphComponent;
 	private DataLoader dataLoader;
 	
-	private mxGraph graphTarget;
-	private mxGraphModel graphModelTarget;
-	private mxGraphComponent graphComponentTarget;
-	private DataLoader dataLoaderTarget;
 	
 	private int defaultNodeWidth = 80;
 	private int defaultNodeHeight = 40;
@@ -76,66 +66,57 @@ public class Visualizer {
 	
 	
 	
-	public Visualizer(Shell shell, DataLoader dataLoader, DataLoader dataLoaderTarget) {
+	public Visualizer(DataLoader dataLoader, Panel panel) {
 		
-		System.out.println("overload constructor...");
+		/*source data model*/
+		if (((InstanceDiagrammLoader) dataLoader).getInstanceModel() != null) {
+			this.dataLoader = dataLoader;
+			dataLoader.loadData();
+		}
+
 		
-		/*source dataModel*/
-		this.dataLoader = dataLoader;
-		dataLoader.loadData();
+		//just for debugging
+		/*
+		for (int i = 0; i < dataLoader.nodes.size(); i++) {
+			System.out.println(dataLoader.nodes.get(i).toString());
+			
+		}
 		
-		/*target dataModel*/
-		this.dataLoaderTarget = dataLoaderTarget;
-		dataLoaderTarget.loadData();
+		for (ArrayList<Edge> e : dataLoader.edges.values()) {
+			for (Edge edge : e) {
+				System.out.println(edge.toString());
+			}
+			
+		}*/
 		
 		
-		this.shell = shell;
-		
-		
-		//initialize shell layout
-		
-		MainWindow graphVisualizer = new MainWindow(this.shell);
-		
-		panelSrc = graphVisualizer.panelSrc;
-		panelTrg = graphVisualizer.panelTrg;
+		this.panel = panel;
 		
 		
 		/* source graph*/
 		graph = new mxGraph();
 		graphModel = ((mxGraphModel)graph.getModel());
 		
-		/*target graph*/
-		graphTarget = new mxGraph();
-		graphModelTarget = ((mxGraphModel)graphTarget.getModel()); 
 		
-		
-		org.eclipse.swt.graphics.Rectangle shellBounds = this.shell.getBounds();
-		
-		//System.out.println("Monitor bounds:" + monitorBounds.toString());
+		Rectangle shellBounds = panel.getBounds();
 		
 		//nur noch 0.5 mal so viel zu vor in x-Dimension
-		defaultNodePosition = new Point2D.Double(((double) shellBounds.width) * 0.5 * 0.4 - defaultNodeWidth *0.5, ((double) shellBounds.height) * 0.4- defaultNodeHeight *0.5);
+		defaultNodePosition = new Point2D.Double(((double) shellBounds.width) * 0.4 - defaultNodeWidth * 0.5 , ((double) shellBounds.height) * 0.4 - defaultNodeHeight * 0.5);
 		
 		
-		/*src graph*/
 		addStyles();
-		insertDataIntoGraph(graph, dataLoader);
-		setUpLayout(graph, panelSrc);
-		runLayout(graph, graphModel);
 		
-		/*add src graph to src panel*/
-		graphComponent = new mxGraphComponent(graph);
-		panelSrc.add(graphComponent);
+		//create graph
+		if (this.dataLoader != null){
+			addStyles();
+			insertDataIntoGraph();
+			setUpLayout();
+			runLayout();
+			
+			graphComponent = new mxGraphComponent(graph);
+			this.panel.add(graphComponent);
+		}
 		
-		
-		/*trg graph*/
-		insertDataIntoGraph(graphTarget, dataLoaderTarget);
-		setUpLayout(graphTarget, panelTrg);
-		runLayout(graphTarget, graphModelTarget);
-		
-		/* add trg graph to trg panel*/
-		graphComponentTarget = new mxGraphComponent(graphTarget);
-		panelTrg.add(graphComponentTarget);
 		
 	}
 	
@@ -165,7 +146,7 @@ public class Visualizer {
 		//stylesheet.setDefaultEdgeStyle(edgeStyle);
 	}
 	
-	private void insertDataIntoGraph(mxGraph graph, DataLoader dataLoader) {
+	private void insertDataIntoGraph() {
 		
 		double centerX = graph.getGraphBounds().getCenterX();
 		double centerY = graph.getGraphBounds().getCenterY();
@@ -188,12 +169,9 @@ public class Visualizer {
 		
 		centerX = graph.getGraphBounds().getCenterX();
 		centerY = graph.getGraphBounds().getCenterY();
-		
-		//System.out.println("Center X: " + String.valueOf(centerX));
-		//System.out.println("Center Y: " + String.valueOf(centerY));
 	}
 	
-	private void setUpLayout(mxGraph graph, Panel panel) {
+	private void setUpLayout() {
 		
 		preLayout = new mxFastOrganicLayout(graph);
 		preLayout.setForceConstant(150);
@@ -201,22 +179,16 @@ public class Visualizer {
 		preLayout.setUseInputOrigin(false);
 		preLayout.setDisableEdgeStyle(false);
 		
-		//org.eclipse.swt.graphics.Rectangle shellBounds = shell.getBounds();
 		Rectangle shellBounds = panel.getBounds();
 		
-		//System.out.println("Shellbounds: " + shellBounds.toString());
 		
 		double hWRatio = (double) shellBounds.height / (double)shellBounds.width;
 		
 		int baseSize = Math.min(dataLoader.nodes.size() * dataLoader.nodes.size(), shellBounds.height * shellBounds.width);
-		
-		//System.out.println("baseSize: " + String.valueOf(baseSize));
+
 		
 		int sizeX = (int) Math.ceil(Math.sqrt(baseSize));
 		int sizeY = (int) Math.ceil(Math.sqrt(baseSize));
-		
-		//System.out.println("SizeX: " + String.valueOf(sizeX));
-		//System.out.println("SizeY: " + String.valueOf(sizeY));
 		
 		nodeGrid = new Grid(shellBounds, sizeX, sizeY,  minNodeDistanceNodes);
 		edgeGrid = new Grid(shellBounds,(int)Math.floor((1-margin ) *shellBounds.width), (int) Math.floor((1-margin ) *shellBounds.height), minNodeDistanceEdges);
@@ -225,7 +197,7 @@ public class Visualizer {
 		
 	}
 	
-	private void updateGraphShellTransformation(mxGraph graph) {
+	private void updateGraphShellTransformation() {
 	
 		double graphWidth = graph.getGraphBounds().getWidth();
 		double graphHeight = graph.getGraphBounds().getHeight();
@@ -233,27 +205,24 @@ public class Visualizer {
 		graphCenterX = graph.getGraphBounds().getCenterX();
 		graphCenterY = graph.getGraphBounds().getCenterY();
 		
-		//xStretch = (shell.getMonitor().getClientArea().width *(1-nodeGrid.margin))/graphWidth;
-		//yStretch = (shell.getMonitor().getClientArea().height*(1-nodeGrid.margin))/graphHeight;
-		
-		//angepasst da nun nur halber Platz pro Graph zur Verfügung steht - betrifft nur x Dimension
-		xStretch = (shell.getMonitor().getClientArea().width * 0.5 *(1-nodeGrid.margin))/graphWidth;
-		yStretch = (shell.getMonitor().getClientArea().height*(1-nodeGrid.margin)*0.9-30)/graphHeight;
+	
+		xStretch = (panel.getWidth() * (1 - nodeGrid.margin)) / graphWidth;
+		yStretch = (panel.getHeight() * (1 - nodeGrid.margin)) / graphHeight;
 		
 	}
 	
-	private void runLayout(mxGraph graph, mxGraphModel graphModel) {
+	private void runLayout() {
 
 		preLayout.execute(graph.getDefaultParent());
 		
 		blockedAreas.clear();
 		
 		System.out.println("Placing nodes");
-		placeNodes(graphModel, graph);
+		placeNodes();
 		System.out.println("Routing edges");
-		placeEdges(graphModel, graph);
+		placeEdges();
 		System.out.println("Placing edge labels");
-		placeLabels(graphModel, graph);
+		placeLabels();
 		System.out.println("Ready");
 		
 	}
@@ -268,9 +237,9 @@ public class Visualizer {
 
 	
 	
-	private void placeNodes(mxGraphModel graphModel, mxGraph graph) {
+	private void placeNodes() {
 		
-		updateGraphShellTransformation(graph);
+		updateGraphShellTransformation();
 		
 		Map<String,Object> cells = graphModel.getCells();	
 		for(Object cell : cells.values()) {
@@ -311,7 +280,7 @@ public class Visualizer {
 		
 	}
 	
-	private void placeEdges(mxGraphModel graphModel, mxGraph graph) {
+	private void placeEdges() {
 		
 		HashMap<String, ArrayList<mxPoint>> plottedEdges = new HashMap<String, ArrayList<mxPoint>>();
 		Map<String,Object> cells = graphModel.getCells();	
@@ -416,7 +385,7 @@ public class Visualizer {
 		}
 	}
 	
-	private void placeLabels(mxGraphModel graphModel, mxGraph graph) {
+	private void placeLabels() {
 		
 		Map<String,Object> cells = graphModel.getCells();	
 		
@@ -460,6 +429,37 @@ public class Visualizer {
 			nodeGrid.setGridValues(labelBounds.getRectangle(), Double.MAX_VALUE);
 			
 		}
+		
+	}
+	
+	// needed for button functions
+	
+	public void addTargetModelToGraphView (DataLoader dataLoader) {
+		Display.getDefault().asyncExec(new Runnable() {
+		    public void run() {
+		    	panel.removeAll();
+				
+				dataLoader.loadData();
+				
+				mxGraph graph = new mxGraph();
+				mxGraphModel graphModel = ((mxGraphModel)graph.getModel()); 
+				
+				addStyles();
+				insertDataIntoGraph();
+				setUpLayout();
+				runLayout();
+				
+				mxGraphComponent graphComponent = new mxGraphComponent(graph);
+				panel.add(graphComponent);
+				
+				panel.repaint();
+				
+				//repaint();
+				//panelTrg.setBackground(Color.BLACK);
+				
+				//shell.redraw();
+		    }
+		});
 		
 	}
 	
