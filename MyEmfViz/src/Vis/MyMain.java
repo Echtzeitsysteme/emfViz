@@ -86,7 +86,7 @@ public class MyMain {
         URI base = URI.createPlatformResourceURI("/", true);
         
         //Assuming your instance model is contained in a .xmi file, path can be adjusted accordingly
-		URI uri =  URI.createURI("Hospital2Administration/instances/trg.xmi");
+		URI uri =  URI.createURI("/Users/Elena/emoflon-workspaces/runtime-06-21-tggViz-workspace/git/emoflon-ibex-tutorial/Hospital2Administration/instances/trg.xmi");
 		
 		
 		
