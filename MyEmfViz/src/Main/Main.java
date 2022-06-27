@@ -25,18 +25,23 @@ public class Main {
 		Display display = new Display();
 		 
         Shell shell = new Shell(display);
-      
+        shell.setFullScreen(true);
         
         //shell.setLayout(new FillLayout(SWT.VERTICAL));
         RowLayout rowLayout = new RowLayout(SWT.VERTICAL);
-        rowLayout.wrap = true;
-        rowLayout.pack = true;
-        rowLayout.justify = true;
+        rowLayout.marginHeight	= 0;
+        rowLayout.marginBottom = 0;
+        rowLayout.marginTop = 0;
+        rowLayout.marginLeft = 0;
+        rowLayout.marginRight = 0;
+        rowLayout.marginWidth = 0;
         
         shell.setLayout(rowLayout);
+        
+        //shell.setLayout(rowLayout);
        
         //Visualization is optimized for this shell size
-        shell.setSize(shell.getMonitor().getClientArea().width, shell.getMonitor().getClientArea().height);
+       // shell.setSize(shell.getMonitor().getClientArea().width, shell.getMonitor().getClientArea().height);
         
         // load models
         Resource instanceModelSrc = null;
@@ -46,7 +51,10 @@ public class Main {
         	
         	MODELGEN_App generator = new MODELGEN_App();
         	MODELGENStopCriterion stop = new MODELGENStopCriterion(generator.getTGG());
-        	stop.setMaxElementCount(10);
+        	stop.setMaxRuleCount("HospitaltoAdministrationRule", 1);
+        	//stop.setMaxRuleCount("NurseShiftplanRule", 3);
+    		//stop.setMaxRuleCount("DoctorShiftplanRule", 3);
+    		stop.setMaxElementCount(10);
         	generator.setStopCriterion(stop);
         	generator.run();
         	
@@ -66,8 +74,8 @@ public class Main {
         
         
         		
-        InstanceDiagrammLoader dataSrc = new InstanceDiagrammLoader(instanceModelSrc);
-		InstanceDiagrammLoader dataTarget = new InstanceDiagrammLoader(instanceModelTrg);
+        InstanceDiagrammLoader dataSrc = new InstanceDiagrammLoader(instanceModelSrc, true);
+		InstanceDiagrammLoader dataTarget = new InstanceDiagrammLoader(instanceModelTrg, true);
 		
 	
 		

@@ -79,7 +79,7 @@ public class Visualizer {
 
 		
 		//just for debugging
-		
+		/*
 		for (int i = 0; i < dataLoader.nodes.size(); i++) {
 			System.out.println(dataLoader.nodes.get(i).toString());
 			
@@ -90,7 +90,7 @@ public class Visualizer {
 				System.out.println(edge.toString());
 			}
 			
-		}
+		}*/
 		
 		/*target data model*/
 		if (((InstanceDiagrammLoader) dataLoaderTarget).getInstanceModel() != null) {
@@ -100,7 +100,7 @@ public class Visualizer {
 		
 		
 		//just for debugging
-		/*
+		
 		for (int i = 0; i < dataLoaderTarget.nodes.size(); i++) {
 			System.out.println(dataLoaderTarget.nodes.get(i).toString());
 			
@@ -112,7 +112,7 @@ public class Visualizer {
 			}
 			
 		}
-		*/
+		
 		
 		
 		this.shell = shell;
