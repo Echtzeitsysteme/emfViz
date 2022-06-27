@@ -1,6 +1,7 @@
 package graphVisualization;
 
 
+import java.awt.Color;
 import java.awt.Panel;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -78,7 +79,7 @@ public class Visualizer {
 
 		
 		//just for debugging
-		/*
+		
 		for (int i = 0; i < dataLoader.nodes.size(); i++) {
 			System.out.println(dataLoader.nodes.get(i).toString());
 			
@@ -89,7 +90,7 @@ public class Visualizer {
 				System.out.println(edge.toString());
 			}
 			
-		}*/
+		}
 		
 		/*target data model*/
 		if (((InstanceDiagrammLoader) dataLoaderTarget).getInstanceModel() != null) {
@@ -505,6 +506,7 @@ public class Visualizer {
 				mxGraph graph = new mxGraph();
 				mxGraphModel graphModel = ((mxGraphModel)graph.getModel()); 
 				
+				addStyles();
 				insertDataIntoGraph(graph, dataLoader);
 				setUpLayout(graph, panelTrg);
 				runLayout(graph, graphModel);
@@ -512,7 +514,10 @@ public class Visualizer {
 				mxGraphComponent graphComponent = new mxGraphComponent(graph);
 				panelTrg.add(graphComponent);
 				
+				panelTrg.repaint();
 				
+				//repaint();
+				//panelTrg.setBackground(Color.BLACK);
 				
 				//shell.redraw();
 		    }

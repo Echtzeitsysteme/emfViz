@@ -95,7 +95,7 @@ public class MainWindow {
 		
 		Button btLoadTarget = new UIButton("Load target Model");
 		panelUserCtrl.add(btLoadTarget);
-		
+			
 		btLoadTarget.addActionListener(new LoadTargetModelActionListener(vis));
 
 	
