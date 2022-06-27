@@ -151,10 +151,10 @@ class LoadTargetModelActionListener implements ActionListener{
 		// add code to load target model
 		System.out.println("Start loading target model...");
 		
-		URI uri =  URI.createURI("/Users/jordanlischka/Documents/runtime-Test_Workspace_2022-05-26/git/emoflon-ibex-tutorial/Hospital2Administration/instances/trg.xmi");
+		//URI uri =  URI.createURI("/Users/jordanlischka/Documents/runtime-Test_Workspace_2022-05-26/git/emoflon-ibex-tutorial/Hospital2Administration/instances/trg.xmi");
 		
-		DataLoader data = ButtonFunctions.loadTargetModelWithURI(uri);
-		vis.addTargetModelToGraphView(data);
+		//DataLoader data = ButtonFunctions.loadTargetModelWithURI(uri);
+		//vis.addTargetModelToGraphView(data);
 	}
 	
 }
