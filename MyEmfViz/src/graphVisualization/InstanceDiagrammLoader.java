@@ -15,11 +15,16 @@ import com.mxgraph.view.mxGraph;
 public class InstanceDiagrammLoader extends DataLoader {
 	
 	private Resource instanceModel;
+	private boolean internalEdgesOnly;
 
-	public InstanceDiagrammLoader(Resource loadedResource) {
+	public InstanceDiagrammLoader(Resource loadedResource, boolean internalEdgesOnly) {
 		super();
 		
 		instanceModel = loadedResource;
+		
+		this.internalEdgesOnly = internalEdgesOnly;
+		
+		System.out.println("Instance Model: " + instanceModel.getURI().toString());
 	}
 
 	@Override
@@ -45,7 +50,19 @@ public class InstanceDiagrammLoader extends DataLoader {
 					edges.put(content.toString(), outgoingEdges);
 				}
 				
+				
+				
 				if(!f.isMany()) {
+					
+					if((EObject) content.eGet(f) == null) {
+						continue;
+					}
+					
+					if(internalEdgesOnly) {	
+						
+						if(! ((EObject) content.eGet(f)).eResource().getURI().equals(instanceModel.getURI()))
+								continue;
+					}
 					
 					EObject target = (EObject) content.eGet(f);
 					
@@ -70,9 +87,19 @@ public class InstanceDiagrammLoader extends DataLoader {
 				else {
 												
 				EList<EObject> values = (EList<EObject>) content.eGet(f);
+				
+				if (values == null) {
+					continue;
+				}
+				
 				EReference opp = ((EReference) f).getEOpposite();
 				
 				for(EObject oMulti : values) {
+					
+					if(internalEdgesOnly) {						
+						if(! oMulti.eResource().getURI().equals(instanceModel.getURI()) )
+								continue;
+					}
 					
 					
 					Edge visEdge = new Edge(f.getName(), "defaultEdge", content.toString(), oMulti.toString());
@@ -93,6 +120,10 @@ public class InstanceDiagrammLoader extends DataLoader {
 			collectContentHierarchichal(containedContent);
 		}
 			
+	}
+	
+	public Resource getInstanceModel () {
+		return instanceModel;
 	}
 	
 	/*private void loadResource(String path) {
