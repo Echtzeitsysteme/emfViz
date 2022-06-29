@@ -3,10 +3,6 @@ package graphVisualization;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.eclipse.emf.ecore.EReference;
-
-import com.mxgraph.view.mxGraph;
-
 public abstract class DataLoader {
 	
 	protected DataLoader() {
