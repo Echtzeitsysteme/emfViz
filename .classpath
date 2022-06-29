@@ -166,5 +166,6 @@
 		</accessrules>
 	</classpathentry>
 	<classpathentry kind="lib" path="C:/Users/Marek/eclipse-workspace/emfViz/external jars/jgraphx-4.2.2.jar"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

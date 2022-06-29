@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: emfViz
+Bundle-SymbolicName: emfViz
+Bundle-Version: 1.0.0.qualifier
+Bundle-ClassPath: emfViz.jar,
+ Marek/eclipse-workspace/emfViz/external jars/org.eclipse.jface-3.6.0.jar,
+ Marek/eclipse-workspace/emfViz/external jars/org.eclipse.swt-3.1.jar,
+ Marek/eclipse-workspace/emfViz/external jars/org.eclipse.emf.ecore_2.25.0.v20210816-0937.jar,
+ Marek/eclipse-workspace/emfViz/external jars/org.emoflon.smartemf_1.0.0.202202281619.jar,
+ Marek/eclipse-workspace/emfViz/external jars/org.eclipse.emf.common_2.23.0.v20210924-1718.jar,
+ Marek/eclipse-workspace/emfViz/external jars/akka-actor_2.12-2.5.19.jar,
+ Marek/eclipse-workspace/emfViz/external jars/jgraphx-4.2.2.jar
+Automatic-Module-Name: emfViz
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Export-Package: graphVisualization
