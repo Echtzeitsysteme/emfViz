@@ -20,8 +20,25 @@ public class ModelLoader {
 	private static Resource instanceModel;
 	private static URI uri;
 	
+	private MODELGEN_App generator;
 	
-	public static Resource loadModelWithURI(ResourceType resourceType, String wokingDirectory) {
+	public ModelLoader() {
+		try {
+			generator = new MODELGEN_App();
+			
+        	MODELGENStopCriterion stop = new MODELGENStopCriterion(generator.getTGG());
+        	stop.setMaxRuleCount("HospitaltoAdministrationRule", 1);
+    		stop.setMaxElementCount(10);
+        	generator.setStopCriterion(stop);
+        	generator.run();
+        	
+		}catch(Exception e) {
+			System.out.print(e.getMessage());
+			
+		}
+	}
+	
+	public static Resource loadModelWithURI(ResourceType resourceType, String workingDirectory) {
 		
 		
 		//Example for loading an instance model diagram
@@ -34,10 +51,10 @@ public class ModelLoader {
 		
 		switch (resourceType) {
 		case Source:
-			uri = URI.createURI(wokingDirectory + "instances/src.xmi");
+			uri = URI.createURI(workingDirectory + "instances/src.xmi");
 			break;
 		case Target:
-			uri = URI.createURI(wokingDirectory + "instances/trg.xmi");
+			uri = URI.createURI(workingDirectory + "instances/trg.xmi");
 			break;
 		}
 				
@@ -71,30 +88,16 @@ public class ModelLoader {
 		return instanceModel;
 	}
 	
-	public static Resource loadModelWithResourceHandler(ResourceType resourceType) {
+	public Resource loadModelWithResourceHandler(ResourceType resourceType) {
 		
-		try {
-        	
-        	MODELGEN_App generator = new MODELGEN_App();
-        	MODELGENStopCriterion stop = new MODELGENStopCriterion(generator.getTGG());
-        	stop.setMaxRuleCount("HospitaltoAdministrationRule", 1);
-    		stop.setMaxElementCount(10);
-        	generator.setStopCriterion(stop);
-        	generator.run();
-		
-			switch (resourceType) {
-			case Source:
-				instanceModel = generator.getResourceHandler().getSourceResource();
-				break;
-			case Target:
-				instanceModel = generator.getResourceHandler().getTargetResource();
-				break;
-			}
-			
-			
-		 } catch(IOException e) {
-	        	System.out.println(e.getMessage());
-	        }
+		switch (resourceType) {
+		case Source:
+			instanceModel = generator.getResourceHandler().getSourceResource();
+			break;
+		case Target:
+			instanceModel = generator.getResourceHandler().getTargetResource();
+			break;
+		}
 		
 		return instanceModel;
 	}

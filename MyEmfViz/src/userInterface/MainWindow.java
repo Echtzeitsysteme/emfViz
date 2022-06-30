@@ -9,14 +9,16 @@ import java.awt.Panel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import org.eclipse.emf.common.util.URI;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import graphVisualization.DataLoader;
+import Main.ModelLoader;
+import Main.ModelLoader.ResourceType;
+import graphVisualization.InstanceDiagrammLoader;
 import graphVisualization.Visualizer;
 
 
@@ -24,7 +26,7 @@ import graphVisualization.Visualizer;
 
 public class MainWindow {
 
-	private Visualizer vis;
+	private ModelLoader modelLoader;
 	
 	private Shell shell;
 	private Composite compositeGraph;
@@ -39,13 +41,14 @@ public class MainWindow {
 	public Panel panelSrc;
 	public Panel panelTrg;
 	
-	public MainWindow (Visualizer vis, Shell shell) {
+	public MainWindow (Shell shell, ModelLoader modelLoader) {
 		
-		this.vis = vis;
 		
-		this.shell = shell;
+		this.modelLoader = modelLoader;
 		//this.shellSizeX = this.shell.getSize().x;
 		//this.shellSizeY = this.shell.getSize().y;
+		
+		this.shell = shell;
 		
 		this.shellSizeX = shell.getMonitor().getClientArea().width;
 		this.shellSizeY = shell.getMonitor().getClientArea().height;
@@ -63,9 +66,9 @@ public class MainWindow {
 		 * 	|_______________________________|
 		 * 	|				|				|
 		 * 	|				|				|
-		 * 	|				|				|	ShellSizeY
+		 * 	|				|				|	
 		 * 	|	//graph		|	//graph		|	
-		 * 	|	//sourc		|	//target	|	
+		 * 	|	//sourc		|	//target	|	ShellSizeY * 0.9
 		 * 	|				|				|
 		 * 	|				|				|
 		 * 	|				|				|
@@ -90,14 +93,6 @@ public class MainWindow {
 		
 		/*add panel to frame*/
 		userCtrlFrame.add(panelUserCtrl);
-		
-		/* add buttons*/
-		
-		Button btLoadTarget = new UIButton("Load target Model");
-		panelUserCtrl.add(btLoadTarget);
-			
-		btLoadTarget.addActionListener(new LoadTargetModelActionListener(vis));
-
 	
 		//graph visualization window
 		compositeGraph = new Composite(this.shell, SWT.EMBEDDED | SWT.NO_BACKGROUND);
@@ -123,14 +118,21 @@ public class MainWindow {
 		graphFrame.add(panelSrc);
 		graphFrame.add(panelTrg);
 		
-		//only for debugging
-		/* 
-		System.out.println("Shell bounds:" + shell.getBounds().toString());
-		System.out.println("Default Position:" + defaultNodePosition.toString());
-		System.out.println("Panel Src bounds:" + panelSrc.getBounds().toString());
-		System.out.println("Panel Trg bounds:" + panelTrg.getBounds().toString());
-		*/
 		
+		
+		/* now add buttons and other user control stuff*/	
+		Button btLoadTarget = new UIButton("Load target Model");
+		panelUserCtrl.add(btLoadTarget);
+			
+		btLoadTarget.addActionListener(new LoadTargetModelActionListener(this));
+	}
+	
+	public void setModelLoader(ModelLoader modelLoader) {
+		this.modelLoader = modelLoader;
+	}
+	
+	public ModelLoader getModelLoader () {
+		return modelLoader;
 	}
 }
 
@@ -138,23 +140,38 @@ public class MainWindow {
 class LoadTargetModelActionListener implements ActionListener{
 	
 	
-	private Visualizer vis;
+	private Panel panel;
+	private ModelLoader modelLoader;
+	private MainWindow window;
 	
-	public LoadTargetModelActionListener(Visualizer vis) {
-		this.vis = vis;
+	public LoadTargetModelActionListener(MainWindow window) {
+		this.window = window;
+		this.panel = window.panelTrg;
+		this.modelLoader = null;
+		//TODO handle panel = null
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
 		
+		/*	Display.getDefault().asyncExec(new Runnable() {
+		    public void run() {}});*/
+		
 		// add code to load target model
 		System.out.println("Start loading target model...");
 		
-		//URI uri =  URI.createURI("/Users/jordanlischka/Documents/runtime-Test_Workspace_2022-05-26/git/emoflon-ibex-tutorial/Hospital2Administration/instances/trg.xmi");
+		//delete all components from this panel
 		
-		//DataLoader data = ButtonFunctions.loadTargetModelWithURI(uri);
-		//vis.addTargetModelToGraphView(data);
+    	panel.removeAll();
+    	
+    	modelLoader = window.getModelLoader();
+		
+		InstanceDiagrammLoader data = new InstanceDiagrammLoader(modelLoader.loadModelWithResourceHandler(ResourceType.Target), true);
+		Visualizer vis = new Visualizer(data, panel);
+    	
+		panel.revalidate();
+    	panel.repaint();
 	}
 	
 }

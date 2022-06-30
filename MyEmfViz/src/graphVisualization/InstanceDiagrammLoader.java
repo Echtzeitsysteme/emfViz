@@ -9,7 +9,6 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.impl.EClassImpl;
 import org.eclipse.emf.ecore.resource.Resource;
-import com.mxgraph.view.mxGraph;
 
 
 public class InstanceDiagrammLoader extends DataLoader {
