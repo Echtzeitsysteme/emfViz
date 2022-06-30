@@ -38,7 +38,7 @@ public class ModelLoader {
 		}
 	}
 	
-	public static Resource loadModelWithURI(ResourceType resourceType, String wokingDirectory) {
+	public static Resource loadModelWithURI(ResourceType resourceType, String workingDirectory) {
 		
 		
 		//Example for loading an instance model diagram
@@ -51,10 +51,10 @@ public class ModelLoader {
 		
 		switch (resourceType) {
 		case Source:
-			uri = URI.createURI(wokingDirectory + "instances/src.xmi");
+			uri = URI.createURI(workingDirectory + "instances/src.xmi");
 			break;
 		case Target:
-			uri = URI.createURI(wokingDirectory + "instances/trg.xmi");
+			uri = URI.createURI(workingDirectory + "instances/trg.xmi");
 			break;
 		}
 				
