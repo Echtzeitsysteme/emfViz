@@ -36,8 +36,8 @@ public class Main {
         shell.setLayout(rowLayout);
        
         //Visualization is optimized for this shell size
-        shell.setSize(shell.getMonitor().getClientArea().width, shell.getMonitor().getClientArea().height);
-        
+        //shell.setSize(shell.getMonitor().getClientArea().width, shell.getMonitor().getClientArea().height);
+        shell.setSize(1800, 1000);
         // load models
         Resource instanceModelSrc = null;
         Resource instanceModelTrg = null;
@@ -59,8 +59,8 @@ public class Main {
         
         
         		
-        InstanceDiagrammLoader dataSrc = new InstanceDiagrammLoader(instanceModelSrc);
-		InstanceDiagrammLoader dataTarget = new InstanceDiagrammLoader(instanceModelTrg);
+        InstanceDiagrammLoader dataSrc = new InstanceDiagrammLoader(instanceModelSrc, true);
+		InstanceDiagrammLoader dataTarget = new InstanceDiagrammLoader(instanceModelTrg, true);
 		
 		Visualizer vis = new Visualizer(shell, dataSrc, dataTarget);
         

@@ -120,10 +120,10 @@ public class MyMain {
         
         
 		//Create an instace of the InstaceDiagrammLoader class with the loaded resource
-		InstanceDiagrammLoader data = new InstanceDiagrammLoader(instanceModel);
+		InstanceDiagrammLoader data = new InstanceDiagrammLoader(instanceModel, true);
 		
 		
-		InstanceDiagrammLoader dataTarget = new InstanceDiagrammLoader(instanceModel);
+		InstanceDiagrammLoader dataTarget = new InstanceDiagrammLoader(instanceModel, true);
 		
 		
         
