@@ -21,24 +21,8 @@ public class Main_withResourceHandler {
 	public static void main(String[] args) {
 	
 		Display display = new Display();
-		 
-		//initialize shell layout
-        Shell shell = new Shell(display);
-        shell.setFullScreen(true);
-        
-        RowLayout rowLayout = new RowLayout(SWT.VERTICAL);
-        rowLayout.marginHeight	= 0;
-        rowLayout.marginBottom = 0;
-        rowLayout.marginTop = 0;
-        rowLayout.marginLeft = 0;
-        rowLayout.marginRight = 0;
-        rowLayout.marginWidth = 0;
-        
-        shell.setLayout(rowLayout);
-      
 		
-  		MainWindow graphVisualizer = new MainWindow(shell, null);
-  		graphVisualizer.createMainWindow();
+  		MainWindow graphVisualizer = new MainWindow(display, null);
   		
   		Panel panelSrc = graphVisualizer.panelSrc;
 		Panel panelTrg = graphVisualizer.panelTrg;
@@ -46,6 +30,8 @@ public class Main_withResourceHandler {
 		ModelLoader modelLoader = new ModelLoader();
 		
 		graphVisualizer.setModelLoader(modelLoader);
+		
+		Shell shell = graphVisualizer.getShell();
 		
         InstanceDiagrammLoader dataSrc = new InstanceDiagrammLoader(modelLoader.loadModelWithResourceHandler(ResourceType.Source), true);
 		InstanceDiagrammLoader dataTarget = new InstanceDiagrammLoader(modelLoader.loadModelWithResourceHandler(ResourceType.Target), true);

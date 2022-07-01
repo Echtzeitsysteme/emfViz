@@ -12,6 +12,7 @@ import java.awt.event.ActionListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.layout.RowData;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -28,30 +29,25 @@ public class MainWindow {
 
 	private ModelLoader modelLoader;
 	
+	private Display display;
 	private Shell shell;
 	private Composite compositeGraph;
 	private Composite compositeUserCtrl;
 	private Frame graphFrame;
 	private Frame userCtrlFrame; 	
 	
-	final int shellSizeX;
-	final int shellSizeY;
+	private int shellSizeX;
+	private int shellSizeY;
 	
 	public Panel panelUserCtrl;
 	public Panel panelSrc;
 	public Panel panelTrg;
 	
-	public MainWindow (Shell shell, ModelLoader modelLoader) {
+	public MainWindow (Display display, ModelLoader modelLoader) {
 		
 		
 		this.modelLoader = modelLoader;
-		//this.shellSizeX = this.shell.getSize().x;
-		//this.shellSizeY = this.shell.getSize().y;
-		
-		this.shell = shell;
-		
-		this.shellSizeX = shell.getMonitor().getClientArea().width;
-		this.shellSizeY = shell.getMonitor().getClientArea().height;
+		this.display = display;
 		
 	}
 	
@@ -76,6 +72,23 @@ public class MainWindow {
 		 * 
 		 * 
 		 */
+		
+		//initialize shell layout
+        shell = new Shell(display);
+        shell.setFullScreen(true);
+        
+        RowLayout rowLayout = new RowLayout(SWT.VERTICAL);
+        rowLayout.marginHeight	= 0;
+        rowLayout.marginBottom = 0;
+        rowLayout.marginTop = 0;
+        rowLayout.marginLeft = 0;
+        rowLayout.marginRight = 0;
+        rowLayout.marginWidth = 0;
+        
+        shell.setLayout(rowLayout);
+		
+		shellSizeX = shell.getMonitor().getClientArea().width;
+		shellSizeY = shell.getMonitor().getClientArea().height;
 		
 		
 		//layout for user control widgets
@@ -125,6 +138,22 @@ public class MainWindow {
 		panelUserCtrl.add(btLoadTarget);
 			
 		btLoadTarget.addActionListener(new LoadTargetModelActionListener(this));
+	}
+	
+	public void resourcLoaderWindow () {
+		
+		int width = 600;
+		int height = 600;
+		
+		shell = new Shell(display);
+		shell.setSize(width, height);
+		
+		
+		
+	}
+	
+	public Shell getShell() {
+		return shell;
 	}
 	
 	public void setModelLoader(ModelLoader modelLoader) {
