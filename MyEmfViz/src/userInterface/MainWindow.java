@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.Panel;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
@@ -78,6 +80,8 @@ public class MainWindow {
 		graphFrame.add(panelSrc);
 		graphFrame.add(panelTrg);
 		
+		panelSrc.addMouseListener(new generateElementMouseListener());
+		
 		//only for debugging
 		/* 
 		System.out.println("Shell bounds:" + shell.getBounds().toString());
@@ -86,5 +90,14 @@ public class MainWindow {
 		System.out.println("Panel Trg bounds:" + panelTrg.getBounds().toString());
 		*/
 		
+	}
+	
+	class generateElementMouseListener extends MouseAdapter 
+	{
+	  @Override
+	  public void mouseClicked(MouseEvent e) 
+	  {
+	    System.out.println("Test MouseListener");
+	  }
 	}
 }
