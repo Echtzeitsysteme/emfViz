@@ -1,19 +1,17 @@
 package graphVisualization;
 
-import java.awt.Frame;
+
+import java.awt.Panel;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.awt.SWT_AWT;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Composite;
 
 import com.mxgraph.layout.mxFastOrganicLayout;
 import com.mxgraph.model.mxCell;
@@ -28,11 +26,12 @@ import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxStylesheet;
 
+
+
 public class Visualizer {
 	
-	private Shell shell;
-	private Composite composite;
-	private Frame frame;
+
+	private Panel panel;
 	
 	private mxGraph graph;
 	private mxGraphModel graphModel;
@@ -61,35 +60,57 @@ public class Visualizer {
 	
 	
 	
-	public Visualizer(Shell shell, DataLoader dataLoader) {
+	public Visualizer(DataLoader dataLoader, Panel panel) {
 		
-		this.dataLoader = dataLoader;
-		dataLoader.loadData();
+		/*source data model*/
+		if (((InstanceDiagrammLoader) dataLoader).getInstanceModel() != null) {
+			this.dataLoader = dataLoader;
+			dataLoader.loadData();
+		}
+
 		
-		this.shell = shell;
-		composite = new Composite(shell, SWT.EMBEDDED | SWT.NO_BACKGROUND);
-		composite.setVisible(true);
-		frame = SWT_AWT.new_Frame(composite);
+		//just for debugging
+		/*
+		for (int i = 0; i < dataLoader.nodes.size(); i++) {
+			System.out.println(dataLoader.nodes.get(i).toString());
+			
+		}
 		
+		for (ArrayList<Edge> e : dataLoader.edges.values()) {
+			for (Edge edge : e) {
+				System.out.println(edge.toString());
+			}
+			
+		}*/
+		
+		
+		this.panel = panel;
+		
+		
+		/* source graph*/
 		graph = new mxGraph();
 		graphModel = ((mxGraphModel)graph.getModel());
 		
-		org.eclipse.swt.graphics.Rectangle shellBounds = shell.getBounds();
 		
-		//System.out.println("Monitor bounds:" + monitorBounds.toString());
+		Rectangle shellBounds = panel.getBounds();
 		
-		defaultNodePosition = new Point2D.Double(((double) shellBounds.width) * 0.4 - defaultNodeWidth *0.5, ((double) shellBounds.height) * 0.4- defaultNodeHeight *0.5);
-		//defaultNodePosition = new Point2D.Double(shellBounds.width, shellBounds.height);
-		//System.out.println("Shell bounds:" + shell.getBounds().toString());
-		//System.out.println("Default Position:" + defaultNodePosition.toString());
+		//nur noch 0.5 mal so viel zu vor in x-Dimension
+		defaultNodePosition = new Point2D.Double(((double) shellBounds.width) * 0.4 - defaultNodeWidth * 0.5 , ((double) shellBounds.height) * 0.4 - defaultNodeHeight * 0.5);
+		
 		
 		addStyles();
-		insertDataIntoGraph();
-		setUpLayout();
-		runLayout();
 		
-		graphComponent = new mxGraphComponent(graph);
-		frame.add(graphComponent);
+		//create graph
+		if (this.dataLoader != null){
+			addStyles();
+			insertDataIntoGraph();
+			setUpLayout();
+			runLayout();
+			
+			graphComponent = new mxGraphComponent(graph);
+			this.panel.add(graphComponent);
+		}
+		
 		
 	}
 	
@@ -100,7 +121,7 @@ public class Visualizer {
 		cellStyle.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_RECTANGLE);
 		cellStyle.put(mxConstants.STYLE_OPACITY, 50);
 		cellStyle.put(mxConstants.STYLE_FONTCOLOR, "#00000");
-		cellStyle.put(mxConstants.STYLE_FONTSIZE, "13");
+		cellStyle.put(mxConstants.STYLE_FONTSIZE, "10");
 		cellStyle.put(mxConstants.STYLE_FILLCOLOR, "#FFFFFF");
 		cellStyle.put(mxConstants.ALIGN_CENTER, "1");
 		cellStyle.put(mxConstants.STYLE_OVERFLOW, "hidden");
@@ -109,7 +130,7 @@ public class Visualizer {
 		
 		Hashtable<String, Object> edgeStyle = new Hashtable<String, Object>();
 		edgeStyle.put(mxConstants.STYLE_FONTCOLOR, "#00000");
-		edgeStyle.put(mxConstants.STYLE_FONTSIZE, "10");
+		edgeStyle.put(mxConstants.STYLE_FONTSIZE, "8");
 		edgeStyle.put(mxConstants.STYLE_FILLCOLOR, "#FFFFFF");
 		edgeStyle.put(mxConstants.ALIGN_LEFT, "1");
 		edgeStyle.put(mxConstants.STYLE_OVERFLOW, "fill");
@@ -142,34 +163,26 @@ public class Visualizer {
 		
 		centerX = graph.getGraphBounds().getCenterX();
 		centerY = graph.getGraphBounds().getCenterY();
-		
-		//System.out.println("Center X: " + String.valueOf(centerX));
-		//System.out.println("Center Y: " + String.valueOf(centerY));
 	}
 	
 	private void setUpLayout() {
 		
 		preLayout = new mxFastOrganicLayout(graph);
 		preLayout.setForceConstant(150);
-		preLayout.setMinDistanceLimit(8);
+		preLayout.setMinDistanceLimit(4);
 		preLayout.setUseInputOrigin(false);
 		preLayout.setDisableEdgeStyle(false);
 		
-		org.eclipse.swt.graphics.Rectangle shellBounds = shell.getBounds();
+		Rectangle shellBounds = panel.getBounds();
 		
-		//System.out.println("Shellbounds: " + shellBounds.toString());
 		
 		double hWRatio = (double) shellBounds.height / (double)shellBounds.width;
 		
 		int baseSize = Math.min(dataLoader.nodes.size() * dataLoader.nodes.size(), shellBounds.height * shellBounds.width);
-		
-		//System.out.println("baseSize: " + String.valueOf(baseSize));
+
 		
 		int sizeX = (int) Math.ceil(Math.sqrt(baseSize));
 		int sizeY = (int) Math.ceil(Math.sqrt(baseSize));
-		
-		//System.out.println("SizeX: " + String.valueOf(sizeX));
-		//System.out.println("SizeY: " + String.valueOf(sizeY));
 		
 		nodeGrid = new Grid(shellBounds, sizeX, sizeY,  minNodeDistanceNodes);
 		edgeGrid = new Grid(shellBounds,(int)Math.floor((1-margin ) *shellBounds.width), (int) Math.floor((1-margin ) *shellBounds.height), minNodeDistanceEdges);
@@ -186,9 +199,9 @@ public class Visualizer {
 		graphCenterX = graph.getGraphBounds().getCenterX();
 		graphCenterY = graph.getGraphBounds().getCenterY();
 		
-		xStretch = (shell.getMonitor().getClientArea().width *(1-nodeGrid.margin))/graphWidth;
-		yStretch = (shell.getMonitor().getClientArea().height*(1-nodeGrid.margin))/graphHeight;
-		
+	
+		xStretch = (panel.getWidth() * (1 - nodeGrid.margin)) / graphWidth;
+		yStretch = (panel.getHeight() * (1 - nodeGrid.margin)) / graphHeight;
 		
 	}
 	
@@ -296,6 +309,12 @@ public class Visualizer {
 				
 				//ID: HospitalExample.impl.NurseImpl@2ca923bb (name: Stefanie Jones, staffID: 7)worksHospitalExample.impl.DepartmentImpl@64ec96c6 (dID: 2, maxRoomCount: 4)
 				
+				
+				// Added by JL
+				/*if (source == null || edgeGraph == null || terminal == null){
+					continue;
+				}*/
+				
 				String edgeId = source.getId().toString()+edgeGraph.getValue().toString()+terminal.getId().toString();
 				
 				
@@ -337,7 +356,7 @@ public class Visualizer {
 				
 				EdgePlanner edgePlanner = new EdgePlanner(sourceCenter, targetCenter, source.getGeometry(), terminal.getGeometry(), edgeGrid); 
 				
-				ArrayList<Point> edgePath = edgePlanner.planEdge();
+				LinkedList<Point> edgePath = edgePlanner.planEdge();
 				
 				if(edgePath == null)
 					continue;
@@ -406,7 +425,6 @@ public class Visualizer {
 		}
 		
 	}
-	
 }
 	
 	

@@ -29,5 +29,12 @@ public class Edge {
 	public boolean hasOpposite() {
 		return oppositeId != null;
 	}
+	
+	@Override
+	public String toString() {
+		return "id: "+ id + " , label: " + label + " , styleCategory: " + styleCategory + 
+				", oppositeID: " + oppositeId + " , sourceNID: " + sourceNID + " , targetNID: " + targetNID ;
+	}
+
 
 }

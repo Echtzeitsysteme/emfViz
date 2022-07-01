@@ -20,10 +20,10 @@ public class InstanceDiagrammLoader extends DataLoader {
 		super();
 		
 		instanceModel = loadedResource;
+		
 		this.internalEdgesOnly = internalEdgesOnly;
 		
 		System.out.println("Instance Model: " + instanceModel.getURI().toString());
-	
 	}
 
 	@Override
@@ -42,23 +42,35 @@ public class InstanceDiagrammLoader extends DataLoader {
 		
 		for(EStructuralFeature f : ((EClassImpl)content.eClass()).getEAllStructuralFeatures()) {
 			
-			
 			if(f instanceof EReference) {
-				
+					
 				if(!edges.containsKey(content.toString())) {						
 					ArrayList<Edge> outgoingEdges = new ArrayList<Edge>();
 					edges.put(content.toString(), outgoingEdges);
 				}
 				
+				
+				
 				if(!f.isMany()) {
-
-					if(internalEdgesOnly) {						
+					
+					if((EObject) content.eGet(f) == null) {
+						continue;
+					}
+					
+					if(internalEdgesOnly) {	
+						
 						if(! ((EObject) content.eGet(f)).eResource().getURI().equals(instanceModel.getURI()))
 								continue;
 					}
 					
+					EObject target = (EObject) content.eGet(f);
 					
-					Edge visEdge = new Edge(f.getName(), "defaultEdge", content.toString(), ((EObject) content.eGet(f)).toString());
+					if (target == null) {
+						continue;
+					}
+					
+					Edge visEdge = new Edge(f.getName(), "defaultEdge", content.toString(), target.toString());
+					
 					
 					EReference opp = ((EReference) f).getEOpposite();
 					
@@ -69,11 +81,16 @@ public class InstanceDiagrammLoader extends DataLoader {
 					}
 					edges.get(content.toString()).add(visEdge);
 					
-
+						
 				}
 				else {
 												
 				EList<EObject> values = (EList<EObject>) content.eGet(f);
+				
+				if (values == null) {
+					continue;
+				}
+				
 				EReference opp = ((EReference) f).getEOpposite();
 				
 				for(EObject oMulti : values) {
@@ -102,6 +119,10 @@ public class InstanceDiagrammLoader extends DataLoader {
 			collectContentHierarchichal(containedContent);
 		}
 			
+	}
+	
+	public Resource getInstanceModel () {
+		return instanceModel;
 	}
 	
 	/*private void loadResource(String path) {

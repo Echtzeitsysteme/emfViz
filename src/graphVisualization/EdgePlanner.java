@@ -5,6 +5,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 
@@ -261,7 +262,7 @@ public class EdgePlanner {
 		}
 	
 
-	public ArrayList<Point> planEdge(){
+	public LinkedList<Point> planEdge(){
 		
 		euclidComparator comp = new euclidComparator(centerTarget);
 		possibleOrigins.sort(comp);
@@ -291,7 +292,7 @@ public class EdgePlanner {
 			}
 
 			
-			ArrayList<Point> reducedPath = new ArrayList<Point>();
+			LinkedList<Point> reducedPath = new LinkedList<Point>();
 			
 			for(int idx: interestingIndices) {
 				
@@ -314,15 +315,15 @@ public class EdgePlanner {
 	}
 	
 	
-	private void reduceWayPoints(ArrayList<Point> fullPath){
+	private void reduceWayPoints(LinkedList<Point> reducedPath){
 		
-		for(int i = 0; i < fullPath.size() -1; i++){
+		for(int i = 0; i < reducedPath.size() -1; i++){
 			
-			Point currentWayPoint = fullPath.get(i);
-			Point nextWayPoint = fullPath.get(i+1);
+			Point currentWayPoint = reducedPath.get(i);
+			Point nextWayPoint = reducedPath.get(i+1);
 			
 			if(currentWayPoint.distance(nextWayPoint.x, nextWayPoint.y) < minInterPointDist){
-				fullPath.remove(i+1);			
+				reducedPath.remove(i+1);			
 				i--;
 			}
 			

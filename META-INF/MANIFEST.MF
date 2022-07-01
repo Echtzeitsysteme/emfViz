@@ -10,5 +10,6 @@ Require-Bundle: org.eclipse.emf.common;bundle-version="2.23.0",
  org.eclipse.emf.ecore;bundle-version="2.25.0",
  org.eclipse.swt;bundle-version="3.118.0",
  org.emoflon.smartemf;bundle-version="1.0.0",
- org.eclipse.jface;bundle-version="3.24.0"
+ org.eclipse.jface;bundle-version="3.24.0",
+ Hospital2Administration;bundle-version="0.0.1"
 Bundle-ClassPath: lib/jgraphx-4.2.2.jar
