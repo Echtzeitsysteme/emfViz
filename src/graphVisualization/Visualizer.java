@@ -1,6 +1,7 @@
 package graphVisualization;
 
 
+import java.awt.Frame;
 import java.awt.Panel;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -12,6 +13,11 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.awt.SWT_AWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 
 import com.mxgraph.layout.mxFastOrganicLayout;
 import com.mxgraph.model.mxCell;
@@ -57,6 +63,10 @@ public class Visualizer {
 	private int minNodeDistanceEdges = 10;
 	
 	private ArrayList<mxGeometry> blockedAreas;
+
+	private Shell shell;
+	private Composite composite;
+	private Frame frame;
 	
 	
 	
@@ -111,6 +121,38 @@ public class Visualizer {
 			this.panel.add(graphComponent);
 		}
 		
+		
+	}
+	
+	public Visualizer(Shell shell, DataLoader dataLoader) {
+		
+		this.dataLoader = dataLoader;
+		dataLoader.loadData();
+		
+		this.shell = shell;
+		composite = new Composite(shell, SWT.EMBEDDED | SWT.NO_BACKGROUND);
+		composite.setVisible(true);
+		frame = SWT_AWT.new_Frame(composite);
+		
+		graph = new mxGraph();
+		graphModel = ((mxGraphModel)graph.getModel());
+		
+		org.eclipse.swt.graphics.Rectangle shellBounds = shell.getBounds();
+		
+		//System.out.println("Monitor bounds:" + monitorBounds.toString());
+		
+		defaultNodePosition = new Point2D.Double(((double) shellBounds.width) * 0.4 - defaultNodeWidth *0.5, ((double) shellBounds.height) * 0.4- defaultNodeHeight *0.5);
+		//defaultNodePosition = new Point2D.Double(shellBounds.width, shellBounds.height);
+		//System.out.println("Shell bounds:" + shell.getBounds().toString());
+		//System.out.println("Default Position:" + defaultNodePosition.toString());
+		
+		addStyles();
+		insertDataIntoGraph();
+		setUpLayout();
+		runLayout();
+		
+		graphComponent = new mxGraphComponent(graph);
+		frame.add(graphComponent);
 		
 	}
 	
@@ -173,7 +215,8 @@ public class Visualizer {
 		preLayout.setUseInputOrigin(false);
 		preLayout.setDisableEdgeStyle(false);
 		
-		Rectangle shellBounds = panel.getBounds();
+		//Rectangle shellBounds = panel.getBounds();
+		org.eclipse.swt.graphics.Rectangle shellBounds = shell.getBounds();
 		
 		
 		double hWRatio = (double) shellBounds.height / (double)shellBounds.width;
@@ -200,8 +243,8 @@ public class Visualizer {
 		graphCenterY = graph.getGraphBounds().getCenterY();
 		
 	
-		xStretch = (panel.getWidth() * (1 - nodeGrid.margin)) / graphWidth;
-		yStretch = (panel.getHeight() * (1 - nodeGrid.margin)) / graphHeight;
+		xStretch = (shell.getMonitor().getClientArea().width *(1-nodeGrid.margin))/graphWidth;
+		yStretch = (shell.getMonitor().getClientArea().height*(1-nodeGrid.margin))/graphHeight;
 		
 	}
 	
@@ -424,6 +467,10 @@ public class Visualizer {
 			
 		}
 		
+	}
+	
+	public mxGraph getGraph() {
+		return graph;
 	}
 }
 	
