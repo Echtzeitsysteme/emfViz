@@ -8,6 +8,8 @@ import java.awt.GridLayout;
 import java.awt.Panel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
@@ -52,6 +54,7 @@ public class MainWindow {
 		
 		this.shellSizeX = shell.getMonitor().getClientArea().width;
 		this.shellSizeY = shell.getMonitor().getClientArea().height;
+		shell.setSize(shellSizeX, shellSizeY);
 		
 	}
 	
@@ -125,6 +128,7 @@ public class MainWindow {
 		panelUserCtrl.add(btLoadTarget);
 			
 		btLoadTarget.addActionListener(new LoadTargetModelActionListener(this));
+		
 	}
 	
 	public void setModelLoader(ModelLoader modelLoader) {
@@ -169,11 +173,21 @@ class LoadTargetModelActionListener implements ActionListener{
 		
 		InstanceDiagrammLoader data = new InstanceDiagrammLoader(modelLoader.loadModelWithResourceHandler(ResourceType.Target), true);
 		Visualizer vis = new Visualizer(data, panel);
+		
+		
     	
 		panel.revalidate();
     	panel.repaint();
 	}
 	
+}
+class generateElementMouseListener extends MouseAdapter 
+{
+  @Override
+  public void mouseClicked(MouseEvent e) 
+  {
+    System.out.println("Test MouseListener");
+  }
 }
 
 
