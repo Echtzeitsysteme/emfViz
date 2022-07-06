@@ -2,18 +2,32 @@ package userInterface;
 
 import java.awt.BorderLayout;
 import java.awt.Button;
+import java.awt.Checkbox;
+import java.awt.CheckboxGroup;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Frame;
 import java.awt.GridLayout;
+import java.awt.Label;
 import java.awt.Panel;
+import java.awt.Rectangle;
+import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.Graphics;
 
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.layout.RowData;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 
 import Main.ModelLoader;
@@ -34,24 +48,21 @@ public class MainWindow {
 	private Frame graphFrame;
 	private Frame userCtrlFrame; 	
 	
-	final int shellSizeX;
-	final int shellSizeY;
+	private int shellSizeX;
+	private int shellSizeY;
 	
 	public Panel panelUserCtrl;
 	public Panel panelSrc;
 	public Panel panelTrg;
 	
-	public MainWindow (Shell shell, ModelLoader modelLoader) {
+	public MainWindow (Shell shell) {
 		
 		
-		this.modelLoader = modelLoader;
-		//this.shellSizeX = this.shell.getSize().x;
-		//this.shellSizeY = this.shell.getSize().y;
-		
+		this.modelLoader = null;
 		this.shell = shell;
 		
-		this.shellSizeX = shell.getMonitor().getClientArea().width;
-		this.shellSizeY = shell.getMonitor().getClientArea().height;
+		
+		resourcLoaderWindow();
 		
 	}
 	
@@ -77,6 +88,15 @@ public class MainWindow {
 		 * 
 		 */
 		
+		//initialize shell layout		
+		shellSizeX = shell.getDisplay().getClientArea().width;
+		shellSizeY = shell.getDisplay().getClientArea().height;
+		
+        shell.setSize(shellSizeX, shellSizeY);
+        shell.setFullScreen(true);
+        
+        
+        shell.setLayout(new RowLayout(SWT.VERTICAL));
 		
 		//layout for user control widgets
 		compositeUserCtrl = new Composite(this.shell, SWT.EMBEDDED | SWT.BACKGROUND);
@@ -119,63 +139,286 @@ public class MainWindow {
 		graphFrame.add(panelTrg);
 		
 		
+		 graphFrame.validate();
+	     graphFrame.repaint();
+	}
+	
+	public void resourcLoaderWindow () {
 		
-		/* now add buttons and other user control stuff*/	
-		Button btLoadTarget = new UIButton("Load target Model");
-		panelUserCtrl.add(btLoadTarget);
-			
-		btLoadTarget.addActionListener(new LoadTargetModelActionListener(this));
+		shellSizeX = 600;
+		shellSizeY = 280;
+		
+		shell.setSize(shellSizeX, shellSizeY);
+		
+		Composite composite = new Composite(this.shell, SWT.EMBEDDED | SWT.BACKGROUND);
+		composite.setVisible(true);
+		composite.setSize(shellSizeX, shellSizeY);
+		
+		Frame frame = SWT_AWT.new_Frame(composite);
+		frame.setLayout(null);
+		frame.setTitle("Choose your model loading option");
+		
+	
+		CheckboxGroup bgroup = new CheckboxGroup();
+		Checkbox defaultButton = new Checkbox("Default",bgroup, true);
+		defaultButton.setForeground(Color.BLACK);
+		defaultButton.setBounds(20, 30, 160, 20);
+		Checkbox emptyModelButton = new Checkbox("Create new model",bgroup,false);
+		emptyModelButton.setForeground(Color.BLACK);
+		emptyModelButton.setBounds(20, 80, 160, 20);
+		Checkbox chooseModelButton = new Checkbox("Select model",bgroup,false);
+		chooseModelButton.setForeground(Color.BLACK);
+		chooseModelButton.setBounds(20, 130, 160, 20);
+		
+		
+		
+		
+        
+        Button nextBt	= new UIButton("next");       
+        nextBt.setBounds(510,220,80,20);
+        nextBt.addActionListener(new NextActionListener(bgroup, this));
+        
+        frame.add(defaultButton);
+        frame.add(emptyModelButton);   
+        frame.add(chooseModelButton);  
+        frame.add(nextBt);
+		
 	}
 	
-	public void setModelLoader(ModelLoader modelLoader) {
-		this.modelLoader = modelLoader;
+	public void chooseLocationWindow() {
+		shellSizeX = 600;
+		shellSizeY = 280;
+		
+		shell.setSize(shellSizeX, shellSizeY);
+		
+		Composite composite = new Composite(this.shell, SWT.EMBEDDED | SWT.BACKGROUND);
+		composite.setVisible(true);
+		composite.setSize(shellSizeX, shellSizeY);
+		
+		Frame frame = SWT_AWT.new_Frame(composite);
+		frame.setLayout(null);
+		frame.setTitle("Select your models");
+		
+		Label labelSource = new UILabel("Please select your source model.");
+		Label labelTarget = new UILabel("Please select your target model.");
+		
+		labelSource.setBounds(20, 30, 300, 20);
+		labelTarget.setBounds(20, 130, 300, 20);
+		
+		Label sourceLoc	= new UILabel ("Source dir:");
+		Label targetLoc	= new UILabel ("Target dir:");
+		
+		sourceLoc.setBounds(20, 60, 150, 20);
+		targetLoc.setBounds(20, 160, 150, 20);
+		
+		TextField sourceTxt	= new UITextField();
+		TextField targetTxt	= new UITextField();
+		
+		sourceTxt.setBounds(170, 60, 420, 20);
+		targetTxt.setBounds(170, 160, 420, 20);
+		
+		Button selectSrc	= new UIButton("select");
+		Button selectTrg	= new UIButton("select");
+		
+		selectSrc.addActionListener(new SelectDirListener(shell, sourceTxt));
+		selectTrg.addActionListener(new SelectDirListener(shell, targetTxt));
+		
+		selectSrc.setBounds(510,30,80,20);
+		selectTrg.setBounds(510,130,80,20);
+		
+		Button next	= new UIButton("next");
+		next.setBounds(510,220,80,20);
+		next.addActionListener(new LoadActionListener(this, sourceTxt, targetTxt));
+		
+		frame.add(labelSource);
+		frame.add(labelTarget);
+		frame.add(sourceLoc);
+		frame.add(targetLoc);
+		frame.add(selectSrc);
+		frame.add(selectTrg);
+		frame.add(sourceTxt);
+		frame.add(targetTxt);
+		frame.add(next);
+		
 	}
 	
-	public ModelLoader getModelLoader () {
-		return modelLoader;
+	public void resetShell() {
+		for (Control kid : shell.getChildren()) {
+	          kid.dispose();
+	    }
+	}
+	
+	public Shell getShell() {
+		return shell;
 	}
 }
 
-
-class LoadTargetModelActionListener implements ActionListener{
+class SelectDirListener implements ActionListener{
 	
+	TextField textField;
+	Shell shell;
+	String selectedDir;
 	
-	private Panel panel;
-	private ModelLoader modelLoader;
-	private MainWindow window;
-	
-	public LoadTargetModelActionListener(MainWindow window) {
-		this.window = window;
-		this.panel = window.panelTrg;
-		this.modelLoader = null;
-		//TODO handle panel = null
+	public SelectDirListener(Shell s, TextField txt) {
+		
+		shell = s;
+		textField = txt;
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
 		
-		/*	Display.getDefault().asyncExec(new Runnable() {
-		    public void run() {}});*/
-		
-		// add code to load target model
-		System.out.println("Start loading target model...");
-		
-		//delete all components from this panel
-		
-    	panel.removeAll();
-    	
-    	modelLoader = window.getModelLoader();
-		
-		InstanceDiagrammLoader data = new InstanceDiagrammLoader(modelLoader.loadModelWithResourceHandler(ResourceType.Target), true);
-		Visualizer vis = new Visualizer(data, panel);
-    	
-		panel.revalidate();
-    	panel.repaint();
+		Display.getDefault().syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				FileDialog directoryDialog = new FileDialog(shell, SWT.OPEN);
+			    
+				String filterExt[] = new String[1];
+				filterExt[0]	= ".xmi";
+				
+				directoryDialog.setFilterPath(selectedDir);
+				directoryDialog.setFilterExtensions(filterExt);
+		        
+		        if(directoryDialog.open() != null) {
+		        	
+		        	String dir = directoryDialog.getFilterPath() + System.getProperty( "file.separator" ) + directoryDialog.getFileName();
+		        	textField.setText(dir);
+		            selectedDir = dir;
+		            
+		            
+		         }
+			}
+			
+		});
 	}
 	
 }
 
+class LoadActionListener implements ActionListener{
+
+	MainWindow mw;
+	ModelLoader modelLoader;
+	TextField src;
+	TextField trg;
+	
+	public LoadActionListener(MainWindow mw, TextField src, TextField trg) {
+		this.mw = mw;
+		modelLoader = new ModelLoader();
+		this.src = src;
+		this.trg = trg; 
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		
+		System.out.println(src.getText() + " // " + trg.getText());
+		
+		Display.getDefault().asyncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				mw.resetShell();
+				
+				mw.createMainWindow();
+				
+				
+				modelLoader.CreateResourcesFromPath(src.getText(), trg.getText());
+				Resource src = modelLoader.getSource();
+				Resource trg = modelLoader.getTarget();
+				
+				InstanceDiagrammLoader dataSrc = new InstanceDiagrammLoader(src, true);
+				InstanceDiagrammLoader dataTrg = new InstanceDiagrammLoader(trg, true);
+				
+				Visualizer visSrc = new Visualizer(dataSrc, mw.panelSrc );
+				Visualizer visTrg = new Visualizer(dataTrg, mw.panelTrg);
+			}
+		});
+		
+	}
+}
+
+class NextActionListener implements ActionListener{
+	
+	private CheckboxGroup bgroup;
+	private MainWindow mw;
+	
+	public NextActionListener(CheckboxGroup bgroup, MainWindow mw) {
+		this.bgroup = bgroup;	
+		this.mw = mw;
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		Checkbox checkBox = bgroup.getSelectedCheckbox();
+		String selection = checkBox.getLabel();
+		switch (selection){
+		case "Default":
+			
+			Display.getDefault().asyncExec(new Runnable() {
+
+				@Override
+				public void run() {
+				
+					mw.resetShell();
+					
+					mw.createMainWindow();
+					
+					String workingDirectory = "/Users/jordanlischka/Documents/runtime-Test_Workspace_2022-05-26/git/emoflon-ibex-tutorial/Hospital2Administration/";
+					
+					InstanceDiagrammLoader dataSrc = new InstanceDiagrammLoader(ModelLoader.loadModelWithURI(ResourceType.Source, workingDirectory), true);
+					InstanceDiagrammLoader dataTrg = new InstanceDiagrammLoader(ModelLoader.loadModelWithURI(ResourceType.Target, workingDirectory), true);
+					
+					Visualizer visSrc = new Visualizer(dataSrc, mw.panelSrc );
+					Visualizer visTrg = new Visualizer(dataTrg, mw.panelTrg);
+				}
+			});
+			
+			break;
+		case "Create new model":
+			//close this shell and create new one
+			Display.getDefault().asyncExec(new Runnable() {
+
+				@Override
+				public void run() {
+				
+					mw.resetShell();
+					
+					mw.createMainWindow();
+					
+					ModelLoader modelLoader = new ModelLoader();
+					modelLoader.generateNewModel();
+					
+					InstanceDiagrammLoader dataSrc = new InstanceDiagrammLoader(modelLoader.loadModelWithResourceHandler(ResourceType.Source), true);
+					InstanceDiagrammLoader dataTrg = new InstanceDiagrammLoader(modelLoader.loadModelWithResourceHandler(ResourceType.Target), true);
+					
+					Visualizer visSrc = new Visualizer(dataSrc, mw.panelSrc );
+					Visualizer visTrg = new Visualizer(dataTrg, mw.panelTrg);	
+				}
+				
+			});
+			 
+			break;
+			
+		case "Select model":
+			
+			Display.getDefault().asyncExec(new Runnable() {
+
+				@Override
+				public void run() {
+					
+					mw.resetShell();
+					
+					mw.chooseLocationWindow();
+					
+				}
+			});
+			
+			break;
+		
+		}
+	}
+}
 
 /*general button style*/
 class UIButton extends Button{
@@ -185,5 +428,25 @@ class UIButton extends Button{
 
 		setForeground(Color.BLACK);
 		
+		
+	}
+}
+
+class UILabel extends Label{
+	public UILabel(String text) {
+		super(text);
+		
+		setForeground(Color.BLACK);
+		
+		
+	}
+}
+
+class UITextField extends TextField{
+	public UITextField() {
+		super();
+		
+		setForeground(Color.BLACK);
+		setBackground(Color.WHITE);
 	}
 }

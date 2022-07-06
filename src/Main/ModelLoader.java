@@ -1,6 +1,7 @@
 package Main;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.eclipse.emf.common.util.URI;
@@ -8,7 +9,9 @@ import org.eclipse.emf.ecore.resource.ContentHandler;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.emoflon.ibex.common.emf.EMFSaveUtils;
 import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGENStopCriterion;
+import org.emoflon.ibex.tgg.operational.strategies.modules.TGGResourceHandler.TGGFileNotFoundException;
 import org.emoflon.ibex.tgg.run.hospital2administration.MODELGEN_App;
 import org.emoflon.smartemf.persistence.SmartEMFResourceFactoryImpl;
 
@@ -21,20 +24,28 @@ public class ModelLoader {
 	private static URI uri;
 	
 	private MODELGEN_App generator;
+	protected Resource source;
+	protected Resource target;
 	
 	public ModelLoader() {
 		try {
 			generator = new MODELGEN_App();
-			
-        	MODELGENStopCriterion stop = new MODELGENStopCriterion(generator.getTGG());
-        	stop.setMaxRuleCount("HospitaltoAdministrationRule", 1);
-    		stop.setMaxElementCount(10);
-        	generator.setStopCriterion(stop);
-        	generator.run();
-        	
-		}catch(Exception e) {
-			System.out.print(e.getMessage());
-			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}   
+	}
+	
+	public void generateNewModel() {
+		try {
+			MODELGENStopCriterion stop = new MODELGENStopCriterion(generator.getTGG());
+	    	stop.setMaxRuleCount("HospitaltoAdministrationRule", 1);
+			stop.setMaxElementCount(10);
+	    	generator.setStopCriterion(stop);
+			generator.run();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	
@@ -75,11 +86,11 @@ public class ModelLoader {
 		
 		rs.getPackageRegistry().put(Hospital2AdministrationPackage.eINSTANCE.getNsURI(), Hospital2AdministrationPackage.eINSTANCE);
 		
-
 		
 		instanceModel = rs.createResource(uri, ContentHandler.UNSPECIFIED_CONTENT_TYPE);
+		
 		try {
-		instanceModel.load(null);
+			instanceModel.load(null);
 		}
 		catch(Exception e) {
 			System.out.print(e.getMessage());
@@ -99,7 +110,27 @@ public class ModelLoader {
 			break;
 		}
 		
+		
 		return instanceModel;
+	}
+	
+	public void CreateResourcesFromPath(String pathSrc, String pathTrg) {
+		try {
+			source = generator.getResourceHandler().loadResource(pathSrc);
+			target = generator.getResourceHandler().loadResource(pathTrg);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public Resource getSource(){
+		return source;
+	}
+	
+	public Resource getTarget() {
+		return target;
 	}
 
 }

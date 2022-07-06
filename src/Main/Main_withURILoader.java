@@ -29,25 +29,12 @@ public class Main_withURILoader {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		System.out.println("Hello World - Ordner H2A");
+	
 		
 		Display display = new Display();
-		 
-        Shell shell = new Shell(display);
-        shell.setFullScreen(true);
-        
-        //shell.setLayout(new FillLayout(SWT.VERTICAL));
-        RowLayout rowLayout = new RowLayout(SWT.VERTICAL);
-        rowLayout.marginHeight	= 0;
-        rowLayout.marginBottom = 0;
-        rowLayout.marginTop = 0;
-        rowLayout.marginLeft = 0;
-        rowLayout.marginRight = 0;
-        rowLayout.marginWidth = 0;
-        
-        shell.setLayout(rowLayout);
+		Shell shell	= new Shell(display);
        
-        MainWindow graphVisualizer = new MainWindow(shell, null);
+        MainWindow graphVisualizer = new MainWindow(shell);
   		graphVisualizer.createMainWindow();
   		
   		Panel panelSrc = graphVisualizer.panelSrc;
@@ -56,7 +43,7 @@ public class Main_withURILoader {
         // first define workingDirectory of the model
     	String wokingDirectory = "/Users/jordanlischka/Documents/runtime-Test_Workspace_2022-05-26/git/emoflon-ibex-tutorial/Hospital2Administration/";
 		
-        
+    	
 		//Create an instace of the InstaceDiagrammLoader class with the loaded resource
 		InstanceDiagrammLoader dataSrc = new InstanceDiagrammLoader(ModelLoader.loadModelWithURI(ResourceType.Source, wokingDirectory), true);
 		InstanceDiagrammLoader dataTarget = new InstanceDiagrammLoader(ModelLoader.loadModelWithURI(ResourceType.Target, wokingDirectory), true);
