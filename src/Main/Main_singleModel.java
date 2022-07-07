@@ -40,10 +40,6 @@ public class Main_singleModel {
 		
 	    InstanceDiagrammLoader dataSrc = new InstanceDiagrammLoader(srcResource, true);
 	    
-	    
-	    //EList<EObject> objects = srcResource.getContents();
-	    
-	    
 		/*for (EObject eObject : objects) {
 			
 			/*EList<EStructuralFeature> allEStructFeats = eObject.eClass().getEAllStructuralFeatures();
@@ -64,8 +60,6 @@ public class Main_singleModel {
 			
 		}*/
 		
-		
-		
 		Visualizer visSrc = new Visualizer(shell, dataSrc);
 		
 		GraphManipulator manipulator = new GraphManipulator(visSrc, srcResource, dataSrc);
@@ -73,42 +67,7 @@ public class Main_singleModel {
 	    shell.open();
 	    while (!shell.isDisposed()) {
 	    	manipulator.removeSelected();
-	    	//visSrc.getGraph().getModel().beginUpdate();
-	    	/*try {
-	    		Object[] selectedCells = visSrc.getGraph().getSelectionCells();
-	    		
-	    		if(selectedCells.length > 0) {
-	    			System.out.println("selected");
-	    			for (Object selected : selectedCells) {
-	    				visSrc.getGraph().getModel().remove(selected);
-	    				for (EObject eObject : objects) {
-	    					
-	    					/*EList<EStructuralFeature> allEStructFeats = eObject.eClass().getEAllStructuralFeatures();
-	    					
-	    					for(EStructuralFeature esf : allEStructFeats)
-	    					{
-	    						System.out.println("blub");
-	    					    Object o = eObject.eGet(esf);
-
-	    					    if(true)
-	    					    {
-	    					    	Integer i = 0;
-	    					        eObject.eSet(esf, i);
-	    					        
-	    					    }
-	    					}
-	    					iterateModelHierarchical(eObject, selected, dataSrc);
-	    				}
-					}
-	    			
-	    			
-	    			shell.redraw();
-	    			System.out.println("redrawn");
-	    		}
-	    	}
-	    	finally {
-	    		//visSrc.getGraph().getModel().endUpdate();
-	    	}*/
+	    	
 	    	/*visSrc.getGraph().addListener(mxEvent.SELECT,function (sender, evt) {
 	    		mxEvent.isRightMouseButton(evt);
 	    	
@@ -123,25 +82,4 @@ public class Main_singleModel {
 	    display.dispose();
 
 	}
-	
-	/*private static void iterateModelHierarchical(EObject obj, Object comp, InstanceDiagrammLoader loader) {
-		for (EObject eobj : obj.eContents()) {
-			iterateModelHierarchical(eobj, comp, loader);
-		}
-		
-		mxCell c = (mxCell) comp;
-		if(obj.toString().equals(c.getId())) {
-			System.out.println("equal found");
-			EcoreUtil.remove(obj); //delete wirft Nullpointerexception, aber so wird Kante nicht gelöscht
-			System.out.println("removed");
-			for (Node nodeElement : loader.nodes) {
-				if(nodeElement.id.equals(obj.toString())) {
-					loader.nodes.remove(nodeElement);
-				}
-			}
-		}
-		System.out.println(obj.toString());
-		System.out.println(c.getId());
-	}*/
-	
 }

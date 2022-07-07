@@ -63,15 +63,20 @@ public class GraphManipulator {
 		mxCell c = (mxCell) comp;
 		if(obj.toString().equals(c.getId())) {
 			System.out.println("equal found");
+			selectAction();
 			EcoreUtil.remove(obj); //delete wirft Nullpointerexception, aber so wird Kante nicht gelöscht
-			System.out.println("removed");
-			/*for (Node nodeElement : loader.nodes) {
+			System.out.println("removed"); //statt remove neue Methode: select action
+			for (Node nodeElement : loader.nodes) {
 				if(nodeElement.id.equals(obj.toString())) {
 					loader.nodes.remove(nodeElement);
 				}
-			}*/
+			} //kann zur Laufzeit nicht modifiziert werden?
 		}
 		System.out.println(obj.toString());
 		System.out.println(c.getId());
+	}
+	
+	private void selectAction() {
+		//open menu on node or on background
 	}
 }
