@@ -94,8 +94,8 @@ public class Visualizer {
 		
 		Rectangle shellBounds = panel.getBounds();
 		
-		//nur noch 0.5 mal so viel zu vor in x-Dimension
-		defaultNodePosition = new Point2D.Double(((double) shellBounds.width) * 0.4 - defaultNodeWidth * 0.5 , ((double) shellBounds.height) * 0.4 - defaultNodeHeight * 0.5);
+		
+		defaultNodePosition = new Point2D.Double(((double) shellBounds.width) * 0.5 - defaultNodeWidth * 0.5 , ((double) shellBounds.height) * 0.5 - defaultNodeHeight * 0.5);
 		
 		
 		addStyles();
@@ -185,7 +185,7 @@ public class Visualizer {
 		int sizeY = (int) Math.ceil(Math.sqrt(baseSize));
 		
 		nodeGrid = new Grid(shellBounds, sizeX, sizeY,  minNodeDistanceNodes);
-		edgeGrid = new Grid(shellBounds,(int)Math.floor((1-margin ) *shellBounds.width), (int) Math.floor((1-margin ) *shellBounds.height), minNodeDistanceEdges);
+		edgeGrid = new Grid(shellBounds,(int)Math.floor((1-margin ) * shellBounds.width), (int) Math.floor((1-margin ) * shellBounds.height), minNodeDistanceEdges);
 		
 		blockedAreas = new ArrayList<mxGeometry>();
 		
@@ -199,9 +199,12 @@ public class Visualizer {
 		graphCenterX = graph.getGraphBounds().getCenterX();
 		graphCenterY = graph.getGraphBounds().getCenterY();
 		
-	
+		
+		
 		xStretch = (panel.getWidth() * (1 - nodeGrid.margin)) / graphWidth;
 		yStretch = (panel.getHeight() * (1 - nodeGrid.margin)) / graphHeight;
+
+		//System.out.println(xStretch + " : " + yStretch);
 		
 	}
 	

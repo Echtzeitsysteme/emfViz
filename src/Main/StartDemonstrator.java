@@ -1,20 +1,15 @@
 package Main;
 
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.RowLayout;
+
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import graphVisualization.InstanceDiagrammLoader;
-import graphVisualization.Visualizer;
 import userInterface.MainWindow;
-
-import Main.ModelLoader.ResourceType;
 
 import java.awt.Panel;
 
-public class Main_withResourceHandler {
+public class StartDemonstrator {
 	
 	
 

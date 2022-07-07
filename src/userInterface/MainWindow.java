@@ -1,31 +1,23 @@
 package userInterface;
 
-import java.awt.BorderLayout;
+
 import java.awt.Button;
 import java.awt.Checkbox;
 import java.awt.CheckboxGroup;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Frame;
-import java.awt.GridLayout;
 import java.awt.Label;
 import java.awt.Panel;
-import java.awt.Rectangle;
 import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.Graphics;
+
 
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.layout.RowData;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
@@ -40,13 +32,9 @@ import graphVisualization.Visualizer;
 
 public class MainWindow {
 
-	private ModelLoader modelLoader;
-	
 	private Shell shell;
-	private Composite compositeGraph;
-	private Composite compositeUserCtrl;
-	private Frame graphFrame;
-	private Frame userCtrlFrame; 	
+	
+	private ModelLoader modelLoader;
 	
 	private int shellSizeX;
 	private int shellSizeY;
@@ -92,55 +80,43 @@ public class MainWindow {
 		shellSizeX = shell.getDisplay().getClientArea().width;
 		shellSizeY = shell.getDisplay().getClientArea().height;
 		
-        shell.setSize(shellSizeX, shellSizeY);
-        shell.setFullScreen(true);
+        shell.setSize(shellSizeX, shellSizeY);      
         
+        Composite composite = new Composite(this.shell, SWT.EMBEDDED | SWT.BACKGROUND);
+        composite.setSize(shellSizeX, shellSizeY);
+        composite.setVisible(true);
         
-        shell.setLayout(new RowLayout(SWT.VERTICAL));
+        Frame frame = SWT_AWT.new_Frame(composite);
+        frame.setLayout(null);
+        //frame.setBounds(0, 0, shellSizeX, (int) (shellSizeY * 0.1));
 		
-		//layout for user control widgets
-		compositeUserCtrl = new Composite(this.shell, SWT.EMBEDDED | SWT.BACKGROUND);
-		compositeUserCtrl.setVisible(true);
-		compositeUserCtrl.setLayoutData(new RowData(shellSizeX, (int) (shellSizeY * 0.1)));
-		
-		userCtrlFrame = SWT_AWT.new_Frame(compositeUserCtrl);
-		userCtrlFrame.setLayout(new BorderLayout());
-		
-		
-		panelUserCtrl = new Panel();
-		panelUserCtrl.setBackground(Color.WHITE);
-		panelUserCtrl.setSize(shellSizeX, (int) (shellSizeY * 0.1));
+		Panel panel = new Panel();
+		panel.setBackground(Color.WHITE);
+		panel.setBounds(0,0,shellSizeX, (int) (shellSizeY * 0.1));
 		
 		/*add panel to frame*/
-		userCtrlFrame.add(panelUserCtrl);
+		frame.add(panel);
 	
-		//graph visualization window
-		compositeGraph = new Composite(this.shell, SWT.EMBEDDED | SWT.NO_BACKGROUND);
-		compositeGraph.setVisible(true);
-		compositeGraph.setLayoutData(new RowData(shellSizeX, (int) (shellSizeY  - panelUserCtrl.getSize().height)));
-		
-		graphFrame = SWT_AWT.new_Frame(compositeGraph);
-		graphFrame.setLayout(new GridLayout());
 		
 		/* generate two panels to display the graphs*/
 		panelSrc = new Panel();
-		panelSrc.setLayout(new BorderLayout());
-		panelSrc.setBackground(Color.WHITE);
-		panelSrc.setSize((int) (shellSizeX * 0.5), (int) (shellSizeY  - panelUserCtrl.getSize().height));
+		panelSrc.setBackground(Color.LIGHT_GRAY);
+		panelSrc.setBounds(0, (int) (shellSizeY * 0.1) + 3, (int) (shellSizeX * 0.5)-3, (int) (shellSizeY * 0.9)-6);
+		//panelSrc.setSize((int) (shellSizeX * 0.5), (int) (shellSizeY  - panelUserCtrl.getSize().height));
 		
 		panelTrg = new Panel();
-		panelTrg.setLayout(new BorderLayout());
 		panelTrg.setBackground(Color.WHITE);
-		panelTrg.setSize((int) (shellSizeX * 0.5), (int) (shellSizeY  - panelUserCtrl.getSize().height));
+		panelTrg.setBounds((int) (shellSizeX * 0.5) + 3, (int) (shellSizeY * 0.1)+3, (int) (shellSizeX * 0.5)-3, (int) (shellSizeY * 0.9)-6);
+		//panelTrg.setSize((int) (shellSizeX * 0.5), (int) (shellSizeY  - panelUserCtrl.getSize().height));
 		
 		
 		/*add panels to frame*/
-		graphFrame.add(panelSrc);
-		graphFrame.add(panelTrg);
+		frame.add(panelSrc);
+		frame.add(panelTrg);
 		
 		
-		 graphFrame.validate();
-	     graphFrame.repaint();
+		frame.validate();
+		frame.repaint();
 	}
 	
 	public void resourcLoaderWindow () {

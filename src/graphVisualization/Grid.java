@@ -4,26 +4,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IMenuListener;
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.util.Geometry;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.awt.SWT_AWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Canvas;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
+
 
 import com.mxgraph.util.mxPoint;
 
@@ -37,7 +18,6 @@ public class Grid {
 	private double visWidth;
 	private double visHeight;
 	
-	//private org.eclipse.swt.graphics.Rectangle shellBounds;
 	private Rectangle shellBounds;
 	
 	double visXOffset;
@@ -67,8 +47,8 @@ public class Grid {
 		
 		calculateGraphBounds();
 		
-		horizontalGridDist =  Math.max((double)(1-margin )* shellBounds2.width / (double)sizeX , 1);
-		verticalGridDist = Math.max((double)(1-margin )* shellBounds2.height / (double)sizeY, 1);
+		horizontalGridDist =  Math.max((double)(1-margin )* this.shellBounds.width / (double)sizeX , 1);
+		verticalGridDist = Math.max((double)(1-margin )* this.shellBounds.height / (double)sizeY, 1);
 		
 		this.blockMarginX = (int) Math.ceil(blockMargin / horizontalGridDist);
 		this.blockMarginY = (int) Math.ceil(blockMargin / verticalGridDist);

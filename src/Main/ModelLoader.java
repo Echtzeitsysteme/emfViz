@@ -13,9 +13,14 @@ import org.emoflon.ibex.common.emf.EMFSaveUtils;
 import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGENStopCriterion;
 import org.emoflon.ibex.tgg.operational.strategies.modules.TGGResourceHandler.TGGFileNotFoundException;
 import org.emoflon.ibex.tgg.run.hospital2administration.MODELGEN_App;
+//import org.emoflon.ibex.tgg.run.hospital2administration.MODELGEN_App;
 import org.emoflon.smartemf.persistence.SmartEMFResourceFactoryImpl;
 
 import Hospital2Administration.Hospital2AdministrationPackage;
+
+import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGEN;
+
+//import Hospital2Administration.Hospital2AdministrationPackage;
 
 public class ModelLoader {
 	
@@ -30,6 +35,7 @@ public class ModelLoader {
 	public ModelLoader() {
 		try {
 			generator = new MODELGEN_App();
+		
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
