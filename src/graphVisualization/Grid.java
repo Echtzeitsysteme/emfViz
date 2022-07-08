@@ -1,7 +1,8 @@
 package graphVisualization;
 
 import java.awt.Point;
-import java.awt.Rectangle;
+//import java.awt.Rectangle;
+import org.eclipse.swt.graphics.Rectangle;
 import java.awt.geom.Point2D;
 
 
@@ -145,7 +146,7 @@ public class Grid {
 	public mxPoint getFreeGridPosition(Point2D.Double initialPosition, java.awt.Rectangle geometry){
 		
 		Point origin = primeGridSearch(initialPosition);
-		java.awt.Rectangle includedArea =  (Rectangle) geometry.clone();
+		java.awt.Rectangle includedArea =  (java.awt.Rectangle) geometry.clone();
 				
 		
 		for(int d = 0 ; d < maxDistanceToOrigin; d++) {

@@ -1,29 +1,34 @@
 package userInterface;
 
 
-import java.awt.Button;
-import java.awt.Checkbox;
-import java.awt.CheckboxGroup;
-import java.awt.Color;
-import java.awt.Frame;
-import java.awt.Label;
-import java.awt.Panel;
-import java.awt.TextField;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
+
+
+import java.awt.Frame;
+
+import java.io.IOException;
 
 import org.eclipse.emf.ecore.resource.Resource;
+
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 
 import Main.ModelLoader;
-import Main.ModelLoader.ResourceType;
 import graphVisualization.InstanceDiagrammLoader;
 import graphVisualization.Visualizer;
 
@@ -32,6 +37,8 @@ import graphVisualization.Visualizer;
 
 public class MainWindow {
 
+	
+	private Display display;
 	private Shell shell;
 	
 	private ModelLoader modelLoader;
@@ -39,19 +46,61 @@ public class MainWindow {
 	private int shellSizeX;
 	private int shellSizeY;
 	
-	public Panel panelUserCtrl;
-	public Panel panelSrc;
-	public Panel panelTrg;
+	private Frame frameSrc;
+	private Frame frameTrg;
 	
-	public MainWindow (Shell shell) {
+	private Rectangle rectangleSrc;
+	private Rectangle rectangleTrg;
+	
+	public MainWindow (ModelLoader modelLoader) {
 		
 		
-		this.modelLoader = null;
-		this.shell = shell;
+		this.modelLoader = modelLoader;
 		
+		//init display and shell
+		InitUI();
 		
-		resourcLoaderWindow();
+		//open first window
+		createResourcLoaderWindow();	
+		//createMainWindow();
+	}
+	
+	
+	private void InitUI() {
+		/* init main window */
+		display = new Display();
+		shell = new Shell(display);
+	}
+	
+	public void run() {
+		shell.open();
 		
+		while (!shell.isDisposed()) {
+			if (!display.readAndDispatch()) {
+				display.sleep();
+			}
+		}
+		
+		display.dispose();
+
+	}
+
+	public void exit() {
+		shell.dispose();
+	}
+	
+	private void resetShell() {
+		for (Control kid : shell.getChildren()) {
+	          kid.dispose();
+	    }
+	}
+	
+	public Shell getShell() {
+		return shell;
+	}
+	
+	public ModelLoader getModelLoader() {
+		return modelLoader;
 	}
 	
 	public void createMainWindow() {
@@ -77,352 +126,310 @@ public class MainWindow {
 		 */
 		
 		//initialize shell layout		
-		shellSizeX = shell.getDisplay().getClientArea().width;
-		shellSizeY = shell.getDisplay().getClientArea().height;
+		//shellSizeX = shell.getDisplay().getClientArea().width;
+		//shellSizeY = shell.getDisplay().getClientArea().height;
+		shellSizeX = display.getClientArea().width;
+		shellSizeY = display.getClientArea().height;
 		
-        shell.setSize(shellSizeX, shellSizeY);      
-        
-        Composite composite = new Composite(this.shell, SWT.EMBEDDED | SWT.BACKGROUND);
-        composite.setSize(shellSizeX, shellSizeY);
-        composite.setVisible(true);
-        
-        Frame frame = SWT_AWT.new_Frame(composite);
-        frame.setLayout(null);
-        //frame.setBounds(0, 0, shellSizeX, (int) (shellSizeY * 0.1));
+		GridLayout grid = new GridLayout();
+		grid.numColumns = 2;
+		grid.makeColumnsEqualWidth = true;
 		
-		Panel panel = new Panel();
-		panel.setBackground(Color.WHITE);
-		panel.setBounds(0,0,shellSizeX, (int) (shellSizeY * 0.1));
-		
-		/*add panel to frame*/
-		frame.add(panel);
-	
-		
-		/* generate two panels to display the graphs*/
-		panelSrc = new Panel();
-		panelSrc.setBackground(Color.LIGHT_GRAY);
-		panelSrc.setBounds(0, (int) (shellSizeY * 0.1) + 3, (int) (shellSizeX * 0.5)-3, (int) (shellSizeY * 0.9)-6);
-		//panelSrc.setSize((int) (shellSizeX * 0.5), (int) (shellSizeY  - panelUserCtrl.getSize().height));
-		
-		panelTrg = new Panel();
-		panelTrg.setBackground(Color.WHITE);
-		panelTrg.setBounds((int) (shellSizeX * 0.5) + 3, (int) (shellSizeY * 0.1)+3, (int) (shellSizeX * 0.5)-3, (int) (shellSizeY * 0.9)-6);
-		//panelTrg.setSize((int) (shellSizeX * 0.5), (int) (shellSizeY  - panelUserCtrl.getSize().height));
+		shell.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY));
 		
 		
-		/*add panels to frame*/
-		frame.add(panelSrc);
-		frame.add(panelTrg);
+		shell.setLayout(grid);
+		
+		Composite comp = new Composite(shell, SWT.TOP);
+		//comp.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY));
+		
+		GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+		gridData.heightHint = (int)(shellSizeY * 0.1);
+		gridData.horizontalSpan = 2;
+		
+		comp.setLayoutData(gridData);
+		
+		Composite compSrc = new Composite(shell, SWT.BOTTOM | SWT.EMBEDDED);
+		compSrc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		
+		GridData gridDataSrc = new GridData(GridData.FILL_HORIZONTAL);
+		gridDataSrc.heightHint = (int)(shellSizeY * 0.9);
+		//gridData.widthHint = shellSizeX;
+		gridDataSrc.horizontalSpan = 1;
+		
+		compSrc.setLayoutData(gridDataSrc);
+		
+		Composite compTrg = new Composite(shell, SWT.BOTTOM |  SWT.EMBEDDED);
+		compTrg.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_GRAY));
+		
+		GridData gridDataTrg = new GridData(GridData.FILL_HORIZONTAL);
+		gridDataTrg.heightHint = (int)(shellSizeY * 0.9);
+		//gridData.widthHint = shellSizeX;
+		gridDataTrg.horizontalSpan = 1;
+		
+		compTrg.setLayoutData(gridDataTrg);
+		
+		frameSrc = SWT_AWT.new_Frame(compSrc);
 		
 		
-		frame.validate();
-		frame.repaint();
-	}
-	
-	public void resourcLoaderWindow () {
+		//System.out.println("src1: " + frameSrc.getBounds());
 		
-		shellSizeX = 600;
-		shellSizeY = 280;
+		frameTrg = SWT_AWT.new_Frame(compTrg);
+		
 		
 		shell.setSize(shellSizeX, shellSizeY);
 		
-		Composite composite = new Composite(this.shell, SWT.EMBEDDED | SWT.BACKGROUND);
-		composite.setVisible(true);
-		composite.setSize(shellSizeX, shellSizeY);
-		
-		Frame frame = SWT_AWT.new_Frame(composite);
-		frame.setLayout(null);
-		frame.setTitle("Choose your model loading option");
+		rectangleSrc = compSrc.getBounds();
+		rectangleTrg = compTrg.getBounds();
 		
 	
-		CheckboxGroup bgroup = new CheckboxGroup();
-		Checkbox defaultButton = new Checkbox("Default",bgroup, true);
-		defaultButton.setForeground(Color.BLACK);
-		defaultButton.setBounds(20, 30, 160, 20);
-		Checkbox emptyModelButton = new Checkbox("Create new model",bgroup,false);
-		emptyModelButton.setForeground(Color.BLACK);
-		emptyModelButton.setBounds(20, 80, 160, 20);
-		Checkbox chooseModelButton = new Checkbox("Select model",bgroup,false);
-		chooseModelButton.setForeground(Color.BLACK);
-		chooseModelButton.setBounds(20, 130, 160, 20);
-		
-		
-		
-		
-        
-        Button nextBt	= new UIButton("next");       
-        nextBt.setBounds(510,220,80,20);
-        nextBt.addActionListener(new NextActionListener(bgroup, this));
-        
-        frame.add(defaultButton);
-        frame.add(emptyModelButton);   
-        frame.add(chooseModelButton);  
-        frame.add(nextBt);
-		
+        System.out.println("compTrg: " + compTrg.getBounds());
+        System.out.println("compSrc: " + compSrc.getBounds());
 	}
 	
-	public void chooseLocationWindow() {
+	public void createResourcLoaderWindow () {
+		
 		shellSizeX = 600;
-		shellSizeY = 280;
+		shellSizeY = 180;
+		
+		shell.setLayout(new GridLayout());
+		shell.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY));
+		
+		
+		Composite composite = new Composite(shell, SWT.EMBEDDED);
+		composite.setVisible(true);
+		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,true));
+		composite.setLayout(new GridLayout());
+		
+		
+		Group modelGroup = new Group(composite, SWT.None);
+		modelGroup.setText("Select your model location:");
+		modelGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		modelGroup.setLayout(new GridLayout());
+		//modelGroup.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_GRAY));
+		
+		Button defaultBT = new Button(modelGroup, SWT.RADIO);
+		defaultBT.setText("Default");
+		
+		Button newModeltBT = new Button(modelGroup, SWT.RADIO);
+		newModeltBT.setText("New Model");
+		
+		Button modelLocationBT = new Button(modelGroup, SWT.RADIO);
+		modelLocationBT.setText("Select Model");
+		
+		Button nextBT = new Button(composite, SWT.PUSH);
+		nextBT.setText("Next");
+		nextBT.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+		
+
+		nextBT.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent pSelectionEvent) {
+				for (Control bt : modelGroup.getChildren()) {
+					if (((Button)bt).getSelection()) {
+						modelLocationSelection(((Button)bt).getText());
+						break;
+					}
+				}
+			}
+		});
 		
 		shell.setSize(shellSizeX, shellSizeY);
+	}
+	
+	
+	public void CreateDirectorySelectionWindow() {
+		shellSizeX = 450;
+		shellSizeY = 280;
 		
-		Composite composite = new Composite(this.shell, SWT.EMBEDDED | SWT.BACKGROUND);
+		
+		shell.setLayout(new GridLayout());
+		shell.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY));
+		
+		Composite composite = new Composite(shell, SWT.EMBEDDED);
 		composite.setVisible(true);
-		composite.setSize(shellSizeX, shellSizeY);
 		
-		Frame frame = SWT_AWT.new_Frame(composite);
-		frame.setLayout(null);
-		frame.setTitle("Select your models");
+		GridData gridData1 = new GridData(GridData.FILL_BOTH);
+		//gridData1.horizontalSpan = 3;
 		
-		Label labelSource = new UILabel("Please select your source model.");
-		Label labelTarget = new UILabel("Please select your target model.");
+		composite.setLayoutData(gridData1);
+		composite.setLayout(new GridLayout());
 		
-		labelSource.setBounds(20, 30, 300, 20);
-		labelTarget.setBounds(20, 130, 300, 20);
 		
-		Label sourceLoc	= new UILabel ("Source dir:");
-		Label targetLoc	= new UILabel ("Target dir:");
 		
-		sourceLoc.setBounds(20, 60, 150, 20);
-		targetLoc.setBounds(20, 160, 150, 20);
+		Group srcGroup = new Group(composite, SWT.None);
+		srcGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		srcGroup.setLayout(new GridLayout(2, false));
 		
-		TextField sourceTxt	= new UITextField();
-		TextField targetTxt	= new UITextField();
+		Group trgGroup = new Group(composite, SWT.None);
+		trgGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));	
+		trgGroup.setLayout(new GridLayout(2, false));
 		
-		sourceTxt.setBounds(170, 60, 420, 20);
-		targetTxt.setBounds(170, 160, 420, 20);
+		//create widgets for source location
+		Label srcLabel = new Label(srcGroup, SWT.NONE);
+		srcLabel.setText("Select your source xmi:");
 		
-		Button selectSrc	= new UIButton("select");
-		Button selectTrg	= new UIButton("select");
+		Button srcBT = new Button(srcGroup, SWT.PUSH);
+		srcBT.setText("Source xmi");
+		srcBT.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		
-		selectSrc.addActionListener(new SelectDirListener(shell, sourceTxt));
-		selectTrg.addActionListener(new SelectDirListener(shell, targetTxt));
+		Text srcTxt = new Text(srcGroup, SWT.NONE);
 		
-		selectSrc.setBounds(510,30,80,20);
-		selectTrg.setBounds(510,130,80,20);
+		GridData gridDataSrc = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gridDataSrc.widthHint = 300;
+				
+		srcTxt.setLayoutData(gridDataSrc);
 		
-		Button next	= new UIButton("next");
-		next.setBounds(510,220,80,20);
-		next.addActionListener(new LoadActionListener(this, sourceTxt, targetTxt));
+		//create widgets for target location		
+		Label trgLabel = new Label(trgGroup, SWT.NONE);
+		trgLabel.setText("Select your target xmi:");
 		
-		frame.add(labelSource);
-		frame.add(labelTarget);
-		frame.add(sourceLoc);
-		frame.add(targetLoc);
-		frame.add(selectSrc);
-		frame.add(selectTrg);
-		frame.add(sourceTxt);
-		frame.add(targetTxt);
-		frame.add(next);
+		Button trgBT = new Button(trgGroup, SWT.PUSH);
+		trgBT.setText("Target xmi");
+		trgBT.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		
-	}
-	
-	public void resetShell() {
-		for (Control kid : shell.getChildren()) {
-	          kid.dispose();
-	    }
-	}
-	
-	public Shell getShell() {
-		return shell;
-	}
-}
-
-class SelectDirListener implements ActionListener{
-	
-	TextField textField;
-	Shell shell;
-	String selectedDir;
-	
-	public SelectDirListener(Shell s, TextField txt) {
+		Text trgTxt = new Text(trgGroup, SWT.NONE);
 		
-		shell = s;
-		textField = txt;
-	}
-	
-	@Override
-	public void actionPerformed(ActionEvent e) {
+		GridData gridDataTrg = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gridDataTrg.widthHint = 300;
 		
-		Display.getDefault().syncExec(new Runnable() {
-
+		trgTxt.setLayoutData(gridDataTrg);
+		
+		// buttons directory selection listener
+		
+		srcBT.addSelectionListener(new SelectionAdapter() {
 			@Override
-			public void run() {
-				FileDialog directoryDialog = new FileDialog(shell, SWT.OPEN);
-			    
-				String filterExt[] = new String[1];
-				filterExt[0]	= ".xmi";
-				
-				directoryDialog.setFilterPath(selectedDir);
-				directoryDialog.setFilterExtensions(filterExt);
-		        
-		        if(directoryDialog.open() != null) {
-		        	
-		        	String dir = directoryDialog.getFilterPath() + System.getProperty( "file.separator" ) + directoryDialog.getFileName();
-		        	textField.setText(dir);
-		            selectedDir = dir;
-		            
-		            
-		         }
-			}
-			
-		});
-	}
-	
-}
-
-class LoadActionListener implements ActionListener{
-
-	MainWindow mw;
-	ModelLoader modelLoader;
-	TextField src;
-	TextField trg;
-	
-	public LoadActionListener(MainWindow mw, TextField src, TextField trg) {
-		this.mw = mw;
-		modelLoader = new ModelLoader();
-		this.src = src;
-		this.trg = trg; 
-	}
-	
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		
-		System.out.println(src.getText() + " // " + trg.getText());
-		
-		Display.getDefault().asyncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				mw.resetShell();
-				
-				mw.createMainWindow();
-				
-				
-				modelLoader.CreateResourcesFromPath(src.getText(), trg.getText());
-				Resource src = modelLoader.getSource();
-				Resource trg = modelLoader.getTarget();
-				
-				InstanceDiagrammLoader dataSrc = new InstanceDiagrammLoader(src, true);
-				InstanceDiagrammLoader dataTrg = new InstanceDiagrammLoader(trg, true);
-				
-				Visualizer visSrc = new Visualizer(dataSrc, mw.panelSrc );
-				Visualizer visTrg = new Visualizer(dataTrg, mw.panelTrg);
+			public void widgetSelected(SelectionEvent pSelectionEvent) {
+				srcTxt.setText(openDirectoryDialog());
 			}
 		});
 		
+		trgBT.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent pSelectionEvent) {
+				trgTxt.setText(openDirectoryDialog());
+			}
+		});
+		
+		
+		
+		//control buttons / composite 
+		Composite compositeCtrl = new Composite(shell, SWT.EMBEDDED);
+		compositeCtrl.setVisible(true);
+		compositeCtrl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		compositeCtrl.setLayout(new RowLayout());
+		
+		Button nextBT = new Button(compositeCtrl, SWT.PUSH);
+		nextBT.setText("Next");
+		nextBT.setAlignment(SWT.CENTER);
+		
+		nextBT.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent pSelectionEvent) {
+				if (srcTxt.getText() != " " && trgTxt.getText() != " ") {
+					loadModelFromPath(srcTxt.getText(), trgTxt.getText());
+				}
+				
+			}
+		});
+		
+		Button backBT = new Button(compositeCtrl, SWT.PUSH);
+		backBT.setText("Back");
+		backBT.setAlignment(SWT.CENTER);
+		
+		//go back to previous window
+		backBT.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent pSelectionEvent) {
+				resetShell();
+				createResourcLoaderWindow();
+			}
+		});
+		
+		shell.setSize(shellSizeX, shellSizeY);	
 	}
-}
-
-class NextActionListener implements ActionListener{
 	
-	private CheckboxGroup bgroup;
-	private MainWindow mw;
-	
-	public NextActionListener(CheckboxGroup bgroup, MainWindow mw) {
-		this.bgroup = bgroup;	
-		this.mw = mw;
-	}
-	
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		Checkbox checkBox = bgroup.getSelectedCheckbox();
-		String selection = checkBox.getLabel();
-		switch (selection){
+	private void modelLocationSelection(String text) {
+		switch (text) {
 		case "Default":
+			System.out.println("option: " + text );
+			resetShell();
+			createMainWindow();
+			break;
+		case "New Model":
+			System.out.println("option: " + text );
 			
-			Display.getDefault().asyncExec(new Runnable() {
-
-				@Override
-				public void run() {
+			
+			resetShell();
+			createMainWindow();
+			
+			//generate a new model
+			modelLoader.generateNewModel();
 				
-					mw.resetShell();
-					
-					mw.createMainWindow();
-					
-					String workingDirectory = "/Users/jordanlischka/Documents/runtime-Test_Workspace_2022-05-26/git/emoflon-ibex-tutorial/Hospital2Administration/";
-					
-					InstanceDiagrammLoader dataSrc = new InstanceDiagrammLoader(ModelLoader.loadModelWithURI(ResourceType.Source, workingDirectory), true);
-					InstanceDiagrammLoader dataTrg = new InstanceDiagrammLoader(ModelLoader.loadModelWithURI(ResourceType.Target, workingDirectory), true);
-					
-					Visualizer visSrc = new Visualizer(dataSrc, mw.panelSrc );
-					Visualizer visTrg = new Visualizer(dataTrg, mw.panelTrg);
-				}
-			});
+			InstanceDiagrammLoader dataSrc = new InstanceDiagrammLoader(modelLoader.getResourceHandler().getSourceResource(), true);
+			InstanceDiagrammLoader dataTrg = new InstanceDiagrammLoader(modelLoader.getResourceHandler().getTargetResource(), true);
+			
+			Visualizer visSrc = new Visualizer(dataSrc, frameSrc, rectangleSrc);
+			Visualizer visTrg = new Visualizer(dataTrg, frameTrg, rectangleTrg);
 			
 			break;
-		case "Create new model":
-			//close this shell and create new one
-			Display.getDefault().asyncExec(new Runnable() {
-
-				@Override
-				public void run() {
-				
-					mw.resetShell();
-					
-					mw.createMainWindow();
-					
-					ModelLoader modelLoader = new ModelLoader();
-					modelLoader.generateNewModel();
-					
-					InstanceDiagrammLoader dataSrc = new InstanceDiagrammLoader(modelLoader.loadModelWithResourceHandler(ResourceType.Source), true);
-					InstanceDiagrammLoader dataTrg = new InstanceDiagrammLoader(modelLoader.loadModelWithResourceHandler(ResourceType.Target), true);
-					
-					Visualizer visSrc = new Visualizer(dataSrc, mw.panelSrc );
-					Visualizer visTrg = new Visualizer(dataTrg, mw.panelTrg);	
-				}
-				
-			});
-			 
+		case "Select Model":
+			System.out.println("option: " + text );
+			resetShell();
+			CreateDirectorySelectionWindow();
 			break;
-			
-		case "Select model":
-			
-			Display.getDefault().asyncExec(new Runnable() {
-
-				@Override
-				public void run() {
-					
-					mw.resetShell();
-					
-					mw.chooseLocationWindow();
-					
-				}
-			});
-			
-			break;
-		
 		}
 	}
-}
-
-/*general button style*/
-class UIButton extends Button{
 	
-	public UIButton (String text) {
-		super(text);
-
-		setForeground(Color.BLACK);
+	
+	private void loadModelFromPath (String src, String trg) {
 		
+		try {
+			modelLoader.CreateResourcesFromPath(src, trg);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+			System.out.println("Resource could'nt be loaded from path: " + e);
+			return;
+		}
 		
+		resetShell();
+		createMainWindow();
+		
+		Resource srcRs = modelLoader.getSource();
+		Resource trgRs = modelLoader.getTarget();
+		
+		InstanceDiagrammLoader dataSrc = new InstanceDiagrammLoader(srcRs, true);
+		InstanceDiagrammLoader dataTrg = new InstanceDiagrammLoader(trgRs, true);
+		
+		Visualizer visSrc = new Visualizer(dataSrc, frameSrc, rectangleSrc);
+		Visualizer visTrg = new Visualizer(dataTrg, frameTrg, rectangleTrg);
+		
+	}
+	
+	public String openDirectoryDialog() {
+		
+		String selectedDir = "";
+		
+		FileDialog directoryDialog = new FileDialog(shell, SWT.OPEN);
+	    
+		String filterExt[] = new String[1];
+		filterExt[0]	= ".xmi";
+		
+		directoryDialog.setFilterPath(selectedDir);
+		directoryDialog.setFilterExtensions(filterExt);
+        
+        if(directoryDialog.open() != null) {
+        	
+        	String dir = directoryDialog.getFilterPath() + System.getProperty( "file.separator" ) + directoryDialog.getFileName();
+        	//textField.setText(dir);
+            selectedDir = dir;
+            
+            return selectedDir;
+         }
+        
+        return selectedDir;
 	}
 }
 
-class UILabel extends Label{
-	public UILabel(String text) {
-		super(text);
-		
-		setForeground(Color.BLACK);
-		
-		
-	}
-}
 
-class UITextField extends TextField{
-	public UITextField() {
-		super();
-		
-		setForeground(Color.BLACK);
-		setBackground(Color.WHITE);
-	}
-}

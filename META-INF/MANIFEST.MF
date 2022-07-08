@@ -15,6 +15,5 @@ Require-Bundle: org.eclipse.emf.common;bundle-version="2.23.0",
  org.emoflon.ibex.tgg.runtime,
  org.eclipse.core.runtime.source;bundle-version="3.24.100",
  org.emoflon.ibex.tgg.integrate;bundle-version="1.0.0",
- org.emoflon.ibex.tgg.runtime.hipe;bundle-version="1.0.0",
- Hospital2Administration;bundle-version="0.0.1"
+ org.emoflon.ibex.tgg.runtime.hipe;bundle-version="1.0.0"
 Bundle-ClassPath: lib/jgraphx-4.2.2.jar
