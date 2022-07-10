@@ -9,7 +9,7 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-
+import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
 
 import Main.ModelLoader.ResourceType;
 import graphVisualization.DataLoader;
@@ -18,6 +18,7 @@ import graphVisualization.Node;
 import graphVisualization.Visualizer;
 import userInterface.GraphManipulator;
 import userInterface.MainWindow;
+import userInterface.PopupFrame;
 
 public class Main_singleModel {
 	
@@ -66,12 +67,10 @@ public class Main_singleModel {
 	    
 	    shell.open();
 	    while (!shell.isDisposed()) {
-	    	manipulator.removeSelected();
-	    	
-	    	/*visSrc.getGraph().addListener(mxEvent.SELECT,function (sender, evt) {
-	    		mxEvent.isRightMouseButton(evt);
-	    	
-	    	}*/
+	    	//manipulator.iterateModel();
+	    	PopupFrame popup = new PopupFrame(visSrc);
+	    	//IbexOptions ibxopt = new IbexOptions();
+	    	//ibxopt.tgg.tgg().getSrc()
 	    	
 	        if (!display.readAndDispatch()) {
 	            display.sleep();

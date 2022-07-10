@@ -472,6 +472,9 @@ public class Visualizer {
 	public mxGraph getGraph() {
 		return graph;
 	}
+	public Frame getFrame() {
+		return frame;
+	}
 }
 	
 	
