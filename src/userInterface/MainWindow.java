@@ -52,6 +52,9 @@ public class MainWindow {
 	private Rectangle rectangleSrc;
 	private Rectangle rectangleTrg;
 	
+	private GraphManipulator manipSrc;
+	private GraphManipulator manipTrg;
+	
 	public MainWindow (ModelLoader modelLoader) {
 		
 		
@@ -372,6 +375,10 @@ public class MainWindow {
 			Visualizer visSrc = new Visualizer(dataSrc, frameSrc, rectangleSrc);
 			Visualizer visTrg = new Visualizer(dataTrg, frameTrg, rectangleTrg);
 			
+			GraphManipulator manipSrc = new GraphManipulator(visSrc, dataSrc.getInstanceModel(), dataSrc);
+			this.manipSrc = manipSrc;
+			GraphManipulator manipTrg = new GraphManipulator(visTrg, dataTrg.getInstanceModel(), dataTrg);
+			this.manipTrg = manipTrg;
 			break;
 		case "Select Model":
 			System.out.println("option: " + text );
@@ -405,6 +412,11 @@ public class MainWindow {
 		Visualizer visSrc = new Visualizer(dataSrc, frameSrc, rectangleSrc);
 		Visualizer visTrg = new Visualizer(dataTrg, frameTrg, rectangleTrg);
 		
+		GraphManipulator manipSrc = new GraphManipulator(visSrc, dataSrc.getInstanceModel(), dataSrc);
+		this.manipSrc = manipSrc;
+		GraphManipulator manipTrg = new GraphManipulator(visTrg, dataTrg.getInstanceModel(), dataTrg);
+		this.manipTrg = manipTrg;
+		
 	}
 	
 	public String openDirectoryDialog() {
@@ -429,6 +441,12 @@ public class MainWindow {
          }
         
         return selectedDir;
+	}
+	public GraphManipulator getSrcManipulator() {
+		return manipSrc;
+	}
+	public GraphManipulator getTrgManipulator() {
+		return manipTrg;
 	}
 }
 
