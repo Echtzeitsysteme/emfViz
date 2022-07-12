@@ -64,13 +64,14 @@ public class Main_singleModel {
 		Visualizer visSrc = new Visualizer(shell, dataSrc);
 		
 		GraphManipulator manipulator = new GraphManipulator(visSrc, srcResource, dataSrc);
-	    
+		PopupFrame popup = new PopupFrame(visSrc);
 	    shell.open();
 	    while (!shell.isDisposed()) {
-	    	//manipulator.iterateModel();
-	    	PopupFrame popup = new PopupFrame(visSrc);
-	    	//IbexOptions ibxopt = new IbexOptions();
-	    	//ibxopt.tgg.tgg().getSrc()
+	    	manipulator.iterateModel();
+	    	
+	    	/*IbexOptions ibxopt = new IbexOptions();
+	    	ibxopt.tgg.tgg().getSrc().get(0).getESubpackages();
+	    	ibxopt.tgg.tgg().getSrc().get(0).eContents(); //sind die Klassen da drin?*/
 	    	
 	        if (!display.readAndDispatch()) {
 	            display.sleep();
