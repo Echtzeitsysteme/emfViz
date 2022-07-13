@@ -1,6 +1,7 @@
 package Main;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.eclipse.emf.common.util.URI;
@@ -8,11 +9,18 @@ import org.eclipse.emf.ecore.resource.ContentHandler;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.emoflon.ibex.common.emf.EMFSaveUtils;
 import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGENStopCriterion;
-import org.emoflon.ibex.tgg.run.hospital2administration.MODELGEN_App;
+import org.emoflon.ibex.tgg.operational.strategies.modules.TGGResourceHandler;
+import org.emoflon.ibex.tgg.operational.strategies.modules.TGGResourceHandler.TGGFileNotFoundException;
+import org.emoflon.ibex.tgg.operational.strategies.sync.INITIAL_BWD;
+import org.emoflon.ibex.tgg.operational.strategies.sync.INITIAL_FWD;
+import org.emoflon.ibex.tgg.operational.strategies.sync.SYNC;
+//import org.emoflon.ibex.tgg.run.hospital2administration.MODELGEN_App;
 import org.emoflon.smartemf.persistence.SmartEMFResourceFactoryImpl;
+import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGEN;
 
-import Hospital2Administration.Hospital2AdministrationPackage;
+//import Hospital2Administration.Hospital2AdministrationPackage;
 
 public class ModelLoader {
 	
@@ -20,24 +28,66 @@ public class ModelLoader {
 	private static Resource instanceModel;
 	private static URI uri;
 	
-	private MODELGEN_App generator;
+	private TGGResourceHandler generator;
+	private MODELGEN modelgen;
+	private SYNC sync;
+	private INITIAL_FWD fwd;
+	private INITIAL_BWD bwd;
+	private String typeOf;
+	protected Resource source;
+	protected Resource target;
 	
-	public ModelLoader() {
-		try {
-			generator = new MODELGEN_App();
+	
+	public ModelLoader(MODELGEN modelgen) {
+		this.modelgen = modelgen;
+		this.generator = modelgen.getResourceHandler();
+		this.typeOf = "MODELGEN";
+	}
+	
+	public ModelLoader(SYNC sync) {
+		this.sync = sync;
+		this.generator = this.sync.getResourceHandler();
+		this.typeOf = "SYNC";
+	}
+	public ModelLoader(INITIAL_FWD fwd) {
+		this.fwd = fwd;
+		this.generator = this.fwd.getResourceHandler();
+		this.typeOf = "FWD";
+	}
+	public ModelLoader(INITIAL_BWD bwd) {
+		this.bwd = bwd;
+		this.generator = this.bwd.getResourceHandler();
+		this.typeOf = "BWD";
+	}
+	
+	public TGGResourceHandler getResourceHandler() {
+		return generator;
+	}
+	
+
+	
+	public void generateNewModel() {
+		
+		if (typeOf == "MODELGEN") {
+			try {
+				MODELGENStopCriterion stop = new MODELGENStopCriterion(modelgen.getTGG());
+		    	stop.setMaxRuleCount("HospitaltoAdministrationRule", 1);
+				stop.setMaxElementCount(10);
+				modelgen.setStopCriterion(stop);
+				modelgen.run();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}else if (typeOf == "SYNC") {
 			
-        	MODELGENStopCriterion stop = new MODELGENStopCriterion(generator.getTGG());
-        	stop.setMaxRuleCount("HospitaltoAdministrationRule", 1);
-    		stop.setMaxElementCount(10);
-        	generator.setStopCriterion(stop);
-        	generator.run();
-        	
-		}catch(Exception e) {
-			System.out.print(e.getMessage());
+		}else if (typeOf == "FWD") {
+			
+		}else if (typeOf == "BWD") {
 			
 		}
 	}
-	
+	/*
 	public static Resource loadModelWithURI(ResourceType resourceType, String workingDirectory) {
 		
 		
@@ -48,7 +98,7 @@ public class ModelLoader {
         //Assuming your instance model is contained in a .xmi file, path can be adjusted accordingly
 		//URI uri =  URI.createURI("/Hospital2Administration/instances/trg.xmi");
 		
-		
+		/*
 		switch (resourceType) {
 		case Source:
 			uri = URI.createURI(workingDirectory + "instances/src.xmi");
@@ -75,31 +125,63 @@ public class ModelLoader {
 		
 		rs.getPackageRegistry().put(Hospital2AdministrationPackage.eINSTANCE.getNsURI(), Hospital2AdministrationPackage.eINSTANCE);
 		
-
 		
 		instanceModel = rs.createResource(uri, ContentHandler.UNSPECIFIED_CONTENT_TYPE);
+		
 		try {
-		instanceModel.load(null);
+			instanceModel.load(null);
 		}
 		catch(Exception e) {
 			System.out.print(e.getMessage());
 		}
 		
 		return instanceModel;
-	}
+		
+		*/
+//	}
 	
 	public Resource loadModelWithResourceHandler(ResourceType resourceType) {
 		
 		switch (resourceType) {
 		case Source:
-			instanceModel = generator.getResourceHandler().getSourceResource();
+			instanceModel = generator.getSourceResource();
 			break;
 		case Target:
-			instanceModel = generator.getResourceHandler().getTargetResource();
+			instanceModel = generator.getTargetResource();
 			break;
 		}
 		
+		
 		return instanceModel;
+	}
+	
+	public void CreateResourcesFromPath(String pathSrc, String pathTrg) throws IOException {
+		
+		if (typeOf == "MODELGEN") {
+			source = generator.loadResource(pathSrc);
+			target = generator.loadResource(pathTrg);
+			
+		}else if (typeOf == "SYNC"){
+			source = generator.loadResource(pathSrc);
+			target = generator.loadResource(pathTrg);
+				
+		}else if (typeOf == "FWD") {
+			source = generator.loadResource(pathSrc);
+			target = null;
+			
+		}else if (typeOf == "BWD") {
+			source = null;
+			target = generator.loadResource(pathTrg);
+		}
+		
+	}
+	
+	public Resource getSource(){
+		return source;
+	}
+	
+	public Resource getTarget() {
+		return target;
 	}
 
 }

@@ -1,0 +1,37 @@
+/*
+*
+* copy the source code into your tgg model (e.g. Hospital2Administration)
+* add emfViz to the Manifest > Dependencies
+*
+*
+*/
+
+/*package Demonstrator;*/
+
+import java.io.IOException;
+
+import org.emoflon.ibex.tgg.run.hospital2administration.MODELGEN_App;
+
+import Main.Demonstrator;
+
+public class Main {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		
+		
+		//new MODELGEN_APP
+		try {
+			MODELGEN_App app = new MODELGEN_App();
+			
+			Demonstrator demonstrator = new Demonstrator(app);
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+}
+
+

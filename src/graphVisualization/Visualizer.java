@@ -1,9 +1,9 @@
 package graphVisualization;
 
 
-import java.awt.Panel;
+import java.awt.Frame;
 import java.awt.Point;
-import java.awt.Rectangle;
+
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,6 +12,8 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import org.eclipse.swt.graphics.Rectangle;
 
 import com.mxgraph.layout.mxFastOrganicLayout;
 import com.mxgraph.model.mxCell;
@@ -31,13 +33,14 @@ import com.mxgraph.view.mxStylesheet;
 public class Visualizer {
 	
 
-	private Panel panel;
+	private Frame frame;
 	
 	private mxGraph graph;
 	private mxGraphModel graphModel;
 	private mxGraphComponent graphComponent;
 	private DataLoader dataLoader;
 	
+	private Rectangle shellBounds;
 	
 	private int defaultNodeWidth = 80;
 	private int defaultNodeHeight = 40;
@@ -60,7 +63,7 @@ public class Visualizer {
 	
 	
 	
-	public Visualizer(DataLoader dataLoader, Panel panel) {
+	public Visualizer(DataLoader dataLoader, Frame frame, Rectangle r) {
 		
 		/*source data model*/
 		if (((InstanceDiagrammLoader) dataLoader).getInstanceModel() != null) {
@@ -84,19 +87,17 @@ public class Visualizer {
 		}*/
 		
 		
-		this.panel = panel;
+		//this.panel = panel;
 		
+		
+		this.frame = frame;
 		
 		/* source graph*/
 		graph = new mxGraph();
 		graphModel = ((mxGraphModel)graph.getModel());
 		
-		
-		Rectangle shellBounds = panel.getBounds();
-		
-		//nur noch 0.5 mal so viel zu vor in x-Dimension
-		defaultNodePosition = new Point2D.Double(((double) shellBounds.width) * 0.4 - defaultNodeWidth * 0.5 , ((double) shellBounds.height) * 0.4 - defaultNodeHeight * 0.5);
-		
+		shellBounds = r;
+		defaultNodePosition = new Point2D.Double(((double) shellBounds.width) * 0.5 - defaultNodeWidth * 0.5 , ((double) shellBounds.height) * 0.5 - defaultNodeHeight * 0.5);
 		
 		addStyles();
 		
@@ -108,7 +109,8 @@ public class Visualizer {
 			runLayout();
 			
 			graphComponent = new mxGraphComponent(graph);
-			this.panel.add(graphComponent);
+			//this.panel.add(graphComponent);
+			frame.add(graphComponent);
 		}
 		
 		
@@ -173,7 +175,8 @@ public class Visualizer {
 		preLayout.setUseInputOrigin(false);
 		preLayout.setDisableEdgeStyle(false);
 		
-		Rectangle shellBounds = panel.getBounds();
+		//Rectangle shellBounds = panel.getBounds();
+		//Rectangle shellBounds = frame.getBounds();
 		
 		
 		double hWRatio = (double) shellBounds.height / (double)shellBounds.width;
@@ -185,7 +188,7 @@ public class Visualizer {
 		int sizeY = (int) Math.ceil(Math.sqrt(baseSize));
 		
 		nodeGrid = new Grid(shellBounds, sizeX, sizeY,  minNodeDistanceNodes);
-		edgeGrid = new Grid(shellBounds,(int)Math.floor((1-margin ) *shellBounds.width), (int) Math.floor((1-margin ) *shellBounds.height), minNodeDistanceEdges);
+		edgeGrid = new Grid(shellBounds,(int)Math.floor((1-margin ) * shellBounds.width), (int) Math.floor((1-margin ) * shellBounds.height), minNodeDistanceEdges);
 		
 		blockedAreas = new ArrayList<mxGeometry>();
 		
@@ -199,9 +202,12 @@ public class Visualizer {
 		graphCenterX = graph.getGraphBounds().getCenterX();
 		graphCenterY = graph.getGraphBounds().getCenterY();
 		
-	
-		xStretch = (panel.getWidth() * (1 - nodeGrid.margin)) / graphWidth;
-		yStretch = (panel.getHeight() * (1 - nodeGrid.margin)) / graphHeight;
+		
+		
+		xStretch = (shellBounds.width * (1 - nodeGrid.margin)) / graphWidth;
+		yStretch = (shellBounds.height * (1 - nodeGrid.margin)) / graphHeight;
+
+		//System.out.println(xStretch + " : " + yStretch);
 		
 	}
 	
@@ -424,6 +430,9 @@ public class Visualizer {
 			
 		}
 		
+	}
+	public mxGraph getGraph() {
+		return graph;
 	}
 }
 	
