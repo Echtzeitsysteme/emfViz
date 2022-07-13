@@ -1,8 +1,6 @@
 package graphVisualization;
 
 import java.awt.Point;
-import java.awt.geom.Point2D;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -29,9 +27,7 @@ public class EdgePlanner {
 	private int aStarStepsize = 2;
 	private double minInterPointDist = 10;
 	private double minCurveStrength =2;
-	private int maxIterations = 1000;
-	
-	
+
 	private boolean log;
 	
 	private Grid edgeGrid;
@@ -43,6 +39,8 @@ public class EdgePlanner {
 	public LinkedList<Point> fullPath;
 	
 	private int pathCutoff = 3;
+	
+	private int maxIterations = 1000;
 	
 	public EdgePlanner(Point nodeOrigin, Point nodeTarget, mxGeometry cellBoundsOrigin, mxGeometry cellBoundsTarget, Grid edgeGrid){//RTree<String, Rectangle> blockTree) {
 		
@@ -197,12 +195,19 @@ public class EdgePlanner {
 		
 		cameFrom.put(start,start);
 		
+		int it = 0;
 		while (!openSet.isEmpty()) {
+			
+			
 			
 			//edgeGrid.setGridValues(targetGeom.getRectangle(), 0);
 			//edgeGrid.setGridValues(originGeom.getRectangle(), 0);
 			
 			Point current = openSet.remove();
+			
+			if(it++ > maxIterations)
+				edgeGrid.setGridValues(targetGeom.getRectangle(), 0);
+				edgeGrid.setGridValues(originGeom.getRectangle(), 0);
 			
 			//if(log)
 			//	System.out.println(current.toString());

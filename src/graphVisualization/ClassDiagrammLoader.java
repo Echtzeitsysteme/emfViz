@@ -1,18 +1,14 @@
 package graphVisualization;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.common.util.*;
-import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.impl.EClassImpl;
-import org.eclipse.emf.ecore.util.EcoreEList;
 import org.emoflon.smartemf.runtime.SmartPackage;
-import com.mxgraph.view.mxGraph;
+
 
 
 public class ClassDiagrammLoader extends DataLoader {

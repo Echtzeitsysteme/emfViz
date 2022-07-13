@@ -467,6 +467,13 @@ public class Visualizer {
 		private mxICell node;
 		
 		public EdgePlannerThread(mxGraphModel graphModel, Grid nodeGrid, Grid edgeGrid, mxICell cell, HashMap<String,LinkedList<mxPoint>> plottedEdges, synchronizedWorkingAreas activeAreas) {
+			
+			String cellName = (String) cell.getValue();
+			if(cellName != null)	
+				this.setName(cellName);
+			else
+				this.setName("unknown");			
+			
 			this.graphModel = graphModel;
 			this.nodeGrid = nodeGrid;
 			this.edgeGrid = edgeGrid;
