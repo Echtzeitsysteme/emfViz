@@ -431,6 +431,9 @@ public class Visualizer {
 		}
 		
 	}
+	public mxGraph getGraph() {
+		return graph;
+	}
 }
 	
 	
