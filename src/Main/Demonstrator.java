@@ -5,6 +5,7 @@ package Main;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
 import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGEN;
 import org.emoflon.ibex.tgg.operational.strategies.sync.SYNC;
 import org.emoflon.ibex.tgg.operational.strategies.sync.INITIAL_FWD;
@@ -16,62 +17,45 @@ public class Demonstrator {
 	
 	MainWindow graphVisualizer;
 	ModelLoader modelLoader;
+	IbexOptions options;
 	
-	public Demonstrator (MODELGEN generator) {
+	public Demonstrator (MODELGEN generator, IbexOptions options) {
 		
-		modelLoader = new ModelLoader(generator);
+		this.options = options;
+		modelLoader = new ModelLoader(generator, options);
+		
 		
 		graphVisualizer = new MainWindow(modelLoader);
 		graphVisualizer.run();
 	}
 	
-	public Demonstrator (SYNC generator) {
+	public Demonstrator (SYNC generator, IbexOptions options) {
 		
-		modelLoader = new ModelLoader(generator);
+		this.options = options;
+		modelLoader = new ModelLoader(generator, options);
+		
 		
 		graphVisualizer = new MainWindow(modelLoader);
 		graphVisualizer.run();
 		
 	}
 	
-	public Demonstrator (INITIAL_FWD generator) {
+	public Demonstrator (INITIAL_FWD generator, IbexOptions options) {
 
-		modelLoader = new ModelLoader(generator);
+		this.options = options;
+		modelLoader = new ModelLoader(generator, options);
 		
 		graphVisualizer = new MainWindow(modelLoader);
 		graphVisualizer.run();
 		
 	}
 	
-	public Demonstrator (INITIAL_BWD generator) {
+	public Demonstrator (INITIAL_BWD generator, IbexOptions options) {
 
-		modelLoader = new ModelLoader(generator);
+		this.options = options;
+		modelLoader = new ModelLoader(generator, options);
 		
 		graphVisualizer = new MainWindow(modelLoader);
 		graphVisualizer.run();
-	}
-	
-	
-
-	public static void main(String[] args) {
-		Display display = new Display();
-		Shell shell = new Shell(display);
-		
-  		MainWindow graphVisualizer = new MainWindow(null);
-  		
-  		//Panel panelSrc = graphVisualizer.panelSrc;
-		//Panel panelTrg = graphVisualizer.panelTrg;
-        
-		
-		/*Visualizer visSrc = new Visualizer(dataSrc, panelSrc);
-		Visualizer visTrg = new Visualizer(dataTarget, panelTrg);*/
-        
-        shell.open();
-        while (!shell.isDisposed()) {
-            if (!display.readAndDispatch()) {
-                display.sleep();
-            }
-        }
-        display.dispose();
 	}
 }

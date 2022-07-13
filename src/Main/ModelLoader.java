@@ -18,6 +18,7 @@ import org.emoflon.ibex.tgg.operational.strategies.sync.INITIAL_FWD;
 import org.emoflon.ibex.tgg.operational.strategies.sync.SYNC;
 //import org.emoflon.ibex.tgg.run.hospital2administration.MODELGEN_App;
 import org.emoflon.smartemf.persistence.SmartEMFResourceFactoryImpl;
+import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
 import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGEN;
 
 //import Hospital2Administration.Hospital2AdministrationPackage;
@@ -28,6 +29,7 @@ public class ModelLoader {
 	private static Resource instanceModel;
 	private static URI uri;
 	
+	private IbexOptions options;
 	private TGGResourceHandler generator;
 	private MODELGEN modelgen;
 	private SYNC sync;
@@ -38,24 +40,28 @@ public class ModelLoader {
 	protected Resource target;
 	
 	
-	public ModelLoader(MODELGEN modelgen) {
+	public ModelLoader(MODELGEN modelgen, IbexOptions options) {
 		this.modelgen = modelgen;
-		this.generator = modelgen.getResourceHandler();
+		this.options = options;
+		this.generator = this.modelgen.getResourceHandler();
 		this.typeOf = "MODELGEN";
 	}
 	
-	public ModelLoader(SYNC sync) {
+	public ModelLoader(SYNC sync, IbexOptions options) {
 		this.sync = sync;
+		this.options = options;
 		this.generator = this.sync.getResourceHandler();
 		this.typeOf = "SYNC";
 	}
-	public ModelLoader(INITIAL_FWD fwd) {
+	public ModelLoader(INITIAL_FWD fwd, IbexOptions options) {
 		this.fwd = fwd;
+		this.options = options;
 		this.generator = this.fwd.getResourceHandler();
 		this.typeOf = "FWD";
 	}
-	public ModelLoader(INITIAL_BWD bwd) {
+	public ModelLoader(INITIAL_BWD bwd, IbexOptions options) {
 		this.bwd = bwd;
+		this.options = options;
 		this.generator = this.bwd.getResourceHandler();
 		this.typeOf = "BWD";
 	}
@@ -80,11 +86,11 @@ public class ModelLoader {
 				e.printStackTrace();
 			}
 		}else if (typeOf == "SYNC") {
-			
+			//do nothing
 		}else if (typeOf == "FWD") {
-			
+			//do nothing
 		}else if (typeOf == "BWD") {
-			
+			//do nothing
 		}
 	}
 	/*
@@ -158,19 +164,27 @@ public class ModelLoader {
 	public void CreateResourcesFromPath(String pathSrc, String pathTrg) throws IOException {
 		
 		if (typeOf == "MODELGEN") {
+			if (pathSrc == " " | pathTrg == " ")
+				return;
 			source = generator.loadResource(pathSrc);
 			target = generator.loadResource(pathTrg);
 			
 		}else if (typeOf == "SYNC"){
+			if (pathSrc == " " | pathTrg == " ")
+				return;
 			source = generator.loadResource(pathSrc);
 			target = generator.loadResource(pathTrg);
 				
 		}else if (typeOf == "FWD") {
+			if (pathSrc == " ")
+				return;
 			source = generator.loadResource(pathSrc);
-			target = null;
+			target = generator.createResource(options.project.path() + "/instances/trg.xmi");	
 			
 		}else if (typeOf == "BWD") {
-			source = null;
+			if (pathTrg == " ")
+				return;
+			source = generator.createResource(options.project.path() + "/instances/src.xmi");
 			target = generator.loadResource(pathTrg);
 		}
 		
@@ -182,6 +196,10 @@ public class ModelLoader {
 	
 	public Resource getTarget() {
 		return target;
+	}
+	
+	public String getTypeOf() {
+		return typeOf;
 	}
 
 }
