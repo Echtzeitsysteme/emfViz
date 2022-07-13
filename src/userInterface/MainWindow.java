@@ -21,11 +21,15 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Text;
 
 import Main.ModelLoader;
@@ -73,6 +77,13 @@ public class MainWindow {
 		/* init main window */
 		display = new Display();
 		shell = new Shell(display);
+		
+		shell.addListener(SWT.Close, new Listener() {
+			public void handleEvent(Event event) {
+				System.out.println("close");
+		    }
+		});
+		
 	}
 	
 	public void run() {
@@ -351,10 +362,7 @@ public class MainWindow {
 		nextBT.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent pSelectionEvent) {
-				if (srcTxt.getText() != " " && trgTxt.getText() != " ") {
-					loadModelFromPath(srcTxt.getText(), trgTxt.getText());
-				}
-				
+				loadModelFromPath(srcTxt.getText(), trgTxt.getText());
 			}
 		});
 		
@@ -371,7 +379,22 @@ public class MainWindow {
 			}
 		});
 		
+		//set size of shell
 		shell.setSize(shellSizeX, shellSizeY);	
+		
+		/*if ModelLoader is initialized by Inital_BWD_App or Inital_FWD_App
+		 * source or target model are generated from tgg*/
+		if (modelLoader.getTypeOf() == "FWD")
+		{
+			trgBT.setEnabled(false);
+			trgLabel.setEnabled(false);
+			trgTxt.setEnabled(false);
+			
+		}else if(modelLoader.getTypeOf() == "BWD"){
+			srcBT.setEnabled(false);
+			srcLabel.setEnabled(false);
+			srcTxt.setEnabled(false);
+		}
 	}
 	
 	private void modelLocationSelection(String text) {
@@ -456,7 +479,6 @@ public class MainWindow {
         if(directoryDialog.open() != null) {
         	
         	String dir = directoryDialog.getFilterPath() + System.getProperty( "file.separator" ) + directoryDialog.getFileName();
-        	//textField.setText(dir);
             selectedDir = dir;
             
             return selectedDir;
