@@ -151,6 +151,8 @@ public class MainWindow {
 		gridData.horizontalSpan = 2;
 		
 		comp.setLayoutData(gridData);
+		comp.setVisible(true);
+		comp.setLayout(new GridLayout());
 		
 		Composite compSrc = new Composite(shell, SWT.BOTTOM | SWT.EMBEDDED);
 		compSrc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
@@ -178,6 +180,26 @@ public class MainWindow {
 		//System.out.println("src1: " + frameSrc.getBounds());
 		
 		frameTrg = SWT_AWT.new_Frame(compTrg);
+		
+		Group buttonGroup = new Group(comp, SWT.None);
+		
+		buttonGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,true));
+		buttonGroup.setLayout(new GridLayout());
+		
+		Button deleteButton = new Button(buttonGroup, SWT.PUSH);
+		deleteButton.setText("Delete");
+		deleteButton.setLayoutData(new GridData());
+		
+			
+		deleteButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+            public void widgetSelected(SelectionEvent evt) {
+				System.out.println("delete selected");
+				manipSrc.iterateModel();
+				manipTrg.iterateModel();
+			}
+		});
+		
 		
 		
 		shell.setSize(shellSizeX, shellSizeY);

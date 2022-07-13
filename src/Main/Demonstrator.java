@@ -68,8 +68,8 @@ public class Demonstrator {
         
         shell.open();
         while (!shell.isDisposed()) {
-        	graphVisualizer.getSrcManipulator().iterateModel();
-        	graphVisualizer.getTrgManipulator().iterateModel();
+        	//graphVisualizer.getSrcManipulator().iterateModel();
+        	//graphVisualizer.getTrgManipulator().iterateModel();
             if (!display.readAndDispatch()) {
                 display.sleep();
             }

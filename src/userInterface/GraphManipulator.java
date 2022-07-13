@@ -107,7 +107,8 @@ public class GraphManipulator {
 	
 	
 	private void removeNode() {
-		vis.getGraph().getModel().remove(nodeInGraph);
+		//vis.getGraph().getModel().remove(nodeInGraph);
+		((mxCell) nodeInGraph).removeFromParent();
 		EcoreUtil.remove(nodeInModel); // delete wirft Nullpointerexception, aber so wird Kante nicht gelöscht
 		System.out.println("removed from model");
 		Node deleteNode = null;
