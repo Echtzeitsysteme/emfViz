@@ -12,77 +12,44 @@ import com.mxgraph.util.mxRectangle;
 
 public class LabelPlanner {
 	
-	private Grid entityGrid;
-	private double distanceToEdge = 5;
-	private double stepsize = 10;
+	private Grid edgeGrid;
+	private double distanceToEdge = 10;
 	
 	private mxPoint finalPosition;
 	private List<mxPoint> edgePath;
 	
 	private Rectangle currentLabelBounds;
 	
-	public LabelPlanner(Grid entityGrid) {
-		this.entityGrid = entityGrid;
-		this.edgePath = null;
+	private String label;
+	
+	public LabelPlanner(Grid edgeGrid) {
+		this.edgeGrid = edgeGrid;
 	}
 	
 	
-	public mxPoint planLabel(mxRectangle labelBounds, List<mxPoint> edgePath) {
+	public mxPoint planLabel(mxRectangle labelBounds, List<mxPoint> edgePath, String label) {
 		
 		this.edgePath = edgePath;
-		currentLabelBounds = labelBounds.getRectangle();
+		currentLabelBounds = (Rectangle) labelBounds.getRectangle().clone();
+		//System.out.println(currentLabelBounds.height);
+		currentLabelBounds.grow(-10, -10);
 		finalPosition = edgePath.get(edgePath.size()-2);
 		
-		for(int i = edgePath.size()-1; i >= 1; i--) {
+		double xPlace = edgePath.get(edgePath.size()-1).getX();
+		double yPlace = edgePath.get(edgePath.size()-1).getY();
+			
+		double xStep = (edgePath.get(edgePath.size()-2).getX() - xPlace);
+		double yStep = (edgePath.get(edgePath.size()-2).getY() - yPlace);
 		
-			
-			mxPoint currentPoint = edgePath.get(i);
-			mxPoint nextPoint = edgePath.get(i-1);
-			
-			double xPlace = currentPoint.getX();
-			double yPlace = currentPoint.getY();
-			
-			double xStep = (nextPoint.getX() - xPlace)/stepsize;
-			double yStep = (nextPoint.getY() - yPlace)/stepsize;
-			
-			double angle = Math.atan2(yStep,xStep) + Math.PI/2;
-			
-			xPlace += xStep;
-			yPlace += yStep;
-
-			for(int step = 1 ; step < stepsize; step++) {
-				
-				if(goodPlace(xPlace,yPlace , angle))
-					return finalPosition;
-				
-
-				xPlace += xStep;
-				yPlace += yStep;
-			}
-			
-			
-		}
+		double xOffset = xStep < 0 ? distanceToEdge : -distanceToEdge;
+		double yOffset = yStep < 0 ? distanceToEdge : -distanceToEdge;
 		
-		//System.out.println("Not good Place");
+		finalPosition = edgeGrid.getFreeGridPosition(new Point2D.Double(xPlace + xOffset,yPlace + yOffset), currentLabelBounds);
+			
 		return finalPosition;
 	}
 	
 	
-	public boolean goodPlace(double xPlace, double yPlace, double angle) {
-		
-		double xPotential = xPlace + distanceToEdge * Math.cos(angle);
-		double yPotential = yPlace + distanceToEdge * Math.sin(angle);
-		
-		Point gridP = entityGrid.primeGridSearch(new Point2D.Double(xPotential,yPotential));
-				
-		if(entityGrid.getCostForArea(currentLabelBounds, gridP.x, gridP.y, true) < 1) {
-			//System.out.println("Good Place");
-			finalPosition = new mxPoint(xPotential, yPotential);
-			return true;
-		}
-		
-		return false;
-	}
 	
 
 }

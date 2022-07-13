@@ -408,7 +408,7 @@ public class Visualizer {
 		
 		Map<String,Object> cells = graphModel.getCells();	
 		
-		LabelPlanner lP = new LabelPlanner(nodeGrid);
+		LabelPlanner lP = new LabelPlanner(edgeGrid);
 		
 		for(Object cell : cells.values()) {
 			
@@ -436,7 +436,7 @@ public class Visualizer {
 			mxRectangle labelBounds = edgeState.getLabelBounds();
 			
 			//System.out.println("EdgePath " + edgePath.toString());
-			mxPoint pos = lP.planLabel(labelBounds, edgePath);
+			mxPoint pos = lP.planLabel(labelBounds, edgePath, edgeState.getLabel());
 			
 			//System.out.println("New Pos: " + String.valueOf(pos.getX()) + " , " + String.valueOf(pos.getY()));
 			
@@ -444,8 +444,10 @@ public class Visualizer {
 			labelBounds.setY(pos.getY());
 			
 			edgeState.setLabelBounds(labelBounds);
-			
+			geometry.setX(pos.getX());
+			geometry.setY(pos.getY());
 			nodeGrid.setGridValues(labelBounds.getRectangle(), Double.MAX_VALUE);
+			edgeGrid.setGridValues(labelBounds.getRectangle(), Double.MAX_VALUE);
 			
 		}
 		

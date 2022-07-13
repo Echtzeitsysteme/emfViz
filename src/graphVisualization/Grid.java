@@ -54,7 +54,7 @@ public class Grid {
 	private int blockMarginX = 5;
 	private int blockMarginY = 5;
 	
-	private int maxDistanceToOrigin = 4;
+	private int maxDistanceToOrigin = 30;
 	
 	public Grid(org.eclipse.swt.graphics.Rectangle shellBounds, int sizeX, int sizeY, double blockMargin) {
 		
@@ -191,6 +191,7 @@ public class Grid {
 		
 		//No free grid point found, visualize at initial estimate
 		setGridValues(geometry, Double.MAX_VALUE);	
+		System.out.println("None found");
 		return getAbsolutePosition(origin.x, origin.y);
 		
 	}
