@@ -65,10 +65,9 @@ public class Visualizer {
 	
 	public Visualizer(DataLoader dataLoader, Frame frame, Rectangle r) {
 		
-		/*source data model*/
 		if (((InstanceDiagrammLoader) dataLoader).getInstanceModel() != null) {
 			this.dataLoader = dataLoader;
-			dataLoader.loadData();
+			this.dataLoader.loadData();
 		}
 
 		
@@ -84,11 +83,7 @@ public class Visualizer {
 				System.out.println(edge.toString());
 			}
 			
-		}*/
-		
-		
-		//this.panel = panel;
-		
+		}*/		
 		
 		this.frame = frame;
 		
@@ -110,9 +105,8 @@ public class Visualizer {
 			
 			graphComponent = new mxGraphComponent(graph);
 			//this.panel.add(graphComponent);
-			frame.add(graphComponent);
-		}
-		
+			this.frame.add(graphComponent);
+		}	
 		
 	}
 	
@@ -140,6 +134,23 @@ public class Visualizer {
 		
 		//stylesheet.setDefaultVertexStyle(cellStyle);
 		//stylesheet.setDefaultEdgeStyle(edgeStyle);
+	}
+	/*
+	 * update mxGraph
+	 * TODO: dosen't work correctly - instead of updating the graph generates the function a complete new graph
+	 * 
+	 *
+	 */
+	
+	public void updateGraph() {
+		if (((InstanceDiagrammLoader) dataLoader).getInstanceModel() != null) {
+			this.dataLoader.loadData();
+			
+			addStyles();
+			insertDataIntoGraph();
+			setUpLayout();
+			runLayout();
+		}
 	}
 	
 	private void insertDataIntoGraph() {
@@ -316,11 +327,6 @@ public class Visualizer {
 				//ID: HospitalExample.impl.NurseImpl@2ca923bb (name: Stefanie Jones, staffID: 7)worksHospitalExample.impl.DepartmentImpl@64ec96c6 (dID: 2, maxRoomCount: 4)
 				
 				
-				// Added by JL
-				/*if (source == null || edgeGraph == null || terminal == null){
-					continue;
-				}*/
-				
 				String edgeId = source.getId().toString()+edgeGraph.getValue().toString()+terminal.getId().toString();
 				
 				
@@ -431,6 +437,8 @@ public class Visualizer {
 		}
 		
 	}
+	
+	
 	public mxGraph getGraph() {
 		return graph;
 	}
