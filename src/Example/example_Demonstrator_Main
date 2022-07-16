@@ -21,16 +21,22 @@ import Main.ModelLoader_INITIAL_FWD;
 public class Main {
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		
-		// just to get the workspace and project path
+		/*
+		 * just to get the workspace and project path
+		 * no further intended use
+		 */
 		HiPERegistrationHelper registrationHelper = new HiPERegistrationHelper();
 		IbexOptions options = registrationHelper.createIbexOptions();
 		String projectPath = options.project.path();
 		String workspacePath = options.project.workspacePath();
 		
 		
-		Function<String, INITIAL_FWD> constructor = (path) -> {
+		////////////////////////////////////////////////////////////////////////
+				
+		/*
+		* forward this to TGGDeomnstrator to use INITIAL_FWD_Demonstrator 
+		*/	
+		Function<String, INITIAL_FWD> constructor_INITIAL_FWD = (path) -> {
 			try {
 				return new INITIAL_FWD_Demonstrator(path);
 			} catch (IOException e) {
@@ -40,7 +46,27 @@ public class Main {
 			return null;
 		};
 		
-		Function<String[], MODELGEN> con = (path)->{
+		////////////////////////////////////////////////////////////////////////
+				
+		/*
+		* forward this to TGGDeomnstrator to use INITIAL_BWD_Demonstrator 
+		*/	
+		Function<String, INITIAL_BWD> constructor_INITIAL_BWD = (path) -> {
+			try {
+				return new INITIAL_BWD_Demonstrator(path);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		};
+		
+		////////////////////////////////////////////////////////////////////////
+		
+		/*
+		 * forward this to TGGDeomnstrator to use MODELGEN_Demonstrator 
+		 */	
+		Function<String[], MODELGEN> constructor_MODELGEN = (path)->{
 			try {
 				return new MODELGEN_Demonstrator(path[0], path[1]);
 			} catch (IOException e) {
@@ -49,6 +75,8 @@ public class Main {
 			}
 			return null;
 		};
+		
+		
 	
 		ModelLoader_INITIAL_FWD demon = new ModelLoader_INITIAL_FWD(constructor, projectPath, workspacePath);
 		//Demonstrator demonstrator = new Demonstrator(app);

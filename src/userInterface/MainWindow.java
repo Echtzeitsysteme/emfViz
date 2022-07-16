@@ -265,12 +265,19 @@ public class MainWindow {
 			@Override
             public void widgetSelected(SelectionEvent evt) {
 				System.out.println("Start forward translating");
-				forwardTranslate();
+				forwardTranslation();
 			}
 		});
 		
 		Button syncBackward = new Button(buttonGroupSync, SWT.PUSH);
 		syncBackward.setText("Sync Backward");
+		syncBackward.addSelectionListener(new SelectionAdapter() {
+			@Override
+            public void widgetSelected(SelectionEvent evt) {
+				System.out.println("Start backward translating");
+				backwardTranslation();
+			}
+		});
 		
 		/*new Model functionalities*/
 		Group buttonGroupNM = new Group(comp, SWT.None);
@@ -580,7 +587,7 @@ public class MainWindow {
 	/*
 	 * translating forward, only call-able for INITIAL_FWD
 	 */
-	private void forwardTranslate() {
+	private void forwardTranslation() {
 		if (modelLoader instanceof ModelLoader_INITIAL_FWD){
 			
 			System.out.println("Translating forward...");
@@ -592,6 +599,22 @@ public class MainWindow {
 			dataTrg.setInstanceModel(trgRs);
 			
 			visTrg.updateGraph();
+					
+		}
+	}
+	
+	private void backwardTranslation() {
+		if (modelLoader instanceof ModelLoader_INITIAL_BWD){
+			
+			System.out.println("Translating backward...");
+			
+			((ModelLoader_INITIAL_BWD) modelLoader).backward();
+			
+			Resource srcRs = modelLoader.getTarget();			
+			
+			dataSrc.setInstanceModel(srcRs);
+			
+			visSrc.updateGraph();
 					
 		}
 	}
