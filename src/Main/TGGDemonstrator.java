@@ -1,205 +1,161 @@
 package Main;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 
-import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.resource.ContentHandler;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.function.Function;
+
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
-import org.emoflon.ibex.common.emf.EMFSaveUtils;
 import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGENStopCriterion;
+import org.emoflon.ibex.tgg.operational.strategies.modules.IbexExecutable;
 import org.emoflon.ibex.tgg.operational.strategies.modules.TGGResourceHandler;
-import org.emoflon.ibex.tgg.operational.strategies.modules.TGGResourceHandler.TGGFileNotFoundException;
 import org.emoflon.ibex.tgg.operational.strategies.sync.INITIAL_BWD;
 import org.emoflon.ibex.tgg.operational.strategies.sync.INITIAL_FWD;
 import org.emoflon.ibex.tgg.operational.strategies.sync.SYNC;
-//import org.emoflon.ibex.tgg.run.hospital2administration.MODELGEN_App;
-import org.emoflon.smartemf.persistence.SmartEMFResourceFactoryImpl;
+import org.emoflon.ibex.tgg.operational.updatepolicy.IUpdatePolicy;
+
+import userInterface.MainWindow;
+
 import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
+import org.emoflon.ibex.tgg.operational.matches.ITGGMatch;
+import org.emoflon.ibex.tgg.operational.matches.ImmutableMatchContainer;
 import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGEN;
 
-//import Hospital2Administration.Hospital2AdministrationPackage;
-
-public class ModelLoader {
+public abstract class TGGDemonstrator {
 	
-	public enum ResourceType {Source, Target}
-	private static Resource instanceModel;
-	private static URI uri;
-	
-	private IbexOptions options;
-	private TGGResourceHandler generator;
 	private MODELGEN modelgen;
-	private SYNC sync;
-	private INITIAL_FWD fwd;
-	private INITIAL_BWD bwd;
-	private String typeOf;
+		
+	protected IbexOptions options;
+	protected TGGResourceHandler resourceHandler;
 	protected Resource source;
 	protected Resource target;
 	
+	protected String projectPath;
+	protected String workspacePath;
 	
-	public ModelLoader(MODELGEN modelgen, IbexOptions options) {
-		this.modelgen = modelgen;
-		this.options = options;
-		this.generator = this.modelgen.getResourceHandler();
-		this.typeOf = "MODELGEN";
-	}
+	MainWindow graphVisualizer;
 	
-	public ModelLoader(SYNC sync, IbexOptions options) {
-		this.sync = sync;
-		this.options = options;
-		this.generator = this.sync.getResourceHandler();
-		this.typeOf = "SYNC";
-	}
-	public ModelLoader(INITIAL_FWD fwd, IbexOptions options) {
-		this.fwd = fwd;
-		this.options = options;
-		this.generator = this.fwd.getResourceHandler();
-		this.typeOf = "FWD";
-	}
-	public ModelLoader(INITIAL_BWD bwd, IbexOptions options) {
-		this.bwd = bwd;
-		this.options = options;
-		this.generator = this.bwd.getResourceHandler();
-		this.typeOf = "BWD";
+	public TGGDemonstrator (String pP, String wP) {
+		projectPath = pP;
+		workspacePath = wP;
 	}
 	
-	public TGGResourceHandler getResourceHandler() {
-		return generator;
-	}
+	public void startVisualisation(TGGDemonstrator modelLoader) {
+		graphVisualizer = new MainWindow(modelLoader);
+		graphVisualizer.run();
+	}	
 	
 
-	
+	/*
+	 * generate a new Model
+	 * this method works only if executable is from type MODELGEN 
+	 */
 	public void generateNewModel() {
 		
-		if (typeOf == "MODELGEN") {
-			try {
+		if (options.executable() instanceof MODELGEN) {
+			/*try {
+				//define stop criterions
 				MODELGENStopCriterion stop = new MODELGENStopCriterion(modelgen.getTGG());
 		    	stop.setMaxRuleCount("HospitaltoAdministrationRule", 1);
 				stop.setMaxElementCount(10);
 				modelgen.setStopCriterion(stop);
 				modelgen.run();
+				
+				source = generator.getSourceResource();
+				target = generator.getTargetResource();
+				
+				
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}*/
+			
+			MODELGENStopCriterion stop = new MODELGENStopCriterion(modelgen.getTGG());
+			modelgen.setStopCriterion(stop);
+			
+			modelgen.setUpdatePolicy((IUpdatePolicy) new IUpdatePolicy(){
+
+				@Override
+				public ITGGMatch chooseOneMatch(ImmutableMatchContainer matchContainer) {
+					
+					ArrayList <ITGGMatch> rules = new ArrayList <ITGGMatch>();
+					
+					for(ITGGMatch m : matchContainer.getMatches()) {
+						//m.getRuleName();
+						//return m;
+						rules.add(m);
+					}
+					return rules.get(0);
+				}
+				
+			});
+			
+			try {
+				modelgen.run();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}else if (typeOf == "SYNC") {
+		}else if (options.executable() instanceof SYNC) {
 			//do nothing
-		}else if (typeOf == "FWD") {
+		}else if (options.executable() instanceof INITIAL_FWD) {
 			//do nothing
-		}else if (typeOf == "BWD") {
+		}else if (options.executable() instanceof INITIAL_BWD) {
 			//do nothing
 		}
 	}
+	
 	/*
-	public static Resource loadModelWithURI(ResourceType resourceType, String workingDirectory) {
-		
-		
-		//Example for loading an instance model diagram
-       // URI base = URI.createPlatformResourceURI("/", true);
-       
-        
-        //Assuming your instance model is contained in a .xmi file, path can be adjusted accordingly
-		//URI uri =  URI.createURI("/Hospital2Administration/instances/trg.xmi");
-		
-		/*
-		switch (resourceType) {
-		case Source:
-			uri = URI.createURI(workingDirectory + "instances/src.xmi");
-			break;
-		case Target:
-			uri = URI.createURI(workingDirectory + "instances/trg.xmi");
-			break;
-		}
-				
-				
-		ResourceSet rs = new ResourceSetImpl();
-		rs.getResourceFactoryRegistry().getExtensionToFactoryMap()
-		.put(Resource.Factory.Registry.DEFAULT_EXTENSION, new SmartEMFResourceFactoryImpl("../"));
-		
-		try {
-			rs.getURIConverter().getURIMap().put(URI.createPlatformResourceURI("/", true), URI.createFileURI(new File("../").getCanonicalPath() + File.separator));
-			}
-		catch(Exception e) {
-			System.out.print(e.getMessage());
-		}
-		
-		Resource.Factory.Registry reg = Resource.Factory.Registry.INSTANCE;
-		reg.getExtensionToFactoryMap().put("xmi", new SmartEMFResourceFactoryImpl("../"));
-		
-		rs.getPackageRegistry().put(Hospital2AdministrationPackage.eINSTANCE.getNsURI(), Hospital2AdministrationPackage.eINSTANCE);
-		
-		
-		instanceModel = rs.createResource(uri, ContentHandler.UNSPECIFIED_CONTENT_TYPE);
-		
-		try {
-			instanceModel.load(null);
-		}
-		catch(Exception e) {
-			System.out.print(e.getMessage());
-		}
-		
-		return instanceModel;
-		
-		*/
-//	}
+	 * perform loadModels operation from default locations: /instances/src.xmi  /instances/trg.xmi
+	 */
+	public abstract void loadFromDefault();
 	
-	public Resource loadModelWithResourceHandler(ResourceType resourceType) {
+	/*
+	 * Load source and target model from a given path
+	 */
+	public abstract void createResourcesFromPath(String pathSrc, String pathTrg);
 		
-		switch (resourceType) {
-		case Source:
-			instanceModel = generator.getSourceResource();
-			break;
-		case Target:
-			instanceModel = generator.getTargetResource();
-			break;
-		}
+	
 		
-		
-		return instanceModel;
+	public void setSource(Resource source) {
+		this.source = source;
 	}
 	
-	public void CreateResourcesFromPath(String pathSrc, String pathTrg) throws IOException {
-		
-		if (typeOf == "MODELGEN") {
-			if (pathSrc == " " | pathTrg == " ")
-				return;
-			source = generator.loadResource(pathSrc);
-			target = generator.loadResource(pathTrg);
-			
-		}else if (typeOf == "SYNC"){
-			if (pathSrc == " " | pathTrg == " ")
-				return;
-			source = generator.loadResource(pathSrc);
-			target = generator.loadResource(pathTrg);
-				
-		}else if (typeOf == "FWD") {
-			if (pathSrc == " ")
-				return;
-			source = generator.loadResource(pathSrc);
-			target = generator.createResource(options.project.path() + "/instances/trg.xmi");	
-			
-		}else if (typeOf == "BWD") {
-			if (pathTrg == " ")
-				return;
-			source = generator.createResource(options.project.path() + "/instances/src.xmi");
-			target = generator.loadResource(pathTrg);
-		}
-		
-	}
-	
+	/*
+	 * Return source resource
+	 */
 	public Resource getSource(){
 		return source;
 	}
 	
+	/*
+	 * 
+	 */
+	public void setTarget(Resource target) {
+		this.target = target;
+	}
+	/*
+	 * Return target resource
+	 */
 	public Resource getTarget() {
 		return target;
 	}
+	/*
+	 * Return IbexExecutable
+	 */
+	public IbexExecutable getExectuable() {
+		return options.executable();
+	}
 	
-	public String getTypeOf() {
-		return typeOf;
+	/*
+	 * Return TGGResourceHandler instance
+	 */
+	public TGGResourceHandler getResourceHandler() {
+		return resourceHandler;
 	}
 
 }

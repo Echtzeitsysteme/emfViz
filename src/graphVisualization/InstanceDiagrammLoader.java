@@ -125,6 +125,10 @@ public class InstanceDiagrammLoader extends DataLoader {
 		return instanceModel;
 	}
 	
+	public void setInstanceModel(Resource instanceModel) {
+		this.instanceModel = instanceModel;
+	}
+	
 	/*private void loadResource(String path) {
 		
 		URI base = URI.createPlatformResourceURI("/", true);
