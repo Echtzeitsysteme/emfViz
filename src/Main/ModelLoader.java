@@ -40,28 +40,28 @@ public class ModelLoader {
 	protected Resource target;
 	
 	
-	public ModelLoader(MODELGEN modelgen, IbexOptions options) {
+	public ModelLoader(MODELGEN modelgen) {
 		this.modelgen = modelgen;
-		this.options = options;
+		this.options = modelgen.getOptions();
 		this.generator = this.modelgen.getResourceHandler();
 		this.typeOf = "MODELGEN";
 	}
 	
-	public ModelLoader(SYNC sync, IbexOptions options) {
+	public ModelLoader(SYNC sync) {
 		this.sync = sync;
-		this.options = options;
+		this.options = sync.getOptions();
 		this.generator = this.sync.getResourceHandler();
 		this.typeOf = "SYNC";
 	}
-	public ModelLoader(INITIAL_FWD fwd, IbexOptions options) {
+	public ModelLoader(INITIAL_FWD fwd) {
 		this.fwd = fwd;
-		this.options = options;
+		this.options = fwd.getOptions();
 		this.generator = this.fwd.getResourceHandler();
 		this.typeOf = "FWD";
 	}
-	public ModelLoader(INITIAL_BWD bwd, IbexOptions options) {
+	public ModelLoader(INITIAL_BWD bwd) {
 		this.bwd = bwd;
-		this.options = options;
+		this.options = bwd.getOptions();
 		this.generator = this.bwd.getResourceHandler();
 		this.typeOf = "BWD";
 	}
@@ -200,6 +200,10 @@ public class ModelLoader {
 	
 	public String getTypeOf() {
 		return typeOf;
+	}
+	
+	public IbexOptions getOptions() {
+		return options;
 	}
 
 }

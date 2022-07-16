@@ -4,11 +4,16 @@ import java.awt.*;
 import java.awt.event.*; 
 
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.ecore.EAttribute;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.impl.EClassImpl;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
 
 import com.mxgraph.model.mxCell;
+import com.mxgraph.view.mxGraph;
 
 import graphVisualization.InstanceDiagrammLoader;
 import graphVisualization.Node;
@@ -21,19 +26,21 @@ public class GraphManipulator {
 	private InstanceDiagrammLoader loader;
 	private EObject nodeInModel;
 	private Object nodeInGraph;
+	private mxGraph graph;
 
 	public GraphManipulator(Visualizer vis, Resource resource, InstanceDiagrammLoader loader) {
 
 		this.vis = vis;
 		this.resource = resource;
 		this.loader = loader;
+		graph = vis.getGraph();
 		//PopupFrame popup = new PopupFrame(vis);
 
 	}
 
 	public void iterateModel() {
 		EList<EObject> objects = resource.getContents();
-		Object[] selectedCells = vis.getGraph().getSelectionCells();
+		Object[] selectedCells = graph.getSelectionCells();
 
 		if (selectedCells.length > 0) {
 			System.out.println("selected");
@@ -107,10 +114,15 @@ public class GraphManipulator {
 	
 	
 	private void removeNode() {
-		//vis.getGraph().getModel().remove(nodeInGraph);
-		((mxCell) nodeInGraph).removeFromParent();
+		vis.getGraph().getModel().remove(nodeInGraph);
+		//((mxCell) nodeInGraph).removeFromParent();
 		EcoreUtil.remove(nodeInModel); // delete wirft Nullpointerexception, aber so wird Kante nicht gelöscht
+		//EmfUtil -> kein delte gefunden
+		//emf listener weiß, welche änderungen vorgenommen wurden
 		System.out.println("removed from model");
+		
+		//vis.getGraph().repaint();
+		
 		Node deleteNode = null;
 		for (Node nodeElement : loader.nodes) {
 			if (nodeElement.id.equals(nodeInModel.toString())) {
@@ -121,10 +133,29 @@ public class GraphManipulator {
 			loader.nodes.remove(deleteNode);
 			System.out.println("removed from list");
 		}
+		vis.getGraph().refresh();
 	}
 	
 	private void addEdge() {
 		
+	}
+	
+	public void addNode(EClass cl) {
+		EObject newObj = EcoreUtil.create(cl);
+		resource.getContents().add(newObj);
+		System.out.println("new obj created in model");
+		Node newNode = new Node(newObj.toString(),newObj.eClass().getName(), "defaultNode");
+		loader.nodes.add(newNode);
+		System.out.println("added to list");
+		graph.insertVertex(graph.getDefaultParent(),newNode.id, newNode.name,100,100,80,40);
+		System.out.println("added in graph");
+		for(EAttribute attr : cl.getEAttributes()) {
+			System.out.println(attr.getName() + " , " + attr.getEAttributeType().getInstanceTypeName());
+		}
+		//cl.getEAllStructuralFeatures(); //alle Attribute + Kanten?
+		//EReference Kanten! eindeutig oder null bis n (Liste), isMany 
+		//Tutorial vogella
+		//mxGraph repaint?
 	}
 }
 

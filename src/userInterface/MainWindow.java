@@ -7,7 +7,12 @@ package userInterface;
 import java.awt.Frame;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.impl.EClassImpl;
 import org.eclipse.emf.ecore.resource.Resource;
 
 import org.eclipse.swt.layout.GridData;
@@ -31,6 +36,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Text;
+import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
 
 import Main.ModelLoader;
 import graphVisualization.InstanceDiagrammLoader;
@@ -195,7 +201,10 @@ public class MainWindow {
 		Group buttonGroup = new Group(comp, SWT.None);
 		
 		buttonGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,true));
-		buttonGroup.setLayout(new GridLayout());
+		GridLayout buttonGrid = new GridLayout();
+		buttonGrid.numColumns = 2; //number of columns = number of buttons
+		buttonGrid.makeColumnsEqualWidth = true;
+		buttonGroup.setLayout(buttonGrid);
 		
 		Button deleteButton = new Button(buttonGroup, SWT.PUSH);
 		deleteButton.setText("Delete");
@@ -208,9 +217,78 @@ public class MainWindow {
 				System.out.println("delete selected");
 				manipSrc.iterateModel();
 				manipTrg.iterateModel();
+				//modelLocationSelection("Default");
+				//update graph by loading modified resource
+				//updateVisualizer();
 			}
 		});
 		
+		Button popupButton = new Button(buttonGroup, SWT.PUSH);
+	    popupButton.setText("New Node");
+	    
+	    Menu popupMenu = new Menu(popupButton);
+	    MenuItem srcItem = new MenuItem(popupMenu, SWT.CASCADE);
+	    srcItem.setText("Source");
+	    
+	    Menu srcMenu = new Menu(popupMenu);
+	    srcItem.setMenu(srcMenu);
+	    
+	    List<EClassImpl> srcClasses = new ArrayList<EClassImpl>();
+	    //modelLoader.getOptions().tgg.tgg().getSrc().get(0).eContents();
+    	//ibxopt.tgg.tgg().getSrc().get(0).eContents(); //sind die Klassen da drin?
+    	for(EObject obj: modelLoader.getOptions().tgg.tgg().getSrc().get(0).eContents()) {
+    		if(obj instanceof EClassImpl) {	
+				EClassImpl node = (EClassImpl) obj;
+				srcClasses.add(node);
+    		}
+    	}
+    	for(EClassImpl cl: srcClasses) {
+    		
+    		MenuItem classItem = new MenuItem(srcMenu, SWT.NONE);
+    	    classItem.setText(cl.getName());
+    	    
+    	    
+    	    classItem.addSelectionListener(new SelectionAdapter() {
+    	    	@Override
+    	    	public void widgetSelected(SelectionEvent evt) {
+    	    		System.out.println(cl.getName());
+    	    		manipSrc.addNode(cl);
+    	    	}
+    		});
+    	}
+    	
+    	
+	    MenuItem trgItem = new MenuItem(popupMenu, SWT.CASCADE);
+	    trgItem.setText("Target");
+	    
+	    Menu trgMenu = new Menu(popupMenu);
+	    trgItem.setMenu(trgMenu);
+	    
+	    List<EClassImpl> trgClasses = new ArrayList<EClassImpl>();
+	    //modelLoader.getOptions().tgg.tgg().getTrg().get(0).eContents();
+    	//ibxopt.tgg.tgg().getSrc().get(0).eContents(); //sind die Klassen da drin?
+    	for(EObject obj: modelLoader.getOptions().tgg.tgg().getTrg().get(0).eContents()) {
+    		if(obj instanceof EClassImpl) {	
+				EClassImpl node = (EClassImpl) obj;
+				trgClasses.add(node);
+    		}
+    	}
+    	for(EClassImpl cl: trgClasses) {
+    		
+    		MenuItem classItem = new MenuItem(trgMenu, SWT.NONE);
+    	    classItem.setText(cl.getName());
+    	    
+    	    
+    	    classItem.addSelectionListener(new SelectionAdapter() {
+    	    	@Override
+    	    	public void widgetSelected(SelectionEvent evt) {
+    	    		System.out.println(cl.getName());
+    	    		manipTrg.addNode(cl);
+    	    	}
+    		});
+    	}
+
+	    popupButton.setMenu(popupMenu);
 		
 		
 		shell.setSize(shellSizeX, shellSizeY);
@@ -486,6 +564,26 @@ public class MainWindow {
         
         return selectedDir;
 	}
+	
+	private void updateVisualizer() {
+		resetShell();
+		createMainWindow();
+		
+		Resource srcRs = modelLoader.getSource();
+		Resource trgRs = modelLoader.getTarget();
+		
+		InstanceDiagrammLoader dataSrc = new InstanceDiagrammLoader(srcRs, true);
+		InstanceDiagrammLoader dataTrg = new InstanceDiagrammLoader(trgRs, true);
+		
+		Visualizer visSrc = new Visualizer(dataSrc, frameSrc, rectangleSrc);
+		Visualizer visTrg = new Visualizer(dataTrg, frameTrg, rectangleTrg);
+		
+		GraphManipulator manipSrc = new GraphManipulator(visSrc, dataSrc.getInstanceModel(), dataSrc);
+		this.manipSrc = manipSrc;
+		GraphManipulator manipTrg = new GraphManipulator(visTrg, dataTrg.getInstanceModel(), dataTrg);
+		this.manipTrg = manipTrg;
+	}
+	
 	public GraphManipulator getSrcManipulator() {
 		return manipSrc;
 	}

@@ -22,7 +22,7 @@ public class Demonstrator {
 	public Demonstrator (MODELGEN generator, IbexOptions options) {
 		
 		this.options = options;
-		modelLoader = new ModelLoader(generator, options);
+		modelLoader = new ModelLoader(generator);
 		
 		
 		graphVisualizer = new MainWindow(modelLoader);
@@ -32,7 +32,7 @@ public class Demonstrator {
 	public Demonstrator (SYNC generator, IbexOptions options) {
 		
 		this.options = options;
-		modelLoader = new ModelLoader(generator, options);
+		modelLoader = new ModelLoader(generator);
 		
 		
 		graphVisualizer = new MainWindow(modelLoader);
@@ -43,7 +43,7 @@ public class Demonstrator {
 	public Demonstrator (INITIAL_FWD generator, IbexOptions options) {
 
 		this.options = options;
-		modelLoader = new ModelLoader(generator, options);
+		modelLoader = new ModelLoader(generator);
 		
 		graphVisualizer = new MainWindow(modelLoader);
 		graphVisualizer.run();
@@ -53,7 +53,7 @@ public class Demonstrator {
 	public Demonstrator (INITIAL_BWD generator, IbexOptions options) {
 
 		this.options = options;
-		modelLoader = new ModelLoader(generator, options);
+		modelLoader = new ModelLoader(generator);
 		
 		graphVisualizer = new MainWindow(modelLoader);
 		graphVisualizer.run();
