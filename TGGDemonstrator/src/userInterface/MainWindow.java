@@ -35,9 +35,9 @@ import org.eclipse.swt.widgets.Text;
 import org.emoflon.ibex.tgg.operational.strategies.sync.INITIAL_BWD;
 import org.emoflon.ibex.tgg.operational.strategies.sync.INITIAL_FWD;
 
-import Main.ModelLoader_INITIAL_BWD;
-import Main.ModelLoader_INITIAL_FWD;
-import Main.TGGDemonstrator;
+import tggDemonstrator.ModelLoader_INITIAL_BWD;
+import tggDemonstrator.ModelLoader_INITIAL_FWD;
+import tggDemonstrator.TGGDemonstrator;
 import graphVisualization.InstanceDiagrammLoader;
 import graphVisualization.Visualizer;
 
