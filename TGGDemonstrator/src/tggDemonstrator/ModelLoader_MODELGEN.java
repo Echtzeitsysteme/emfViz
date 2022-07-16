@@ -1,4 +1,4 @@
-package Main;
+package tggDemonstrator;
 
 
 import java.util.function.Function;

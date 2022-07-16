@@ -4,10 +4,8 @@ package userInterface;
 
 
 
-import java.awt.Component;
 import java.awt.Frame;
 
-import java.io.IOException;
 
 import org.eclipse.emf.ecore.resource.Resource;
 
@@ -29,17 +27,14 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Text;
-import org.emoflon.ibex.tgg.operational.strategies.sync.INITIAL_BWD;
-import org.emoflon.ibex.tgg.operational.strategies.sync.INITIAL_FWD;
 
-import Main.ModelLoader_INITIAL_BWD;
-import Main.ModelLoader_INITIAL_FWD;
-import Main.TGGDemonstrator;
+import tggDemonstrator.ModelLoader_INITIAL_BWD;
+import tggDemonstrator.ModelLoader_INITIAL_FWD;
+import tggDemonstrator.TGGDemonstrator;
 import graphVisualization.InstanceDiagrammLoader;
 import graphVisualization.Visualizer;
+import graphVisualization.Visualizer_TGGDemonstrator;
 
 
 
@@ -575,8 +570,11 @@ public class MainWindow {
 		dataTrg = new InstanceDiagrammLoader(trgRs, true);
 		
 		
-		visSrc = new Visualizer(dataSrc, frameSrc, rectangleSrc);
-		visTrg = new Visualizer(dataTrg, frameTrg, rectangleTrg);
+		visSrc = new Visualizer_TGGDemonstrator(dataSrc, frameSrc, rectangleSrc);
+		visTrg = new Visualizer_TGGDemonstrator(dataTrg, frameTrg, rectangleTrg);
+		
+		visSrc.init();
+		visTrg.init();
 		
 		GraphManipulator manipSrc = new GraphManipulator(visSrc, dataSrc.getInstanceModel(), dataSrc);
 		this.manipSrc = manipSrc;
