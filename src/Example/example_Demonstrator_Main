@@ -9,29 +9,50 @@
 /*package Demonstrator;*/
 
 import java.io.IOException;
+import java.util.function.Function;
 
-import org.emoflon.ibex.tgg.run.hospital2administration.MODELGEN_App;
+import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
+import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGEN;
+import org.emoflon.ibex.tgg.operational.strategies.sync.INITIAL_FWD;
+import org.emoflon.ibex.tgg.run.hospital2administration.config.HiPERegistrationHelper;
 
-import Main.Demonstrator;
+import Main.ModelLoader_INITIAL_FWD;
 
 public class Main {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
+		// just to get the workspace and project path
+		HiPERegistrationHelper registrationHelper = new HiPERegistrationHelper();
+		IbexOptions options = registrationHelper.createIbexOptions();
+		String projectPath = options.project.path();
+		String workspacePath = options.project.workspacePath();
 		
-		//new MODELGEN_APP
-		try {
-			MODELGEN_App app = new MODELGEN_App();
-			
-			Demonstrator demonstrator = new Demonstrator(app);
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
+		Function<String, INITIAL_FWD> constructor = (path) -> {
+			try {
+				return new INITIAL_FWD_Demonstrator(path);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		};
+		
+		Function<String[], MODELGEN> con = (path)->{
+			try {
+				return new MODELGEN_Demonstrator(path[0], path[1]);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		};
+	
+		ModelLoader_INITIAL_FWD demon = new ModelLoader_INITIAL_FWD(constructor, projectPath, workspacePath);
+		//Demonstrator demonstrator = new Demonstrator(app);
+
 	}
 
 }
-
-
