@@ -13,7 +13,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 
 import com.mxgraph.layout.mxFastOrganicLayout;
 import com.mxgraph.model.mxCell;
@@ -33,90 +37,97 @@ import com.mxgraph.view.mxStylesheet;
 public class Visualizer {
 	
 
-	private Frame frame;
+	protected Frame frame;
 	
-	private mxGraph graph;
-	private mxGraphModel graphModel;
-	private mxGraphComponent graphComponent;
-	private DataLoader dataLoader;
+	protected mxGraph graph;
+	protected mxGraphModel graphModel;
+	protected mxGraphComponent graphComponent;
+	protected DataLoader dataLoader;
 	
-	private Rectangle shellBounds;
+	protected int defaultNodeWidth = 80;
+	protected int defaultNodeHeight = 40;
+	protected Point2D.Double defaultNodePosition;
 	
-	private int defaultNodeWidth = 80;
-	private int defaultNodeHeight = 40;
-	private Point2D.Double defaultNodePosition;
+	protected Rectangle shellBounds;
 	
-	private mxFastOrganicLayout preLayout;
-	private Grid nodeGrid;
-	private Grid edgeGrid;
+	protected mxFastOrganicLayout preLayout;
+	protected Grid nodeGrid;
+	protected Grid edgeGrid;
 	
-	private double graphCenterX ;
-	private double graphCenterY;
+	protected double graphCenterX ;
+	protected double graphCenterY;
 	
-	private double xStretch ;
-	private double yStretch;
-	private double margin = 0.1;
-	private int minNodeDistanceNodes = 30;
-	private int minNodeDistanceEdges = 10;
+	protected double xStretch ;
+	protected double yStretch;
+	protected double margin = 0.1;
+	protected int minNodeDistanceNodes = 30;
+	protected int minNodeDistanceEdges = 10;
 	
 	private ArrayList<mxGeometry> blockedAreas;
 	
+	private Shell shell;
+	private Composite composite;
 	
 	
-	public Visualizer(DataLoader dataLoader, Frame frame, Rectangle r) {
-		
-		/*source data model*/
+	
+	
+	
+	public Visualizer(DataLoader dataLoader, Shell shell) {
 		if (((InstanceDiagrammLoader) dataLoader).getInstanceModel() != null) {
 			this.dataLoader = dataLoader;
-			dataLoader.loadData();
-		}
-
-		
-		//just for debugging
-		/*
-		for (int i = 0; i < dataLoader.nodes.size(); i++) {
-			System.out.println(dataLoader.nodes.get(i).toString());
+			this.shell = shell;
 			
-		}
-		
-		for (ArrayList<Edge> e : dataLoader.edges.values()) {
-			for (Edge edge : e) {
-				System.out.println(edge.toString());
+			//just for debugging
+			/*
+			for (int i = 0; i < dataLoader.nodes.size(); i++) {
+				System.out.println(dataLoader.nodes.get(i).toString());
+				
 			}
 			
-		}*/
-		
-		
-		//this.panel = panel;
-		
-		
-		this.frame = frame;
-		
-		/* source graph*/
-		graph = new mxGraph();
-		graphModel = ((mxGraphModel)graph.getModel());
-		
-		shellBounds = r;
-		defaultNodePosition = new Point2D.Double(((double) shellBounds.width) * 0.5 - defaultNodeWidth * 0.5 , ((double) shellBounds.height) * 0.5 - defaultNodeHeight * 0.5);
-		
-		addStyles();
-		
-		//create graph
-		if (this.dataLoader != null){
-			addStyles();
-			insertDataIntoGraph();
-			setUpLayout();
-			runLayout();
+			for (ArrayList<Edge> e : dataLoader.edges.values()) {
+				for (Edge edge : e) {
+					System.out.println(edge.toString());
+				}
+				
+			}*/		
 			
-			graphComponent = new mxGraphComponent(graph);
-			//this.panel.add(graphComponent);
-			frame.add(graphComponent);
+		} else {
+			return;
 		}
-		
 		
 	}
 	
-	private void addStyles() {
+	public void init () {
+		
+		this.dataLoader.loadData();
+		
+		composite = new Composite(shell, SWT.EMBEDDED | SWT.NO_BACKGROUND);
+		composite.setVisible(true);
+		frame = SWT_AWT.new_Frame(composite);
+		
+		graph = new mxGraph();
+		graphModel = ((mxGraphModel)graph.getModel());
+		
+		shellBounds = shell.getBounds();
+		
+		//System.out.println("Monitor bounds:" + monitorBounds.toString());
+		
+		defaultNodePosition = new Point2D.Double(((double) shellBounds.width) * 0.4 - defaultNodeWidth *0.5, ((double) shellBounds.height) * 0.4- defaultNodeHeight *0.5);
+		//defaultNodePosition = new Point2D.Double(shellBounds.width, shellBounds.height);
+		//System.out.println("Shell bounds:" + shell.getBounds().toString());
+		//System.out.println("Default Position:" + defaultNodePosition.toString());
+		
+		addStyles();
+		insertDataIntoGraph();
+		setUpLayout();
+		runLayout();
+		
+		graphComponent = new mxGraphComponent(graph);
+		frame.add(graphComponent);
+	}
+		
+	
+	protected void addStyles() {
 		
 		mxStylesheet stylesheet = graph.getStylesheet();
 		Hashtable<String, Object> cellStyle = new Hashtable<String, Object>();
@@ -141,8 +152,25 @@ public class Visualizer {
 		//stylesheet.setDefaultVertexStyle(cellStyle);
 		//stylesheet.setDefaultEdgeStyle(edgeStyle);
 	}
+	/*
+	 * update mxGraph
+	 * TODO: dosen't work correctly - instead of updating the graph generates the function a complete new graph
+	 * 
+	 *
+	 */
 	
-	private void insertDataIntoGraph() {
+	public void updateGraph() {
+		if (((InstanceDiagrammLoader) dataLoader).getInstanceModel() != null) {
+			this.dataLoader.loadData();
+			
+			addStyles();
+			insertDataIntoGraph();
+			setUpLayout();
+			runLayout();
+		}
+	}
+	
+	protected void insertDataIntoGraph() {
 		
 		double centerX = graph.getGraphBounds().getCenterX();
 		double centerY = graph.getGraphBounds().getCenterY();
@@ -167,7 +195,7 @@ public class Visualizer {
 		centerY = graph.getGraphBounds().getCenterY();
 	}
 	
-	private void setUpLayout() {
+	protected void setUpLayout() {
 		
 		preLayout = new mxFastOrganicLayout(graph);
 		preLayout.setForceConstant(150);
@@ -211,7 +239,7 @@ public class Visualizer {
 		
 	}
 	
-	private void runLayout() {
+	protected void runLayout() {
 
 		preLayout.execute(graph.getDefaultParent());
 		
@@ -315,11 +343,6 @@ public class Visualizer {
 				
 				//ID: HospitalExample.impl.NurseImpl@2ca923bb (name: Stefanie Jones, staffID: 7)worksHospitalExample.impl.DepartmentImpl@64ec96c6 (dID: 2, maxRoomCount: 4)
 				
-				
-				// Added by JL
-				/*if (source == null || edgeGraph == null || terminal == null){
-					continue;
-				}*/
 				
 				String edgeId = source.getId().toString()+edgeGraph.getValue().toString()+terminal.getId().toString();
 				
@@ -431,6 +454,8 @@ public class Visualizer {
 		}
 		
 	}
+	
+	
 	public mxGraph getGraph() {
 		return graph;
 	}

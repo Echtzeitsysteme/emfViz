@@ -38,9 +38,12 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Text;
 import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
 
-import Main.ModelLoader;
+import tggDemonstrator.ModelLoader_INITIAL_BWD;
+import tggDemonstrator.ModelLoader_INITIAL_FWD;
+import tggDemonstrator.TGGDemonstrator;
 import graphVisualization.InstanceDiagrammLoader;
 import graphVisualization.Visualizer;
+import graphVisualization.Visualizer_TGGDemonstrator;
 
 
 
@@ -51,7 +54,7 @@ public class MainWindow {
 	private Display display;
 	private Shell shell;
 	
-	private ModelLoader modelLoader;
+	private TGGDemonstrator modelLoader;
 	
 	private int shellSizeX;
 	private int shellSizeY;
@@ -65,7 +68,17 @@ public class MainWindow {
 	private GraphManipulator manipSrc;
 	private GraphManipulator manipTrg;
 	
-	public MainWindow (ModelLoader modelLoader) {
+	private InstanceDiagrammLoader dataSrc;
+	private InstanceDiagrammLoader dataTrg;
+	
+	private Visualizer visSrc;
+	private Visualizer visTrg;
+	
+	
+	/*
+	 * Constructor - needs a ModelLoader instance
+	 */
+	public MainWindow (TGGDemonstrator modelLoader) {
 		
 		
 		this.modelLoader = modelLoader;
@@ -73,26 +86,32 @@ public class MainWindow {
 		//init display and shell
 		InitUI();
 		
-		//open first window
+		//open start window
 		createResourcLoaderWindow();	
-		//createMainWindow();
 	}
 	
 	
+	/*
+	 * Init display and shell
+	 */
 	private void InitUI() {
 		/* init main window */
 		display = new Display();
 		shell = new Shell(display);
+		
+		shell.setText("TGG Demonstrator");
 		
 		shell.addListener(SWT.Close, new Listener() {
 			public void handleEvent(Event event) {
 				System.out.println("close");
 		    }
 		});
-		
 	}
 	
-	public void run() {
+	/*
+	 * start the visualization and open the shell
+	 */
+	public void run() {		
 		shell.open();
 		
 		while (!shell.isDisposed()) {
@@ -102,27 +121,36 @@ public class MainWindow {
 		}
 		
 		display.dispose();
-
 	}
 
-	public void exit() {
-		shell.dispose();
-	}
 	
+	/*
+	 * Removes all widgets from the shell.
+	 * This method is called every time before a new window is opened.
+	 */
 	private void resetShell() {
 		for (Control kid : shell.getChildren()) {
 	          kid.dispose();
 	    }
 	}
 	
+	/*
+	 * Return shell instance
+	 */
 	public Shell getShell() {
 		return shell;
 	}
-	
-	public ModelLoader getModelLoader() {
+	/*
+	 * Return model loader instance
+	 */
+	/*public TGGDemonstrator getModelLoader() {
 		return modelLoader;
-	}
+	}*/
 	
+	
+	/*
+	 * This is the main window where source and target graph are visualized
+	 */
 	public void createMainWindow() {
 		
 		/* BASIC LAYOUT
@@ -130,13 +158,13 @@ public class MainWindow {
 		 * 				shellSizeX
 		 * 	_________________________________
 		 *	|		//area for buttons		|	
-		 * 	|								|	ShellSizeY * 0.1
+		 * 	|								|	shellSizeY * 0.1
 		 * 	|_______________________________|
 		 * 	|				|				|
 		 * 	|				|				|
 		 * 	|				|				|	
 		 * 	|	//graph		|	//graph		|	
-		 * 	|	//sourc		|	//target	|	ShellSizeY * 0.9
+		 * 	|	//source	|	//target	|	shellSizeY * 0.9
 		 * 	|				|				|
 		 * 	|				|				|
 		 * 	|				|				|
@@ -146,8 +174,6 @@ public class MainWindow {
 		 */
 		
 		//initialize shell layout		
-		//shellSizeX = shell.getDisplay().getClientArea().width;
-		//shellSizeY = shell.getDisplay().getClientArea().height;
 		shellSizeX = display.getClientArea().width;
 		shellSizeY = display.getClientArea().height;
 		
@@ -169,7 +195,7 @@ public class MainWindow {
 		
 		comp.setLayoutData(gridData);
 		comp.setVisible(true);
-		comp.setLayout(new GridLayout());
+		comp.setLayout(new GridLayout(3,true));
 		
 		Composite compSrc = new Composite(shell, SWT.BOTTOM | SWT.EMBEDDED);
 		compSrc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
@@ -198,6 +224,8 @@ public class MainWindow {
 		
 		frameTrg = SWT_AWT.new_Frame(compTrg);
 		
+		Group buttonGroupStandrad = new Group(comp, SWT.None);
+		
 		Group buttonGroup = new Group(comp, SWT.None);
 		
 		buttonGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,true));
@@ -205,8 +233,11 @@ public class MainWindow {
 		buttonGrid.numColumns = 2; //number of columns = number of buttons
 		buttonGrid.makeColumnsEqualWidth = true;
 		buttonGroup.setLayout(buttonGrid);
+		buttonGroupStandrad.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,true));
+		buttonGroupStandrad.setText("Standard Functionality");
+		buttonGroupStandrad.setLayout(new GridLayout(3, true));
 		
-		Button deleteButton = new Button(buttonGroup, SWT.PUSH);
+		Button deleteButton = new Button(buttonGroupStandrad, SWT.PUSH);
 		deleteButton.setText("Delete");
 		deleteButton.setLayoutData(new GridData());
 		
@@ -289,6 +320,57 @@ public class MainWindow {
     	}
 
 	    popupButton.setMenu(popupMenu);
+			}
+		});
+		
+		//button to go back to inital window (start window)
+		Button backButton = new Button(buttonGroupStandrad, SWT.PUSH);
+		backButton.setText("Back");
+		
+		backButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+            public void widgetSelected(SelectionEvent evt) {
+				resetShell();
+				createResourcLoaderWindow();
+			}
+		});
+		
+		/*sync, initial_fwd and initial_bwd functionalities*/
+		Group buttonGroupSync = new Group(comp, SWT.None);
+		
+		buttonGroupSync.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,true));
+		buttonGroupSync.setText("Standard Functionality");
+		buttonGroupSync.setLayout(new GridLayout(3, true));
+		
+		Button syncForward = new Button(buttonGroupSync, SWT.PUSH);
+		syncForward.setText("Sync Forward");
+		syncForward.addSelectionListener(new SelectionAdapter() {
+			@Override
+            public void widgetSelected(SelectionEvent evt) {
+				System.out.println("Start forward translating");
+				forwardTranslation();
+			}
+		});
+		
+		Button syncBackward = new Button(buttonGroupSync, SWT.PUSH);
+		syncBackward.setText("Sync Backward");
+		syncBackward.addSelectionListener(new SelectionAdapter() {
+			@Override
+            public void widgetSelected(SelectionEvent evt) {
+				System.out.println("Start backward translating");
+				backwardTranslation();
+			}
+		});
+		
+		/*new Model functionalities*/
+		Group buttonGroupNM = new Group(comp, SWT.None);
+		
+		buttonGroupNM.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,true));
+		buttonGroupNM.setText("New Model Functionality");
+		buttonGroupNM.setLayout(new GridLayout(3, true));
+		
+		Button next = new Button(buttonGroupNM, SWT.PUSH);
+		next.setText("Next Rule");
 		
 		
 		shell.setSize(shellSizeX, shellSizeY);
@@ -301,6 +383,10 @@ public class MainWindow {
         System.out.println("compSrc: " + compSrc.getBounds());
 	}
 	
+	/*
+	 * Window to select between different model loading options.
+	 * It is the initial window (start window)
+	 */
 	public void createResourcLoaderWindow () {
 		
 		shellSizeX = 600;
@@ -351,7 +437,10 @@ public class MainWindow {
 		shell.setSize(shellSizeX, shellSizeY);
 	}
 	
-	
+	/*
+	 * This window will open when option "Select Model" is chosen.
+	 * Window to determine location of source and target model
+	*/
 	public void CreateDirectorySelectionWindow() {
 		shellSizeX = 450;
 		shellSizeY = 280;
@@ -425,8 +514,6 @@ public class MainWindow {
 			}
 		});
 		
-		
-		
 		//control buttons / composite 
 		Composite compositeCtrl = new Composite(shell, SWT.EMBEDDED);
 		compositeCtrl.setVisible(true);
@@ -444,6 +531,7 @@ public class MainWindow {
 			}
 		});
 		
+		// button to go back to initial window
 		Button backBT = new Button(compositeCtrl, SWT.PUSH);
 		backBT.setText("Back");
 		backBT.setAlignment(SWT.CENTER);
@@ -460,88 +548,77 @@ public class MainWindow {
 		//set size of shell
 		shell.setSize(shellSizeX, shellSizeY);	
 		
-		/*if ModelLoader is initialized by Inital_BWD_App or Inital_FWD_App
-		 * source or target model are generated from tgg*/
-		if (modelLoader.getTypeOf() == "FWD")
+		/*
+		 * if ModelLoader is initialized by Inital_BWD_App or Inital_FWD_App
+		 * source or target model are generated from tgg.
+		 */
+		if (modelLoader instanceof ModelLoader_INITIAL_FWD)
 		{
 			trgBT.setEnabled(false);
 			trgLabel.setEnabled(false);
 			trgTxt.setEnabled(false);
 			
-		}else if(modelLoader.getTypeOf() == "BWD"){
+		}else if(modelLoader instanceof ModelLoader_INITIAL_BWD){
 			srcBT.setEnabled(false);
 			srcLabel.setEnabled(false);
 			srcTxt.setEnabled(false);
 		}
 	}
 	
+	/*
+	 * choose between different model loading options and execute selected choice
+	*/
 	private void modelLocationSelection(String text) {
 		switch (text) {
 		case "Default":
-			System.out.println("option: " + text );
+			System.out.println("selected option: " + text );
 			resetShell();
 			createMainWindow();
+			
+			modelLoader.loadFromDefault();
+			
+			initialiseRelevantInstances();
+			
 			break;
+			
 		case "New Model":
-			System.out.println("option: " + text );
+			System.out.println("selected option: " + text );
 			
 			
 			resetShell();
 			createMainWindow();
 			
 			//generate a new model
-			modelLoader.generateNewModel();
-				
-			InstanceDiagrammLoader dataSrc = new InstanceDiagrammLoader(modelLoader.getResourceHandler().getSourceResource(), true);
-			InstanceDiagrammLoader dataTrg = new InstanceDiagrammLoader(modelLoader.getResourceHandler().getTargetResource(), true);
+			modelLoader.generateNewModel();				
 			
-			Visualizer visSrc = new Visualizer(dataSrc, frameSrc, rectangleSrc);
-			Visualizer visTrg = new Visualizer(dataTrg, frameTrg, rectangleTrg);
+			initialiseRelevantInstances();
 			
-			GraphManipulator manipSrc = new GraphManipulator(visSrc, dataSrc.getInstanceModel(), dataSrc);
-			this.manipSrc = manipSrc;
-			GraphManipulator manipTrg = new GraphManipulator(visTrg, dataTrg.getInstanceModel(), dataTrg);
-			this.manipTrg = manipTrg;
 			break;
+			
 		case "Select Model":
-			System.out.println("option: " + text );
+			System.out.println("selected option: " + text );
 			resetShell();
 			CreateDirectorySelectionWindow();
 			break;
 		}
 	}
 	
-	
+	/*
+	 * start loading source and target model from selected path
+	 */
 	private void loadModelFromPath (String src, String trg) {
 		
-		try {
-			modelLoader.CreateResourcesFromPath(src, trg);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			//e.printStackTrace();
-			System.out.println("Resource could'nt be loaded from path: " + e);
-			return;
-		}
+		modelLoader.createResourcesFromPath(src, trg);
 		
 		resetShell();
 		createMainWindow();
 		
-		Resource srcRs = modelLoader.getSource();
-		Resource trgRs = modelLoader.getTarget();
-		
-		InstanceDiagrammLoader dataSrc = new InstanceDiagrammLoader(srcRs, true);
-		InstanceDiagrammLoader dataTrg = new InstanceDiagrammLoader(trgRs, true);
-		
-		Visualizer visSrc = new Visualizer(dataSrc, frameSrc, rectangleSrc);
-		Visualizer visTrg = new Visualizer(dataTrg, frameTrg, rectangleTrg);
-		
-		GraphManipulator manipSrc = new GraphManipulator(visSrc, dataSrc.getInstanceModel(), dataSrc);
-		this.manipSrc = manipSrc;
-		GraphManipulator manipTrg = new GraphManipulator(visTrg, dataTrg.getInstanceModel(), dataTrg);
-		this.manipTrg = manipTrg;
-		
+		initialiseRelevantInstances();
 	}
 	
+	/*
+	 *  open a directory dialog window
+	*/
 	public String openDirectoryDialog() {
 		
 		String selectedDir = "";
@@ -565,18 +642,27 @@ public class MainWindow {
         return selectedDir;
 	}
 	
-	private void updateVisualizer() {
-		resetShell();
-		createMainWindow();
-		
+	
+	public GraphManipulator getSrcManipulator() {
+		return manipSrc;
+	}
+	public GraphManipulator getTrgManipulator() {
+		return manipTrg;
+	}
+	
+	private void initialiseRelevantInstances() {
 		Resource srcRs = modelLoader.getSource();
 		Resource trgRs = modelLoader.getTarget();
 		
-		InstanceDiagrammLoader dataSrc = new InstanceDiagrammLoader(srcRs, true);
-		InstanceDiagrammLoader dataTrg = new InstanceDiagrammLoader(trgRs, true);
+		dataSrc = new InstanceDiagrammLoader(srcRs, true);
+		dataTrg = new InstanceDiagrammLoader(trgRs, true);
 		
-		Visualizer visSrc = new Visualizer(dataSrc, frameSrc, rectangleSrc);
-		Visualizer visTrg = new Visualizer(dataTrg, frameTrg, rectangleTrg);
+		
+		visSrc = new Visualizer_TGGDemonstrator(dataSrc, frameSrc, rectangleSrc);
+		visTrg = new Visualizer_TGGDemonstrator(dataTrg, frameTrg, rectangleTrg);
+		
+		visSrc.init();
+		visTrg.init();
 		
 		GraphManipulator manipSrc = new GraphManipulator(visSrc, dataSrc.getInstanceModel(), dataSrc);
 		this.manipSrc = manipSrc;
@@ -584,11 +670,39 @@ public class MainWindow {
 		this.manipTrg = manipTrg;
 	}
 	
-	public GraphManipulator getSrcManipulator() {
-		return manipSrc;
+	/*
+	 * translating forward, only call-able for INITIAL_FWD
+	 */
+	private void forwardTranslation() {
+		if (modelLoader instanceof ModelLoader_INITIAL_FWD){
+			
+			System.out.println("Translating forward...");
+			
+			((ModelLoader_INITIAL_FWD) modelLoader).forward();
+			
+			Resource trgRs = modelLoader.getTarget();			
+			
+			dataTrg.setInstanceModel(trgRs);
+			
+			visTrg.updateGraph();
+					
+		}
 	}
-	public GraphManipulator getTrgManipulator() {
-		return manipTrg;
+	
+	private void backwardTranslation() {
+		if (modelLoader instanceof ModelLoader_INITIAL_BWD){
+			
+			System.out.println("Translating backward...");
+			
+			((ModelLoader_INITIAL_BWD) modelLoader).backward();
+			
+			Resource srcRs = modelLoader.getTarget();			
+			
+			dataSrc.setInstanceModel(srcRs);
+			
+			visSrc.updateGraph();
+					
+		}
 	}
 }
 
