@@ -20,9 +20,6 @@ import graphVisualization.Visualizer;
 
 public class Main_emfViz {
 	
-	
-	
-	
 	public static void main(String[] args) {
 		
         Display display = new Display();

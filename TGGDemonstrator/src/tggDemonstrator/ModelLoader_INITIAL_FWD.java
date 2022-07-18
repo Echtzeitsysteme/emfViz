@@ -21,7 +21,7 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 		// TODO Auto-generated constructor stub
 		super(pP, wP);
 		
-		System.out.println("Start INITIAL_FWD");
+		System.out.println("Initialize ModelLoader_INITIAL_FWD");
 		fwd_demonstrator = fwd;
 		
 		startVisualisation(this);

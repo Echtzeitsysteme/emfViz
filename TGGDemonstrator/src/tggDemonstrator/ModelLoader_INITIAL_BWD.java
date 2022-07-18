@@ -18,7 +18,11 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 	public ModelLoader_INITIAL_BWD (Function<String, INITIAL_BWD> bwd, String pP, String wP) {
 		super(pP, wP);
 		
+		System.out.println("Initialize ModelLoader_INITIAL_BWD");
 		bwd_Demonstrator = bwd;
+		
+		
+		startVisualisation(this);
 	}
 
 	@Override
@@ -47,6 +51,15 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 		
 	}
 	
+	@Override
+	public void generateNewModel() {
+		return;
+	}
+	
+	
+	/*
+	 * backward translation of the target model
+	 */	
 	public void backward() {
 		try {
 			bwd.backward();

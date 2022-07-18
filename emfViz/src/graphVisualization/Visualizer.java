@@ -36,7 +36,7 @@ import com.mxgraph.view.mxStylesheet;
 
 public class Visualizer {
 	
-
+	// add graph to this frame
 	protected Frame frame;
 	
 	protected mxGraph graph;
@@ -44,33 +44,30 @@ public class Visualizer {
 	protected mxGraphComponent graphComponent;
 	protected DataLoader dataLoader;
 	
+	protected Point2D.Double defaultNodePosition;
 	protected int defaultNodeWidth = 80;
 	protected int defaultNodeHeight = 40;
-	protected Point2D.Double defaultNodePosition;
 	
+	// determines max size of the graph
 	protected Rectangle shellBounds;
 	
-	protected mxFastOrganicLayout preLayout;
-	protected Grid nodeGrid;
-	protected Grid edgeGrid;
+	private mxFastOrganicLayout preLayout;
+	private Grid nodeGrid;
+	private Grid edgeGrid;
 	
-	protected double graphCenterX ;
-	protected double graphCenterY;
+	private double graphCenterX ;
+	private double graphCenterY;
 	
-	protected double xStretch ;
-	protected double yStretch;
-	protected double margin = 0.1;
-	protected int minNodeDistanceNodes = 30;
-	protected int minNodeDistanceEdges = 10;
+	private double xStretch ;
+	private double yStretch;
+	private double margin = 0.1;
+	private int minNodeDistanceNodes = 30;
+	private int minNodeDistanceEdges = 10;
 	
 	private ArrayList<mxGeometry> blockedAreas;
 	
 	private Shell shell;
 	private Composite composite;
-	
-	
-	
-	
 	
 	public Visualizer(DataLoader dataLoader, Shell shell) {
 		if (((InstanceDiagrammLoader) dataLoader).getInstanceModel() != null) {
@@ -97,6 +94,10 @@ public class Visualizer {
 		
 	}
 	
+	/*
+	 * First, create a new frame and add it to the shell
+	 * Second, create a mxGraph from instanceModel and add it to the frame created previously
+	 */	
 	public void init () {
 		
 		this.dataLoader.loadData();
@@ -152,13 +153,13 @@ public class Visualizer {
 		//stylesheet.setDefaultVertexStyle(cellStyle);
 		//stylesheet.setDefaultEdgeStyle(edgeStyle);
 	}
+	
+	
 	/*
 	 * update mxGraph
 	 * TODO: dosen't work correctly - instead of updating the graph generates the function a complete new graph
 	 * 
-	 *
-	 */
-	
+	*/
 	public void updateGraph() {
 		if (((InstanceDiagrammLoader) dataLoader).getInstanceModel() != null) {
 			this.dataLoader.loadData();

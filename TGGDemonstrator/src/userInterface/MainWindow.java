@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Text;
 
 import tggDemonstrator.ModelLoader_INITIAL_BWD;
 import tggDemonstrator.ModelLoader_INITIAL_FWD;
+import tggDemonstrator.ModelLoader_SYNC;
 import tggDemonstrator.TGGDemonstrator;
 import graphVisualization.InstanceDiagrammLoader;
 import graphVisualization.Visualizer;
@@ -318,7 +319,6 @@ public class MainWindow {
 		modelGroup.setText("Select your model location:");
 		modelGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		modelGroup.setLayout(new GridLayout());
-		//modelGroup.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_GRAY));
 		
 		Button defaultBT = new Button(modelGroup, SWT.RADIO);
 		defaultBT.setText("Default");
@@ -332,6 +332,11 @@ public class MainWindow {
 		Button nextBT = new Button(composite, SWT.PUSH);
 		nextBT.setText("Next");
 		nextBT.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+		
+		//generate new model is only for MODELGEN available
+		if (modelLoader instanceof ModelLoader_INITIAL_BWD || modelLoader instanceof ModelLoader_INITIAL_FWD || modelLoader instanceof ModelLoader_SYNC) {
+			newModeltBT.setEnabled(false);
+		}
 		
 
 		nextBT.addSelectionListener(new SelectionAdapter() {
@@ -484,6 +489,7 @@ public class MainWindow {
 		switch (text) {
 		case "Default":
 			System.out.println("selected option: " + text );
+			
 			resetShell();
 			createMainWindow();
 			
@@ -509,8 +515,10 @@ public class MainWindow {
 			
 		case "Select Model":
 			System.out.println("selected option: " + text );
+			
 			resetShell();
 			CreateDirectorySelectionWindow();
+			
 			break;
 		}
 	}

@@ -43,6 +43,9 @@ public abstract class TGGDemonstrator {
 		workspacePath = wP;
 	}
 	
+	/*
+	 * Start the visualization and initialize the UI
+	*/
 	public void startVisualisation(TGGDemonstrator modelLoader) {
 		graphVisualizer = new MainWindow(modelLoader);
 		graphVisualizer.run();
@@ -53,64 +56,14 @@ public abstract class TGGDemonstrator {
 	 * generate a new Model
 	 * this method works only if executable is from type MODELGEN 
 	 */
-	public void generateNewModel() {
-		
-		if (options.executable() instanceof MODELGEN) {
-			/*try {
-				//define stop criterions
-				MODELGENStopCriterion stop = new MODELGENStopCriterion(modelgen.getTGG());
-		    	stop.setMaxRuleCount("HospitaltoAdministrationRule", 1);
-				stop.setMaxElementCount(10);
-				modelgen.setStopCriterion(stop);
-				modelgen.run();
-				
-				source = generator.getSourceResource();
-				target = generator.getTargetResource();
-				
-				
-				
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}*/
-			
-			MODELGENStopCriterion stop = new MODELGENStopCriterion(modelgen.getTGG());
-			modelgen.setStopCriterion(stop);
-			
-			modelgen.setUpdatePolicy((IUpdatePolicy) new IUpdatePolicy(){
-
-				@Override
-				public ITGGMatch chooseOneMatch(ImmutableMatchContainer matchContainer) {
-					
-					ArrayList <ITGGMatch> rules = new ArrayList <ITGGMatch>();
-					
-					for(ITGGMatch m : matchContainer.getMatches()) {
-						//m.getRuleName();
-						//return m;
-						rules.add(m);
-					}
-					return rules.get(0);
-				}
-				
-			});
-			
-			try {
-				modelgen.run();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}else if (options.executable() instanceof SYNC) {
-			//do nothing
-		}else if (options.executable() instanceof INITIAL_FWD) {
-			//do nothing
-		}else if (options.executable() instanceof INITIAL_BWD) {
-			//do nothing
-		}
-	}
+	public abstract void generateNewModel();
+	
+	
+	//--------------------- Abstract Methods --------------------- 
+	
 	
 	/*
-	 * perform loadModels operation from default locations: /instances/src.xmi  /instances/trg.xmi
+	 * Perform loadModels operation from default locations: /instances/src.xmi  /instances/trg.xmi
 	 */
 	public abstract void loadFromDefault();
 	
@@ -120,7 +73,12 @@ public abstract class TGGDemonstrator {
 	public abstract void createResourcesFromPath(String pathSrc, String pathTrg);
 		
 	
-		
+	//--------------------- Setter & Getter Methods --------------------- 
+	
+	
+	/*
+	 * Set source resource
+	 */	
 	public void setSource(Resource source) {
 		this.source = source;
 	}
@@ -133,7 +91,7 @@ public abstract class TGGDemonstrator {
 	}
 	
 	/*
-	 * 
+	 * Set target resource
 	 */
 	public void setTarget(Resource target) {
 		this.target = target;
@@ -157,5 +115,23 @@ public abstract class TGGDemonstrator {
 	public TGGResourceHandler getResourceHandler() {
 		return resourceHandler;
 	}
+	
+	
+	//--------------------- Multi-Threading --------------------- 
+	
+	class NewModelGenerationThread extends Thread {
+        @Override public void run() {
+            while (true) {
+                if (isInterrupted()) {
+                	System.out.println("Thread with ID: " + Thread.currentThread().getId() + " is interrupted!");
+                }
+                
+                //Thread is not interrupted
+            }
+
+        }
+    }
 
 }
+
+

@@ -21,7 +21,11 @@ private Frame frame;
 		shellBounds = r;
 		this.frame = frame;		
 		
-	}	
+	}
+	
+	/*
+	 * create a mxGraph from instanceModel and add this graph to a given frame
+	 */
 	
 	@Override
 	public void init () {
