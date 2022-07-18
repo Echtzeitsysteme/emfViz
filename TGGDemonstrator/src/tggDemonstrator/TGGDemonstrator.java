@@ -110,6 +110,13 @@ public abstract class TGGDemonstrator {
 	}
 	
 	/*
+	 * Return IbexOptions
+	 */
+	public IbexOptions getOptions() {
+		return options;
+	}
+	
+	/*
 	 * Return TGGResourceHandler instance
 	 */
 	public TGGResourceHandler getResourceHandler() {

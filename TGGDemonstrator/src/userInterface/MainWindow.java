@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
 
 import tggDemonstrator.ModelLoader_INITIAL_BWD;
 import tggDemonstrator.ModelLoader_INITIAL_FWD;
@@ -74,6 +75,7 @@ public class MainWindow {
 		
 		
 		this.modelLoader = modelLoader;
+		
 		
 		//init display and shell
 		InitUI();
@@ -583,6 +585,8 @@ public class MainWindow {
 		
 		visSrc.init();
 		visTrg.init();
+		
+		IbexOptions options = ((ModelLoader_INITIAL_FWD)modelLoader).getOptions();
 		
 		GraphManipulator manipSrc = new GraphManipulator(visSrc, dataSrc.getInstanceModel(), dataSrc);
 		this.manipSrc = manipSrc;
