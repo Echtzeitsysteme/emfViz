@@ -14,7 +14,7 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 	
 	private Function<String, INITIAL_FWD> fwd_demonstrator;
 	private INITIAL_FWD fwd;
-	private IbexOptions options;
+	
 	private TGGResourceHandler resourceHandler;
 	
 	public ModelLoader_INITIAL_FWD(Function<String, INITIAL_FWD> fwd, String pP, String wP) {

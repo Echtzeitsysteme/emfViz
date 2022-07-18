@@ -55,6 +55,7 @@ public class MainWindow {
 	private Shell shell;
 	
 	private TGGDemonstrator modelLoader;
+	private IbexOptions options;
 	
 	private int shellSizeX;
 	private int shellSizeY;
@@ -267,7 +268,7 @@ public class MainWindow {
 	    List<EClassImpl> srcClasses = new ArrayList<EClassImpl>();
 	    //modelLoader.getOptions().tgg.tgg().getSrc().get(0).eContents();
     	//ibxopt.tgg.tgg().getSrc().get(0).eContents(); //sind die Klassen da drin?
-    	for(EObject obj: modelLoader.getOptions().tgg.tgg().getSrc().get(0).eContents()) {
+    	for(EObject obj: options.tgg.tgg().getSrc().get(0).eContents()) {
     		if(obj instanceof EClassImpl) {	
 				EClassImpl node = (EClassImpl) obj;
 				srcClasses.add(node);
@@ -294,11 +295,10 @@ public class MainWindow {
 	    
 	    Menu trgMenu = new Menu(popupMenu);
 	    trgItem.setMenu(trgMenu);
-	    
 	    List<EClassImpl> trgClasses = new ArrayList<EClassImpl>();
 	    //modelLoader.getOptions().tgg.tgg().getTrg().get(0).eContents();
     	//ibxopt.tgg.tgg().getSrc().get(0).eContents(); //sind die Klassen da drin?
-    	for(EObject obj: modelLoader.getOptions().tgg.tgg().getTrg().get(0).eContents()) {
+    	for(EObject obj: options.tgg.tgg().getTrg().get(0).eContents()) {
     		if(obj instanceof EClassImpl) {	
 				EClassImpl node = (EClassImpl) obj;
 				trgClasses.add(node);
@@ -662,6 +662,8 @@ public class MainWindow {
 		
 		visSrc.init();
 		visTrg.init();
+		
+		options = modelLoader.getOptions();
 		
 		GraphManipulator manipSrc = new GraphManipulator(visSrc, dataSrc.getInstanceModel(), dataSrc);
 		this.manipSrc = manipSrc;

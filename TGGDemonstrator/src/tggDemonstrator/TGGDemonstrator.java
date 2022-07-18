@@ -147,7 +147,7 @@ public abstract class TGGDemonstrator {
 	/*
 	 * Return IbexExecutable
 	 */
-	public IbexExecutable getExectuable() {
+	public IbexExecutable getExecutable() {
 		return options.executable();
 	}
 	
@@ -156,6 +156,10 @@ public abstract class TGGDemonstrator {
 	 */
 	public TGGResourceHandler getResourceHandler() {
 		return resourceHandler;
+	}
+	
+	public IbexOptions getOptions() {
+		return options;
 	}
 
 }
