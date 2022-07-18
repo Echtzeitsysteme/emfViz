@@ -320,8 +320,7 @@ public class MainWindow {
     	}
 
 	    popupButton.setMenu(popupMenu);
-			}
-		});
+			
 		
 		//button to go back to inital window (start window)
 		Button backButton = new Button(buttonGroupStandrad, SWT.PUSH);
