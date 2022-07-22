@@ -1,19 +1,30 @@
 package graphVisualization;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+
+import org.eclipse.emf.ecore.EObject;
 
 public abstract class DataLoader {
 	
 	protected DataLoader() {
 		
-		nodes = new ArrayList<Node>();
-		edges = new HashMap<String, ArrayList<Edge>>();
+		nodes = new HashSet<Node>();
+		edges = new HashMap<Edge, Edge>();
+		//modelToGraphEdges = new HashMap<Integer,Edge>();
 	}
 
 	//public HashMap<String, String> edgeOpposites;
-	public ArrayList<Node> nodes;
-	public HashMap<String, ArrayList<Edge>> edges;
+	public Collection<Node> nodes;
+	public Map<Edge,Edge> edges;
+	
+	//public Map<Integer,Edge> modelToGraphEdges;
+	
+	// unique mapping from eObject to ID of associated visualization
+	public Map<EObject, Integer> eobjIdmap;
 	
 	protected abstract void loadData();
 }

@@ -32,20 +32,16 @@ public class InstanceDiagrammLoader extends DataLoader {
 	
 	private void collectContentHierarchichal(EObject content) {
 		
-		nodes.add(new Node(content.toString(),content.eClass().getName(), "defaultNode"));
+		nodes.add(new Node("defaultNode", content));
 		
 		for(EStructuralFeature f : ((EClassImpl)content.eClass()).getEAllStructuralFeatures()) {
 			
-			if(f instanceof EReference) {
+			if(f instanceof EReference ref) {
 					
-				if(!edges.containsKey(content.toString())) {						
-					ArrayList<Edge> outgoingEdges = new ArrayList<Edge>();
-					edges.put(content.toString(), outgoingEdges);
-				}
 				
 				if(!f.isMany()) {
 					
-					Edge visEdge = new Edge(f.getName(), "defaultEdge", content.toString(), ((EObject) content.eGet(f)).toString());
+					Edge visEdge = new Edge("defaultEdge", content, ((EObject) content.eGet(f)), ref);
 					
 					EReference opp = ((EReference) f).getEOpposite();
 					
@@ -54,8 +50,8 @@ public class InstanceDiagrammLoader extends DataLoader {
 						//edgeOpposites.put(f.toString(), opp.toString());
 						visEdge.setOppositeId(content.eGet(f).toString()+opp.getName()+content.toString());
 					}
-					edges.get(content.toString()).add(visEdge);
 					
+					edges.put(visEdge, visEdge);
 
 				}
 				else {
@@ -66,13 +62,13 @@ public class InstanceDiagrammLoader extends DataLoader {
 				for(EObject oMulti : values) {
 					
 					
-					Edge visEdge = new Edge(f.getName(), "defaultEdge", content.toString(), oMulti.toString());
+					Edge visEdge = new Edge("defaultEdge", content, oMulti, ref);
 					
 					if(opp != null) {
 						visEdge.setOppositeId(oMulti.toString() + opp.getName() + content.toString());
 					}
 					
-					edges.get(content.toString()).add(visEdge);
+					edges.put(visEdge, visEdge);
 
 				}
 			}	

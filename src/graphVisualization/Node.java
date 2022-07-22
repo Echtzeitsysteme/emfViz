@@ -1,16 +1,46 @@
 package graphVisualization;
 
+import java.util.Objects;
+
+import org.eclipse.emf.ecore.EObject;
+
 public class Node {
+	
+	
+	public static final String DEFAULT_NODE_STYLE = "defaultNode";
 	
 	public String id;
 	public String name;
-	
 	public String styleCategory;
+	public transient EObject eobj;
 
-	public Node(String id, String name, String styleCategory) {
-		this.id = id;
-		this.name = name;
+	public Node(String styleCategory, EObject eobj) {
+		this.name = eobj.eClass().getName();
 		this.styleCategory = styleCategory;
+		this.eobj = eobj;
+	}
+	
+	public Node(EObject eobj) {
+		this(DEFAULT_NODE_STYLE, eobj);
+	}
+	
+	@Override
+	public String toString() {
+		return name;
+	}
+	
+	@Override
+	public int hashCode() {
+		return eobj.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Node n) {
+			return n.eobj.equals(eobj);
+		}
+		
+		return false;
 	}
 
 }

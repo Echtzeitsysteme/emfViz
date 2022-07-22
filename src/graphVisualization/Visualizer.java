@@ -13,6 +13,7 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.swt.SWT;
@@ -124,32 +125,56 @@ public class Visualizer {
 		//stylesheet.setDefaultEdgeStyle(edgeStyle);
 	}
 	
-	private void insertDataIntoGraph() {
+	protected void insertNodeIntoGraph(Node node, double x , double y) {
+
+		graph.insertVertex(graph.getDefaultParent(), String.valueOf(node.hashCode()), node, x, y, defaultNodeWidth, defaultNodeHeight, node.styleCategory);
 		
+	}
+	
+	protected void insertNodeIntoGraph(Node node) {
+
 		double centerX = graph.getGraphBounds().getCenterX();
 		double centerY = graph.getGraphBounds().getCenterY();
+		
+		insertNodeIntoGraph(node,defaultNodePosition.x - centerX, defaultNodePosition.y - centerY);
+		dataLoader.nodes.add(node);
+	}
 	
+	protected void insertEdgeIntoGraph(Edge edge) {
+		graph.insertEdge(graph.getDefaultParent(), String.valueOf(edge.hashCode()), edge, graphModel.getCell(edge.getSourceID()), graphModel.getCell(edge.getTargetID()),edge.styleCategory);
+		dataLoader.edges.put(edge, edge);
+	}
+	
+	protected void removeNodeInGraph(Node node) {
+		removeElement(String.valueOf(node.hashCode()));
+		dataLoader.nodes.remove(node);
+	}
+	
+	protected void removeEdgeInGraph(Edge edge) {
+		removeElement(String.valueOf(edge.hashCode()));
+		dataLoader.edges.remove(edge);
+	}
+	
+	
+	private void removeElement(String hashCode) {
+		
+		Object[] cells = new Object[] {graphModel.getCell(hashCode)};
+		
+		graph.removeCells(cells);
+	}
+	
+	
+	private void insertDataIntoGraph() {
+
 		
 		for(Node n: dataLoader.nodes) {
-			graph.insertVertex(graph.getDefaultParent(),n.id, n.name, defaultNodePosition.x - centerX, defaultNodePosition.y - centerY, defaultNodeWidth, defaultNodeHeight, n.styleCategory);
+			insertNodeIntoGraph(n);
 		}
 		
-		mxGraphModel graphModel = (mxGraphModel) graph.getModel();
-		
-		for(ArrayList<Edge> outgoingEdges : dataLoader.edges.values()) {
-			
-			
-			for(Edge e : outgoingEdges) {
-				graph.insertEdge(graph.getDefaultParent(), e.id, e.label, graphModel.getCell(e.sourceNID), graphModel.getCell(e.targetNID),e.styleCategory);
-			}
-			
+		for(Edge edge : dataLoader.edges.values()) {
+			insertEdgeIntoGraph(edge);
 		}
 		
-		centerX = graph.getGraphBounds().getCenterX();
-		centerY = graph.getGraphBounds().getCenterY();
-		
-		//System.out.println("Center X: " + String.valueOf(centerX));
-		//System.out.println("Center Y: " + String.valueOf(centerY));
 	}
 	
 	private void setUpLayout() {
@@ -204,11 +229,11 @@ public class Visualizer {
 		blockedAreas.clear();
 		
 		System.out.println("Placing nodes");
-		placeNodes();
+		//placeNodes();
 		System.out.println("Routing edges");
-		placeEdges();
+		//placeEdges();
 		System.out.println("Placing edge labels");
-		placeLabels();
+		//placeLabels();
 		System.out.println("Ready");
 		
 	}
@@ -264,7 +289,7 @@ public class Visualizer {
 	
 	private void placeEdges() {
 		
-		HashMap<String, LinkedList<mxPoint>> plottedEdges = new HashMap<String,LinkedList<mxPoint>>();
+		HashMap<Edge, LinkedList<mxPoint>> plottedEdges = new HashMap<Edge,LinkedList<mxPoint>>();
 		Map<String,Object> cells = graphModel.getCells();
 		
 		ArrayList<EdgePlannerThread> activeThreads = new ArrayList<EdgePlannerThread>();
@@ -287,111 +312,7 @@ public class Visualizer {
 			newThread.start();
 			activeThreads.add(newThread);
 			
-			//System.out.println("Node: " + node.getValue());
-			
-			/*for(int i = 0; i < node.getEdgeCount(); i++) {
-				
-				mxICell edgeGraph = node.getEdgeAt(i);
-				
-				mxICell source = edgeGraph.getTerminal(true);
-				mxICell terminal = edgeGraph.getTerminal(false);
-				
-				mxGeometry geometry = edgeGraph.getGeometry();
-				if (geometry == null)
-				{
-					geometry = new mxGeometry();
-					geometry.setRelative(true);
-				}
-				else
-				{
-					geometry = (mxGeometry) geometry.clone();
-				}
-				
-				//ID: HospitalExample.impl.NurseImpl@2ca923bb (name: Stefanie Jones, staffID: 7)worksHospitalExample.impl.DepartmentImpl@64ec96c6 (dID: 2, maxRoomCount: 4)
-				
-				String edgeId = source.getId().toString()+edgeGraph.getValue().toString()+terminal.getId().toString();
-				
-				
-				Edge edge = null;
-				
-				for(Edge outgoingEdge : dataLoader.edges.get(source.getId())){
-									
-					if(outgoingEdge.id.equals(edgeId)) {
-						edge = outgoingEdge;
-						break;
-					}
-				}
-				
-				
-				if(edge.oppositeId != null) {
-							
-					
-					if(plottedEdges.containsKey(edge.oppositeId)) { 						
-						ArrayList<mxPoint> oppositePlot = (ArrayList<mxPoint>) plottedEdges.get(edge.oppositeId).clone();					
-						Collections.reverse(oppositePlot);		
-						geometry.setPoints(oppositePlot);
-						graphModel.setGeometry(edgeGraph, geometry);
-
-						continue;
-					}
-
-				}
-
-				
-				Point sourceCenter = new Point();
-				sourceCenter.x = (int) source.getGeometry().getCenterX();
-				sourceCenter.y = (int) source.getGeometry().getCenterY();
-				
-				Point targetCenter = new Point();
-				targetCenter.x = (int) terminal.getGeometry().getCenterX();
-				targetCenter.y = (int)terminal.getGeometry().getCenterY();
-				
-				
-				
-				EdgePlanner edgePlanner = new EdgePlanner(sourceCenter, targetCenter, source.getGeometry(), terminal.getGeometry(), edgeGrid); 
-				
-				ArrayList<Point> edgePath = edgePlanner.planEdge();
-				
-				if(edgePath == null)
-					continue;
-				
-				ArrayList<mxPoint> points = new ArrayList<mxPoint>();
-				
-				for(Point p : edgePath) {
-					points.add(new mxPoint(p.x, p.y));
-				}
-						
-				geometry.setPoints(points);
-				graphModel.setGeometry(edgeGraph, geometry);
-				
-				plottedEdges.put(edgeId, points);
-				
-
-			}*/
-			
-
 		}
-		/*int counter = 0;
-		while(counter < 500) {
-			
-			//synAreas.printStatus();
-			
-			try {
-				Thread.sleep(10);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			
-			
-			if(counter % 100 == 0) {
-			for(EdgePlannerThread t : activeThreads) {
-				System.out.println("Thread state " + t.getId() + " : " + t.getState().toString());
-			}
-			}
-			
-			counter++;
-		}*/
-		
 		
 		for(EdgePlannerThread t : activeThreads) {
 
@@ -461,20 +382,20 @@ public class Visualizer {
 		
 		private synchronizedWorkingAreas activeAreas;
 		private Area ownArea;
-		private HashMap<String, LinkedList<mxPoint>> plottedEdges;
+		private HashMap<Edge, LinkedList<mxPoint>> plottedEdges;
 		
 		private mxGraphModel graphModel;
 		private Grid nodeGrid;
 		private Grid edgeGrid;
 		private mxICell node;
 		
-		public EdgePlannerThread(mxGraphModel graphModel, Grid nodeGrid, Grid edgeGrid, mxICell cell, HashMap<String,LinkedList<mxPoint>> plottedEdges, synchronizedWorkingAreas activeAreas) {
+		public EdgePlannerThread(mxGraphModel graphModel, Grid nodeGrid, Grid edgeGrid, mxICell cell, HashMap<Edge,LinkedList<mxPoint>> plottedEdges, synchronizedWorkingAreas activeAreas) {
 			
-			String cellName = (String) cell.getValue();
-			if(cellName != null)	
-				this.setName(cellName);
-			else
-				this.setName("unknown");			
+			if(cell.getValue() == null)	
+				this.setName("unknown");
+			else {
+				this.setName(cell.getValue().toString());
+			}
 			
 			this.graphModel = graphModel;
 			this.nodeGrid = nodeGrid;
@@ -495,9 +416,6 @@ public class Visualizer {
 			for(int i = 0; i < node.getEdgeCount(); i++) {
 				
 				mxICell edgeGraph = node.getEdgeAt(i);
-				
-				
-				
 				mxICell source = edgeGraph.getTerminal(true);
 				mxICell terminal = edgeGraph.getTerminal(false);
 				
@@ -518,27 +436,18 @@ public class Visualizer {
 					geometry = (mxGeometry) geometry.clone();
 				}
 				
-				//ID: HospitalExample.impl.NurseImpl@2ca923bb (name: Stefanie Jones, staffID: 7)worksHospitalExample.impl.DepartmentImpl@64ec96c6 (dID: 2, maxRoomCount: 4)
 				
-				String edgeId = source.getId().toString()+edgeGraph.getValue().toString()+terminal.getId().toString();
+				//String edgeId = source.getId().toString()+edgeGraph.getValue().toString()+terminal.getId().toString();
 				
+				Edge edge = (Edge) edgeGraph.getValue();
 				
-				Edge edge = null;
+				if(edge.ref.getEOpposite() != null) {
+
+				Edge oppositeEdge = dataLoader.edges.get(Objects.hash(edge.target, edge.ref.getEOpposite(),edge.source));
 				
-				for(Edge outgoingEdge : dataLoader.edges.get(source.getId())){
-									
-					if(outgoingEdge.id.equals(edgeId)) {
-						edge = outgoingEdge;
-						break;
-					}
-				}
-				
-				
-				if(edge.oppositeId != null) {
-							
-					
-					if(plottedEdges.containsKey(edge.oppositeId)) { 						
-						LinkedList<mxPoint> oppositePlot = (LinkedList<mxPoint>) plottedEdges.get(edge.oppositeId).clone();					
+	
+					if(plottedEdges.containsKey(oppositeEdge)) { 						
+						LinkedList<mxPoint> oppositePlot = (LinkedList<mxPoint>) plottedEdges.get(oppositeEdge).clone();					
 						Collections.reverse(oppositePlot);		
 						geometry.setPoints(oppositePlot);
 						graphModel.setGeometry(edgeGraph, geometry);
@@ -631,7 +540,7 @@ public class Visualizer {
 				geometry.setPoints(points);
 				graphModel.setGeometry(edgeGraph, geometry);
 				
-				plottedEdges.put(edgeId, points);
+				plottedEdges.put(edge, points);
 				
 				//System.out.println("Deallocate" + String.valueOf(this.getId())); 
 				

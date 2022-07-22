@@ -33,21 +33,19 @@ public class ClassDiagrammLoader extends DataLoader {
 				EClassImpl node = (EClassImpl) o;
 				
 				//nodes.add(node);
-				nodes.add(new Node(node.getName(), node.getName(), "defaultNode"));
+				nodes.add(new Node("defaultNode", node));
 						
 				List<EStructuralFeature> features = node.getEAllStructuralFeatures();
 				
 				//ArrayList<EReference> refs = new ArrayList<EReference>();
 				
-				ArrayList<Edge> outgoingEdges = new ArrayList<Edge>();
 				
-				for(EStructuralFeature f : features) {
+				for(EStructuralFeature f : features ) {
 					
-					if(f instanceof EReference) {
+					if(f instanceof EReference ref) {
 						
-						EReference edge = (EReference) f;
 						
-						Edge visEdge = new Edge(f.getName(), "defaultEdge", node.getName(), f.getEType().getName());
+						Edge visEdge = new Edge("defaultEdge", node, ((EObject) node.eGet(ref)),  ref);
 						
 						EReference opp = ((EReference) f).getEOpposite();
 						
@@ -55,12 +53,14 @@ public class ClassDiagrammLoader extends DataLoader {
 							visEdge.setOppositeId(f.getEType().getName()+opp.getName()+node.getName());
 						}
 						
-						outgoingEdges.add(visEdge);
+					
+	
+						edges.put(visEdge, visEdge);
 					}
 					
 				}
 				
-				edges.put(node.getName(), outgoingEdges);
+				
 			}
 		}
 		

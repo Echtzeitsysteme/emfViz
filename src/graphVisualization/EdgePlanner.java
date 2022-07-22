@@ -40,7 +40,7 @@ public class EdgePlanner {
 	
 	private int pathCutoff = 3;
 	
-	private int maxIterations = 1000;
+	private int maxIterations = 2000;
 	
 	public EdgePlanner(Point nodeOrigin, Point nodeTarget, mxGeometry cellBoundsOrigin, mxGeometry cellBoundsTarget, Grid edgeGrid){//RTree<String, Rectangle> blockTree) {
 		
