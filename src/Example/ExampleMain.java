@@ -18,7 +18,7 @@ import graphVisualization.InstanceDiagrammLoader;
 // First add emfViz project to your's project build path via 'Properties' -> 'Java Build Path' -> 'Projects' -> 'Classpath' -> 'Add' 
 import graphVisualization.Visualizer;
 
-public class Example {
+public class ExampleMain {
 	
 	public static void main(String[] args) {
 		
