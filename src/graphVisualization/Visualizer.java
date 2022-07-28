@@ -256,6 +256,7 @@ public class Visualizer {
 		for(Object cell : cells.values()) {
 			
 			mxCell c = (mxCell) cell;
+			
 			mxGeometry geom = c.getGeometry();
 			
 			if(geom == null || c.isEdge())
