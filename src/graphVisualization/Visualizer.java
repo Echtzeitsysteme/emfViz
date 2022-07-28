@@ -229,11 +229,11 @@ public class Visualizer {
 		blockedAreas.clear();
 		
 		System.out.println("Placing nodes");
-		//placeNodes();
+		placeNodes();
 		System.out.println("Routing edges");
-		//placeEdges();
+		placeEdges();
 		System.out.println("Placing edge labels");
-		//placeLabels();
+		placeLabels();
 		System.out.println("Ready");
 		
 	}

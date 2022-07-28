@@ -1,4 +1,4 @@
-package Example;
+package example;
 
 import java.io.File;
 
@@ -21,7 +21,7 @@ import graphVisualization.Visualizer;
 public class ExampleMain {
 	
 	public static void main(String[] args) {
-		
+		 
 
 		
         Display display = new Display();
@@ -38,7 +38,7 @@ public class ExampleMain {
         URI base = URI.createPlatformResourceURI("/", true);
         
         //Assuming your instance model is contained in an .xmi file, path can be adjusted accordingly
-		URI uri =  URI.createURI("hospital.xmi");
+		URI uri =  URI.createURI("C:/Users/sehmes/Coding/eclipse_workspaces/emovlon-tutorial/git/emoflon-ibex-tutorial/HospitalTransformRules/hospital.xmi");
 		System.out.println(uri.devicePath());
 		
 		ResourceSet rs = new ResourceSetImpl();
@@ -57,7 +57,6 @@ public class ExampleMain {
 		
 		rs.getPackageRegistry().put(HospitalExamplePackage.eINSTANCE.getNsURI(), HospitalExamplePackage.eINSTANCE);
 		
-
 		
 		Resource instanceModel = rs.createResource(uri, ContentHandler.UNSPECIFIED_CONTENT_TYPE);
 		try {

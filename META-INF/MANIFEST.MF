@@ -4,7 +4,8 @@ Bundle-Name: emfViz
 Bundle-SymbolicName: emfViz
 Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: external jars/jgraphx-1.4.0.2-sources.jar,
- external jars/jgraphx-4.2.2.jar
+ external jars/jgraphx-4.2.2.jar,
+ external jars/jts-core-1.19.0.jar
 Automatic-Module-Name: emfViz
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: graphVisualization
@@ -12,4 +13,5 @@ Require-Bundle: org.eclipse.emf.common;bundle-version="2.23.0",
  org.eclipse.emf.ecore;bundle-version="2.25.0",
  org.eclipse.jface;bundle-version="3.24.0",
  org.emoflon.smartemf;bundle-version="1.0.0",
- org.eclipse.emf.ecore.xmi;bundle-version="2.16.0"
+ org.eclipse.emf.ecore.xmi;bundle-version="2.16.0",
+ HospitalExample;bundle-version="0.0.1"
