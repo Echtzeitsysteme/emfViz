@@ -51,8 +51,7 @@ public class Visualizer {
 	private Point2D.Double defaultNodePosition;
 	
 	private mxFastOrganicLayout preLayout;
-	private Grid nodeGrid;
-	private Grid edgeGrid;
+	private Grid grid;
 	
 	private double graphCenterX ;
 	private double graphCenterY;
@@ -201,8 +200,7 @@ public class Visualizer {
 		//System.out.println("SizeX: " + String.valueOf(sizeX));
 		//System.out.println("SizeY: " + String.valueOf(sizeY));
 		
-		nodeGrid = new Grid(shellBounds, sizeX, sizeY,  minNodeDistanceNodes);
-		edgeGrid = new Grid(shellBounds,(int)Math.floor((1-margin ) *shellBounds.width), (int) Math.floor((1-margin ) *shellBounds.height), minNodeDistanceEdges);
+		grid = new Grid(shellBounds, sizeX, sizeY,  minNodeDistanceNodes);
 		
 		blockedAreas = new ArrayList<mxGeometry>();
 		
@@ -216,8 +214,8 @@ public class Visualizer {
 		graphCenterX = graph.getGraphBounds().getCenterX();
 		graphCenterY = graph.getGraphBounds().getCenterY();
 		
-		xStretch = (shell.getMonitor().getClientArea().width *(1-nodeGrid.margin))/graphWidth;
-		yStretch = (shell.getMonitor().getClientArea().height*(1-nodeGrid.margin))/graphHeight;
+		xStretch = (shell.getMonitor().getClientArea().width *(1-grid.margin))/graphWidth;
+		yStretch = (shell.getMonitor().getClientArea().height*(1-grid.margin))/graphHeight;
 		
 		
 	}
@@ -257,7 +255,7 @@ public class Visualizer {
 			
 			mxCell c = (mxCell) cell;
 			mxGeometry geom = c.getGeometry();
-			
+
 			if(geom == null || c.isEdge())
 				continue;
 			
@@ -265,7 +263,8 @@ public class Visualizer {
 			
 			transformGraphPositionToVisBounds(position);
 			
-			mxPoint nearestGridPoint = nodeGrid.getFreeGridPosition(position, c.getGeometry().getRectangle());
+			mxPoint nearestGridPoint = grid.placeInFreeGridPosition(c, position, c.getGeometry().getRectangle().getWidth(),
+					c.getGeometry().getRectangle().getHeight());
 			
 			if (nearestGridPoint == null) {
 				System.out.println("Node grid position not found");
@@ -279,10 +278,6 @@ public class Visualizer {
 			//System.out.println("New geom: " + c.getGeometry().toString() + " With rectangle: " + c.getGeometry().getRectangle().toString());
 			blockedAreas.add(c.getGeometry());
 			
-		}
-		
-		for(mxGeometry g : blockedAreas) {
-			edgeGrid.setGridValues(g.getRectangle(), Double.MAX_VALUE);
 		}
 		
 	}
@@ -307,7 +302,7 @@ public class Visualizer {
 				continue;
 			
 			//public EdgePlannerThread(mxGraphModel graphModel, Grid nodeGrid, Grid edgeGrid, mxICell cell, HashMap<String, ArrayList<mxPoint>> plottedEdges, List<Area> activeAreas) {
-			EdgePlannerThread newThread = new EdgePlannerThread(graphModel, nodeGrid, edgeGrid,node, plottedEdges, synAreas);
+			EdgePlannerThread newThread = new EdgePlannerThread(graphModel, grid, edgeGrid, node, plottedEdges, synAreas);
 			
 			newThread.start();
 			activeThreads.add(newThread);
@@ -329,7 +324,7 @@ public class Visualizer {
 		
 		Map<String,Object> cells = graphModel.getCells();	
 		
-		LabelPlanner lP = new LabelPlanner(edgeGrid);
+		LabelPlanner lP = new LabelPlanner(grid);
 		
 		for(Object cell : cells.values()) {
 			
@@ -367,8 +362,8 @@ public class Visualizer {
 			edgeState.setLabelBounds(labelBounds);
 			geometry.setX(pos.getX());
 			geometry.setY(pos.getY());
-			nodeGrid.setGridValues(labelBounds.getRectangle(), Double.MAX_VALUE);
-			edgeGrid.setGridValues(labelBounds.getRectangle(), Double.MAX_VALUE);
+			grid.placeInFreeGridPosition(labelBounds, new Point2D.Double(pos.getX(), pos.getY()), labelBounds.getWidth(), labelBounds.getHeight());
+//			nodeGrid.setGridValues(labelBounds.getRectangle(), Double.MAX_VALUE);
 			
 		}
 		
