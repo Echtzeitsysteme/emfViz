@@ -33,10 +33,10 @@ import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxRectangle;
 
 public class Grid {
-	
+
 //	private double[][] grid;
 	private Quadtree qtree;
-	
+
 //	public int maxXindx;
 //	public int maxYindx;
 //	
@@ -59,10 +59,10 @@ public class Grid {
 //	
 //	private int blockMarginX = 5;
 //	private int blockMarginY = 5;
-	
+
 	private double maxDistFactorX = 3;
 	private double maxDistFactorY = 3;
-	
+
 	public Grid(org.eclipse.swt.graphics.Rectangle shellBounds, int sizeX, int sizeY, double blockMargin) {
 //		
 //		this.shellBounds = shellBounds;
@@ -79,10 +79,9 @@ public class Grid {
 //		
 //		this.blockMarginX = (int) Math.ceil(blockMargin / horizontalGridDist);
 //		this.blockMarginY = (int) Math.ceil(blockMargin / verticalGridDist);
-		
 
 	}
-	
+
 //	private void calculateGraphBounds() {
 //		
 //		int visX =  0;//shellBounds.x;
@@ -106,11 +105,11 @@ public class Grid {
 //		defaultNodePosition.y =  visY + 0.5 * visHeight;
 //		
 //	}
-	
+
 //	mxPoint getAbsolutePosition(int gridX, int gridY) {
 //		return new mxPoint(Math.min(gridX * horizontalGridDist + visXOffset, visXCap), Math.min(gridY * verticalGridDist + visYOffset, visYCap));
 //	}
-	
+
 //	public void setGridValues(java.awt.Rectangle area, double val) {
 //		
 //
@@ -127,11 +126,9 @@ public class Grid {
 //		}
 //		
 //	}
-	
-	
+
 	public double getCostForArea(Envelope envelope) {
-		
-		
+
 //		int xRange = (int) Math.ceil( area.width/(double)horizontalGridDist);
 //		int yRange = (int) Math.ceil( area.height/(double)verticalGridDist);
 //		
@@ -149,32 +146,29 @@ public class Grid {
 //				
 //			}
 //		}
-		
+
 		@SuppressWarnings("unchecked")
 		List<Object> query = qtree.query(envelope);
-		for(Object object :query) {
+		for (Object object : query) {
 			GridObject go = (GridObject) object;
-				if(go.object() instanceof mxCell cell) {
-					if(cell.isVertex()) {
-						return Double.MAX_VALUE;
-					} else {
-						cost += go.cost();
-					}
-				} else if(go.object() instanceof mxRectangle rect) {
+			if (go.object() instanceof mxCell cell) {
+				if (cell.isVertex()) {
 					return Double.MAX_VALUE;
 				} else {
-					// Unknown Type
-					return Double.MAX_VALUE;
-				}	
-				
+					cost += go.cost();
+				}
+			} else if (go.object() instanceof mxRectangle rect) {
+				return Double.MAX_VALUE;
+			} else {
+				// Unknown Type
+				return Double.MAX_VALUE;
 			}
-			
+
 		}
-		
+
 		return cost;
 	}
-	
-		
+
 //	Point primeGridSearch(Point2D.Double p) {
 //			
 //		
@@ -188,25 +182,23 @@ public class Grid {
 //			
 //			return gridPoint;
 //	}
-	
-	
-	public mxPoint placeInFreeGridPosition(mxCell object, Point2D.Double pos, double width, double height){
-		
-		//Point origin = primeGridSearch(initialPosition);
-		//java.awt.Rectangle includedArea =  (Rectangle) geometry.clone();
-		double maxDistX = maxDistFactorX*width;
-		double maxDistY = maxDistFactorY*height;
-		
-		Envelope env = new Envelope(pos.x-width/2, pos.x+width/2, pos.y-height/2, pos.y+height/2);
-		if(getCostForArea(env) <= 0) {
+
+	public mxPoint placeInFreeGridPosition(Object object, Point2D.Double pos, double width, double height) {
+		double maxDistX = maxDistFactorX * width;
+		double maxDistY = maxDistFactorY * height;
+		double marginX = margin * width / 2.0;
+		double marginY = margin * height / 2.0;
+
+		Envelope env = new Envelope(pos.x - width / 2, pos.x + width / 2, pos.y - height / 2, pos.y + height / 2);
+		if (getCostForArea(env) <= 0) {
 			GridObject go = new GridObject(object, pos, env, Double.MAX_VALUE);
 			qtree.insert(env, go);
 			return new mxPoint(pos.x, pos.y);
 		} else {
 			// Search in areas around the initial estimate within a certain radius
-			for(double x = pos.x-maxDistX; x <= pos.x+maxDistX; x+=width) {
-				for(double y = pos.y-maxDistY; x <= pos.y+maxDistY; y+=height) {
-					if(getCostForArea(env) <= 0) {
+			for (double x = pos.x - maxDistX; x <= pos.x + maxDistX; x += width + marginX) {
+				for (double y = pos.y - maxDistY; x <= pos.y + maxDistY; y += height + marginY) {
+					if (getCostForArea(env) <= 0) {
 						GridObject go = new GridObject(object, pos, env, Double.MAX_VALUE);
 						qtree.insert(env, go);
 						return new mxPoint(x, y);
@@ -218,41 +210,23 @@ public class Grid {
 			qtree.insert(env, go);
 			return new mxPoint(pos.x, pos.y);
 		}
-//		for(int d = 0 ; d < maxDistanceToOrigin; d++) {
-//			
-//			for(int y = Math.max(origin.y - d, 0);  y <= Math.min(origin.y +  d, maxYindx); y += Math.max(1,2*d)) {
-//				
-//				
-//				for(int x = Math.max(origin.x - d, 0);  x <= Math.min(origin.x +  d, maxXindx); x += Math.max(1,2*d)) {
-//					
-//					includedArea.setLocation(x,y);
-//					
-//					
-//					if(getCostForArea(object, includedArea, x, y, true) == 0) {
-//						
-//						setGridValues(includedArea, Double.MAX_VALUE);
-//						return getAbsolutePosition(x, y);
-//					}
-//					
-//				}
-//				
-//			}
-//			
-//		}
-//		
-//		//No free grid point found, visualize at initial estimate
-//		setGridValues(geometry, Double.MAX_VALUE);	
-//		System.out.println("None found");
-//		return getAbsolutePosition(origin.x, origin.y);
+
 	}
-	
-//	public double GetGridValue(int x, int y) {
-//		return grid[x][y];
-//	}
-	
-		
-	
+
+	public mxPoint placeEdge(Object edge, Point2D.Double pos, Envelope env, double cost) {
+		if (getCostForArea(env) <= 0) {
+			GridObject go = new GridObject(edge, pos, env, cost);
+			qtree.insert(env, go);
+			return new mxPoint(pos.x, pos.y);
+		} else {
+			// For the time being -> place either way...
+			GridObject go = new GridObject(edge, pos, env, cost);
+			qtree.insert(env, go);
+			return new mxPoint(pos.x, pos.y);
+		}
+
+	}
 }
 
-record GridObject(Object object, Point2D.Double location, Envelope envolope, double cost) {}
-
+record GridObject(Object object, Point2D.Double location, Envelope envolope, double cost) {
+}

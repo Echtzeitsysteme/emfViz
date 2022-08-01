@@ -22,8 +22,8 @@ public class LabelPlanner {
 	
 	private String label;
 	
-	public LabelPlanner(Grid edgeGrid) {
-		this.edgeGrid = edgeGrid;
+	public LabelPlanner(Grid grid) {
+		this.edgeGrid = grid;
 	}
 	
 	
@@ -44,7 +44,7 @@ public class LabelPlanner {
 		double xOffset = xStep < 0 ? distanceToEdge : -distanceToEdge;
 		double yOffset = yStep < 0 ? distanceToEdge : -distanceToEdge;
 		
-		finalPosition = edgeGrid.getFreeGridPosition(new Point2D.Double(xPlace + xOffset,yPlace + yOffset), currentLabelBounds);
+		finalPosition = edgeGrid.placeInFreeGridPosition(currentLabelBounds, new Point2D.Double(xPlace + xOffset,yPlace + yOffset), currentLabelBounds.width, currentLabelBounds.height);
 			
 		return finalPosition;
 	}

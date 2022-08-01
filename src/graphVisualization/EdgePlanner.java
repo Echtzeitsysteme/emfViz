@@ -1,172 +1,158 @@
 package graphVisualization;
 
-import java.awt.Point;
+import java.awt.geom.Point2D;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 
-import com.mxgraph.model.mxGeometry;
+import org.locationtech.jts.geom.Envelope;
 
-
+//import com.mxgraph.model.mxGeometry;
 
 public class EdgePlanner {
-
-	private LinkedList<Point> targetPoints;
-	private Point centerTarget;
+	public static final double EPS = 0.0001;
+	private Object edge;
+	private Envelope sourceCell;
+	private Envelope targetCell;
+	private Point2D sourceCenter;
+	private Point2D targetCenter;
+	private LinkedList<Point2D> targetPoints;
+	private LinkedList<Point2D> possibleOrigins;
 	
-	private LinkedList<Point> possibleOrigins;
+	private HashMap<Point2D, Point2D> cameFrom;
+	private HashMap<Point2D, Double> gscore;
+	private HashMap<Point2D, Double> fscore;
 	
-	private HashMap<Point,Point> cameFrom;
-	private HashMap<Point, Double> gscore;
-	private HashMap<Point, Double> fscore;
-	
-	private double cellOriginBorderMargin = 0.2;
+//	private double cellOriginBorderMargin = 0.2;
 	private double velocityPenalty =0.0000005;
-	private int aStarStepsize = 2;
-	private double minInterPointDist = 10;
-	private double minCurveStrength =2;
+	private double aStarStepsize = 2.0;
+	private double minInterPointDist = 10.0;
+	private double minCurveStrength =2.0;
+	private double edgeSize = 5.0;
 
-	private boolean log;
+//	private boolean log;
 	
-	private Grid edgeGrid;
+	private Grid grid;
 	
-	private mxGeometry targetGeom;
-	private mxGeometry originGeom;
+	private Envelope bounds;
+//	private mxGeometry targetGeom;
+//	private mxGeometry originGeom;
 	//private double[][] edgeGrid;
 	
-	public LinkedList<Point> fullPath;
+	public LinkedList<Point2D> fullPath;
 	
 	private int pathCutoff = 3;
 	
-	private int maxIterations = 2000;
+//	private int maxIterations = 2000;
 	
-	public EdgePlanner(Point nodeOrigin, Point nodeTarget, mxGeometry cellBoundsOrigin, mxGeometry cellBoundsTarget, Grid edgeGrid){//RTree<String, Rectangle> blockTree) {
+	public EdgePlanner(Object edge, Envelope source, Envelope target, Envelope bounds, Grid grid){//RTree<String, Rectangle> blockTree) {
+		this.edge = edge;
+		this.sourceCell = source;
+		this.targetCell = target;
+		this.sourceCenter = new Point2D.Double(source.centre().x, source.centre().y);
+		this.targetCenter = new Point2D.Double(target.centre().x, target.centre().y);
 		
-		this.centerTarget = nodeTarget;
-		
-		this.edgeGrid = edgeGrid;
+		this.grid = grid;
+		this.bounds = bounds;
 	
-		targetPoints = getCellBorderPoints(nodeTarget, cellBoundsTarget);
-		possibleOrigins = getCellBorderPoints(nodeOrigin, cellBoundsOrigin);
+		possibleOrigins = getCellBorderPoints(sourceCenter, sourceCell);
+		targetPoints = getCellBorderPoints(targetCenter, targetCell);
+//		
+//		this.targetGeom = cellBoundsTarget;
+//		this.originGeom = cellBoundsOrigin;
 		
-		this.targetGeom = cellBoundsTarget;
-		this.originGeom = cellBoundsOrigin;
+//		grid.setGridValues(cellBoundsTarget.getRectangle(), 0);
+//		grid.setGridValues(originGeom.getRectangle(), 0);
 		
-		
-		this.edgeGrid = edgeGrid;
-		
-		edgeGrid.setGridValues(cellBoundsTarget.getRectangle(), 0);
-		edgeGrid.setGridValues(originGeom.getRectangle(), 0);
-		
-		this.log = log;
+		//this.log = log;
 
 	}
 	
 	
-	private LinkedList<Point> getCellBorderPoints(Point nodePosition, mxGeometry cellBounds) {
+	private LinkedList<Point2D> getCellBorderPoints(Point2D nodePosition, Envelope cellBounds) {		
+		LinkedList<Point2D> borderPoints = new LinkedList<Point2D>();		
+		Point2D topLeft = new Point2D.Double(cellBounds.getMinX(), cellBounds.getMaxY());
 		
-		
-		LinkedList<Point> borderPoints = new LinkedList<Point>();
-
-		
-		Point topLeft = new Point();
-		topLeft.x = (int) cellBounds.getX();
-		topLeft.y = (int) cellBounds.getY();
-		
-		for(int i = (int) (topLeft.x +  cellBounds.getWidth() * cellOriginBorderMargin); i <  topLeft.x + cellBounds.getWidth() * (1-cellOriginBorderMargin); i++) {
-			
-			Point p1 = new Point();
-			p1.x = i;
-			p1.y = topLeft.y;
+		for(double x = topLeft.getX(); x <  topLeft.getX() + cellBounds.getWidth(); x += cellBounds.getWidth()/10.0) {
+			Point2D p1 = new Point2D.Double(x, topLeft.getY());
 			borderPoints.add(p1);
-			
-			Point p2 = new Point();
-			p2.x = i;
-			p2.y = (int) (topLeft.y + cellBounds.getHeight());
+			Point2D p2 = new Point2D.Double(x, topLeft.getY()-cellBounds.getHeight());
 			borderPoints.add(p2);
-			
 		}
 		
-		for(int i = (int) (topLeft.y + cellBounds.getHeight() * cellOriginBorderMargin); i <  topLeft.y + cellBounds.getHeight() * (1-cellOriginBorderMargin); i++) {
-			
-			Point p3 = new Point();
-			p3.x = topLeft.x;
-			p3.y = i;
+		for(double y = topLeft.getY(); y >  topLeft.getY() - cellBounds.getHeight(); y -= cellBounds.getHeight()/10.0) {
+			Point2D p3 = new Point2D.Double(topLeft.getX(), y);
 			borderPoints.add(p3);
-			
-			Point p4 = new Point();
-			p4.x = (int) (topLeft.x + cellBounds.getWidth());
-			p4.y = i;
+			Point2D p4 = new Point2D.Double(topLeft.getX() + cellBounds.getWidth(), y);
 			borderPoints.add(p4);
-			
 		}
-		
 		
 		return borderPoints;
 	}	
 	
-	private boolean intersectsRectangle(java.awt.Rectangle rectangle, Point p) {
-		return rectangle.getMinX() < p.x && p.x < rectangle.getMaxX() && p.y > rectangle.getMinY() && p.y < rectangle.getMaxY();
+	private boolean intersectsRectangle(Envelope rectangle, Point2D p) {
+		return rectangle.contains(p.getX(), p.getY());
+//		return rectangle.getMinX() < p.gx && p.x < rectangle.getMaxX() && p.y > rectangle.getMinY() && p.y < rectangle.getMaxY();
 	}
 	
-	private double h(Point start) {
-		return Math.sqrt(Math.pow(start.x - centerTarget.x , 2) + Math.pow(start.y - centerTarget.y, 2)) + edgeGrid.GetGridValue(Math.max(0,start.x - (int)edgeGrid.visXOffset),Math.max(0,start.y - (int)edgeGrid.visYOffset));
+	private double h(Point2D start) {
+		return Math.sqrt(Math.pow(start.getX() - targetCenter.getX() , 2) + Math.pow(start.getY() - targetCenter.getY(), 2))
+					+ 	grid.getCostForArea(
+						new Envelope(	start.getX()-aStarStepsize/2, 
+										start.getX()+aStarStepsize/2, 
+										start.getY()-aStarStepsize/2, 
+										start.getY()+aStarStepsize/2)
+						);
 	}
 	
-	private double d(Point p1, Point p2) {
-		return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+	private double d(Point2D p1, Point2D p2) {
+		return p1.distance(p2);
 	}
 	
-	private double velocityPenality(Point current, Point next) {
-		
-		
+	private double velocityPenality(Point2D current, Point2D next) {
 		if(!cameFrom.containsKey(current))
 			return 0;
 		
-		int velXCurrent = current.x-next.x;
-		int velYCurrent = current.y-next.y;
+		double velXCurrent = current.getX()-next.getX();
+		double velYCurrent = current.getY()-next.getY();
 		
-		Point prev = cameFrom.get(current);
+		Point2D prev = cameFrom.get(current);
 		
-		int velXPrev = prev.x - current.x;
-		int velYPrev = prev.y - current.x;
+		double velXPrev = prev.getX() - current.getX();
+		double velYPrev = prev.getY() - current.getX();
 		
-		return velocityPenalty* (Math.abs(velXCurrent - velXPrev) + Math.abs(velYCurrent- velYPrev));
+		return velocityPenalty * (Math.abs(velXCurrent - velXPrev) + Math.abs(velYCurrent- velYPrev));
 	}
 	
-	private LinkedList<Point> getNeighbours(Point p){
+	private LinkedList<Point2D> getNeighbours(Point2D p){
+		LinkedList<Point2D> neighbours = new LinkedList<Point2D>();
 		
-		LinkedList<Point> neighbours = new LinkedList<Point>();
-		
-		
-		for(int i = -aStarStepsize; i <= aStarStepsize; i += aStarStepsize) {
-		
-			for(int j = -aStarStepsize; j<= aStarStepsize; j += aStarStepsize) {
+		for(double x = p.getX()-aStarStepsize; x <= aStarStepsize + p.getX(); x += aStarStepsize) {		
+			for(double y = p.getY()-aStarStepsize; y <= aStarStepsize + p.getY(); y += aStarStepsize) {
 				
-				if(j == 0 && i == 0)
+				if(Math.abs(y-p.getY()) <= EPS && Math.abs(x-p.getX()) <= EPS)
 					continue;
 				
-				Point n = new Point();
+				if(x>bounds.getMaxX() || x<bounds.getMinX())
+					continue;
 				
-				n.x = Math.min( Math.max(0,p.x + i), edgeGrid.maxXindx);
-				n.y = Math.min( Math.max(0,p.y + j), edgeGrid.maxYindx);
+				if(y>bounds.getMaxY() || y<bounds.getMinY())
+					continue;
 				
+				Point2D n = new Point2D.Double(x, y);
 				neighbours.add(n);
 			}
 		}
 		
-		
 		return neighbours;
 	}
 	
-	private LinkedList<Point> constructPath(Point start, Point endPoint){
-
-		LinkedList<Point> path = new LinkedList<Point>();
-		
-		Point p = endPoint;
-		
+	private LinkedList<Point2D> constructPath(Point2D start, Point2D endPoint){
+		LinkedList<Point2D> path = new LinkedList<Point2D>();	
+		Point2D p = endPoint;
 		
 		while(p != start) {
 			path.addFirst(p);
@@ -175,65 +161,53 @@ public class EdgePlanner {
 		
 		path.addFirst(start);	
 		return path;
-		
 	}
 	
-	private LinkedList<Point> AStar(Point start, List<Point> targets){
-		
-		
+	private LinkedList<Point2D> AStar(Point2D start, List<Point2D> targets){
 		fscoreComparator comp = new fscoreComparator();
-		PriorityQueue<Point> openSet = new PriorityQueue<Point>(comp);
+		PriorityQueue<Point2D> openSet = new PriorityQueue<Point2D>(comp);
 		openSet.add(start);
 		
-		cameFrom = new HashMap<Point,Point>();
-		
-		gscore = new HashMap<Point, Double>();
+		cameFrom = new HashMap<Point2D, Point2D>();
+		gscore = new HashMap<Point2D, Double>();
 		gscore.put(start, 0.0);
 		
-		fscore = new HashMap<Point, Double>();
+		fscore = new HashMap<Point2D, Double>();
 		fscore.put(start, null);
-		
 		cameFrom.put(start,start);
 		
-		int it = 0;
+//		int it = 0;
 		while (!openSet.isEmpty()) {
-			
-			
-			
 			//edgeGrid.setGridValues(targetGeom.getRectangle(), 0);
 			//edgeGrid.setGridValues(originGeom.getRectangle(), 0);
 			
-			Point current = openSet.remove();
+			Point2D current = openSet.remove();
 			
-			if(it++ > maxIterations)
-				edgeGrid.setGridValues(targetGeom.getRectangle(), 0);
-				edgeGrid.setGridValues(originGeom.getRectangle(), 0);
-			
+//			if(it++ > maxIterations) {
+//				grid.setGridValues(targetGeom.getRectangle(), 0);
+//				grid.setGridValues(originGeom.getRectangle(), 0);
+//			}
+				
 			//if(log)
 			//	System.out.println(current.toString());
 			
-			if(intersectsRectangle(targetGeom.getRectangle(), current)) {
+			if(intersectsRectangle(targetCell, current)) {
 				return constructPath(start, cameFrom.get(current));
 			}
 			
-			List<Point> neighbours = getNeighbours(current);
+			List<Point2D> neighbours = getNeighbours(current);
 			
-			for(Point neighbour : neighbours){
+			for(Point2D neighbour : neighbours){
 
 				double t_gscore = gscore.getOrDefault(current, Double.MAX_VALUE) + d(current, neighbour) + velocityPenality(current, neighbour);
 				
 				if (t_gscore < gscore.getOrDefault(neighbour, Double.MAX_VALUE)) {
-					
-					
 					cameFrom.put(neighbour, current);
 					gscore.put(neighbour, t_gscore);
 					fscore.put(neighbour, t_gscore + h(neighbour));
 					
 					if(!openSet.contains(neighbour)) 
 						openSet.add(neighbour);
-
-					
-					
 				}
 								
 			}
@@ -244,54 +218,44 @@ public class EdgePlanner {
 	}
 	
 	
-	private class fscoreComparator implements Comparator<Point>{
+	private class fscoreComparator implements Comparator<Point2D>{
 
 		@Override
-		public int compare(Point o1, Point o2) {
+		public int compare(Point2D o1, Point2D o2) {
 			return Double.compare(fscore.getOrDefault(o1, Double.MAX_VALUE), fscore.getOrDefault(o2, Double.MAX_VALUE));
 		}
 		
 	}
 	
-	private class euclidComparator implements Comparator<Point>{
+	private class euclidComparator implements Comparator<Point2D>{
+		private Point2D target;
 		
-		private Point target;
-		
-		public euclidComparator(Point target) {
+		public euclidComparator(Point2D target) {
 			this.target = target;
 		}
 
 		@Override
-		public int compare(Point o1, Point o2) {
+		public int compare(Point2D o1, Point2D o2) {
 			return Double.compare(distanceToTarget(o1), distanceToTarget(o2));
 		}
 
-		private double distanceToTarget(Point p) {
-			return Math.pow(p.x - target.x , 2) + Math.pow(p.y - target.y , 2);
+		private double distanceToTarget(Point2D p) {
+			return p.distance(target);
 		}
-	
-		
-		}
+	}
 	
 
-	public LinkedList<Point> planEdge(){
-		
-		euclidComparator comp = new euclidComparator(centerTarget);
+	public LinkedList<Point2D> planEdge(){
+		euclidComparator comp = new euclidComparator(targetCenter);
 		possibleOrigins.sort(comp);
 		
-		for(Point ori : possibleOrigins) {
-			
-			
+		for(Point2D ori : possibleOrigins) {
 			fullPath = AStar(ori, targetPoints);
 			
 			if(fullPath == null)
 				continue;
-			
-			edgeGrid.setGridValues(targetGeom.getRectangle(), Double.MAX_VALUE);
-			edgeGrid.setGridValues(originGeom.getRectangle(), Double.MAX_VALUE);
 
-			Point[] derivate = getSecondDerivate(fullPath);
-			
+			Point2D[] derivate = getSecondDerivate(fullPath);
 			LinkedList<Integer> interestingIndices = findCurves(derivate);
 			
 			if(fullPath.size() > 2 * pathCutoff) {
@@ -303,22 +267,19 @@ public class EdgePlanner {
 				interestingIndices.add(fullPath.size()-1);
 			}
 			
-			LinkedList<Point> reducedPath = new LinkedList<Point>();
+			LinkedList<Point2D> reducedPath = new LinkedList<Point2D>();
 			
 			for(int idx: interestingIndices) {
 				
 				reducedPath.add(fullPath.get(idx));
 			}
 			
-			
 			reduceWayPoints(reducedPath);
+			insertIntoGrid(reducedPath);
 			
 			return reducedPath;
 
 		}
-		
-		edgeGrid.setGridValues(targetGeom.getRectangle(), Double.MAX_VALUE);
-		edgeGrid.setGridValues(originGeom.getRectangle(), Double.MAX_VALUE);
 		
 		return null;
 		
@@ -326,35 +287,61 @@ public class EdgePlanner {
 	}
 	
 	
-	private void reduceWayPoints(LinkedList<Point> fullPath){
-		
+	private void reduceWayPoints(LinkedList<Point2D> fullPath){
 		for(int i = 0; i < fullPath.size() -1; i++){
+			Point2D currentWayPoint = fullPath.get(i);
+			Point2D nextWayPoint = fullPath.get(i+1);
 			
-			Point currentWayPoint = fullPath.get(i);
-			Point nextWayPoint = fullPath.get(i+1);
-			
-			if(currentWayPoint.distance(nextWayPoint.x, nextWayPoint.y) < minInterPointDist){
+			if(currentWayPoint.distance(nextWayPoint) < minInterPointDist){
 				fullPath.remove(i+1);			
 				i--;
 			}
-			
 		}
-		
 	}
 	
+	private void insertIntoGrid(LinkedList<Point2D> path) {
+		Point2D src = sourceCenter;
+		Iterator<Point2D> itr = path.iterator();
+		Point2D trg = itr.next();
+		
+		Envelope env = envelopeOfSegment(src, trg);
+		Point2D.Double center = new Point2D.Double(env.centre().x, env.centre().y);
+		grid.placeEdge(edge, center, env, Double.MAX_VALUE);
+		while(itr.hasNext()) {
+			src = trg;
+			trg = itr.next();
+			
+			env = envelopeOfSegment(src, trg);
+			center = new Point2D.Double(env.centre().x, env.centre().y);
+			grid.placeEdge(edge, center, env, Double.MAX_VALUE);
+		}
+	}
 	
-	private Point[] getSecondDerivate(LinkedList<Point> valueList) {
-
-		Point[] derivate = new Point[valueList.size()];
-		Point[] valueArr = valueList.toArray(new Point[0]);
+	private Envelope envelopeOfSegment(Point2D src, Point2D trg) {
+		double maxX = (src.getX()>=trg.getX())?src.getX():trg.getX();
+		double minX = (src.getX()<trg.getX())?src.getX():trg.getX();
+		if(Math.abs(maxX-minX) < edgeSize) {
+			maxX += edgeSize/2.0;
+			minX -= edgeSize/2.0;
+		}
+		
+		double maxY = (src.getY()>=trg.getY())?src.getY():trg.getY();
+		double minY = (src.getY()<trg.getY())?src.getY():trg.getY();
+		if(Math.abs(maxY-minY) < edgeSize) {
+			maxY += edgeSize/2.0;
+			minY -= edgeSize/2.0;
+		}
+		
+		return new Envelope(minX, maxX, minY, maxY);
+	}
+	
+	private Point2D[] getSecondDerivate(LinkedList<Point2D> valueList) {
+		Point2D[] derivate = new Point2D[valueList.size()];
+		Point2D[] valueArr = valueList.toArray(new Point2D[0]);
 		
 		for(int i = 1; i < valueArr.length -2 ; i++) {
-			
-			Point p = new Point();
-			
-			p.x = valueArr[i+2].x - 2 * valueArr[i+1].x + valueArr[i].x;
-			p.y = valueArr[i+2].y - 2 * valueArr[i+1].y + valueArr[i].y;
-			
+			Point2D p = new Point2D.Double(valueArr[i+2].getX() - 2 * valueArr[i+1].getX() + valueArr[i].getX(), 
+					valueArr[i+2].getY() - 2 * valueArr[i+1].getY() + valueArr[i].getY());
 			derivate[i] = p;
 		}
 		
@@ -362,21 +349,23 @@ public class EdgePlanner {
 		
 	}
 	
-	private LinkedList<Integer> findCurves(Point[] derivate){
+	private LinkedList<Integer> findCurves(Point2D[] derivate){
 		
 		LinkedList<Integer> foundIdx = new LinkedList<Integer>();
 		
 		for(int i = 2; i < derivate.length-3; i++) {
 			
-			if((derivate[i-1].x < derivate[i].x && derivate[i].x > derivate[i+1].x) || (derivate[i-1].x > derivate[i].x && derivate[i].x < derivate[i+1].x)) {		
-				if(Math.abs(derivate[i].x) >= minCurveStrength) {
+			if((derivate[i-1].getX() < derivate[i].getX() && derivate[i].getX() > derivate[i+1].getX()) 
+					|| (derivate[i-1].getX() > derivate[i].getX() && derivate[i].getX() < derivate[i+1].getX())) {		
+				if(Math.abs(derivate[i].getX()) >= minCurveStrength) {
 				foundIdx.add(i);				
 				continue;
 				}
 			}
 			
-			if((derivate[i-1].y < derivate[i].y && derivate[i].y > derivate[i+1].y) || (derivate[i-1].y > derivate[i].y && derivate[i].y < derivate[i+1].y)) {
-				if(Math.abs(derivate[i].y) >= minCurveStrength ) {
+			if((derivate[i-1].getY() < derivate[i].getY() && derivate[i].getY() > derivate[i+1].getY()) 
+					|| (derivate[i-1].getY() > derivate[i].getY() && derivate[i].getY() < derivate[i+1].getY())) {
+				if(Math.abs(derivate[i].getY()) >= minCurveStrength ) {
 				foundIdx.add(i);
 				}
 			}
