@@ -30,7 +30,7 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 	@Override
 	public void createResourcesFromPath(String pathSrc, String pathTrg) {
 		
-		if (pathSrc != " " && pathSrc != "") {
+		if (!pathSrc.equals(" ") && !pathSrc.equals("")) {
 			
 			fwd = fwd_demonstrator.apply(pathSrc);
 			
@@ -41,7 +41,7 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 			target = resourceHandler.getTargetResource();
 			
 		}else {
-			System.out.println("Path was empty...");
+			System.out.println("Path is empty...");
 		}
 	}
 	

@@ -45,7 +45,7 @@ public abstract class TGGDemonstrator {
 	
 	/*
 	 * Start the visualization and initialize the UI
-	*/
+	 */
 	public void startVisualisation(TGGDemonstrator modelLoader) {
 		graphVisualizer = new MainWindow(modelLoader);
 		graphVisualizer.run();
@@ -122,22 +122,6 @@ public abstract class TGGDemonstrator {
 	public TGGResourceHandler getResourceHandler() {
 		return resourceHandler;
 	}
-	
-	
-	//--------------------- Multi-Threading --------------------- 
-	
-	class NewModelGenerationThread extends Thread {
-        @Override public void run() {
-            while (true) {
-                if (isInterrupted()) {
-                	System.out.println("Thread with ID: " + Thread.currentThread().getId() + " is interrupted!");
-                }
-                
-                //Thread is not interrupted
-            }
-
-        }
-    }
 
 }
 

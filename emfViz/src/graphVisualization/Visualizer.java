@@ -1,6 +1,7 @@
 package graphVisualization;
 
 
+import java.awt.Component;
 import java.awt.Frame;
 import java.awt.Point;
 
@@ -164,10 +165,21 @@ public class Visualizer {
 		if (((InstanceDiagrammLoader) dataLoader).getInstanceModel() != null) {
 			this.dataLoader.loadData();
 			
+			for (Component c : frame.getComponents()) {
+				frame.remove(c);
+			}
+			
+			graph = new mxGraph();
+			graphModel = ((mxGraphModel)graph.getModel());
+			
+			
 			addStyles();
 			insertDataIntoGraph();
 			setUpLayout();
 			runLayout();
+			
+			graphComponent = new mxGraphComponent(graph);
+			frame.add(graphComponent);
 		}
 	}
 	

@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
@@ -32,11 +33,11 @@ import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
 
 import tggDemonstrator.ModelLoader_INITIAL_BWD;
 import tggDemonstrator.ModelLoader_INITIAL_FWD;
+import tggDemonstrator.ModelLoader_MODELGEN;
 import tggDemonstrator.ModelLoader_SYNC;
 import tggDemonstrator.TGGDemonstrator;
 import graphVisualization.InstanceDiagrammLoader;
 import graphVisualization.Visualizer;
-import graphVisualization.Visualizer_TGGDemonstrator;
 
 
 
@@ -221,7 +222,7 @@ public class MainWindow {
 		Group buttonGroupStandrad = new Group(comp, SWT.None);
 		
 		buttonGroupStandrad.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,true));
-		buttonGroupStandrad.setText("Standard Functionality");
+		buttonGroupStandrad.setText("Standard Functionalities");
 		buttonGroupStandrad.setLayout(new GridLayout(3, true));
 		
 		Button deleteButton = new Button(buttonGroupStandrad, SWT.PUSH);
@@ -254,7 +255,7 @@ public class MainWindow {
 		Group buttonGroupSync = new Group(comp, SWT.None);
 		
 		buttonGroupSync.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,true));
-		buttonGroupSync.setText("Standard Functionality");
+		buttonGroupSync.setText("Sync Functionalities");
 		buttonGroupSync.setLayout(new GridLayout(3, true));
 		
 		Button syncForward = new Button(buttonGroupSync, SWT.PUSH);
@@ -281,11 +282,66 @@ public class MainWindow {
 		Group buttonGroupNM = new Group(comp, SWT.None);
 		
 		buttonGroupNM.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,true));
-		buttonGroupNM.setText("New Model Functionality");
+		buttonGroupNM.setText("New Model Functionalities");
 		buttonGroupNM.setLayout(new GridLayout(3, true));
 		
-		Button next = new Button(buttonGroupNM, SWT.PUSH);
-		next.setText("Next Rule");
+		Button nextRule = new Button(buttonGroupNM, SWT.PUSH);
+		nextRule.setText("Next Rule");
+		
+		
+		Combo combo = new Combo(buttonGroupNM, SWT.DROP_DOWN | SWT.READ_ONLY);
+		
+		GridData comboGridData = new GridData(GridData.FILL_HORIZONTAL);
+		comboGridData.horizontalSpan = 2;
+		
+		combo.setLayoutData(comboGridData);
+		
+		if (modelLoader instanceof ModelLoader_MODELGEN) {
+			combo.setItems(((ModelLoader_MODELGEN)modelLoader).getRuleNames());
+			combo.setEnabled(true);
+			combo.select(0);
+		
+		}else {
+			combo.setItems(new String[]{ });
+			combo.setEnabled(false);
+		}
+		
+		nextRule.addSelectionListener(new SelectionAdapter() {
+			@Override
+            public void widgetSelected(SelectionEvent evt) {
+				
+				if (modelLoader instanceof ModelLoader_MODELGEN) {
+				
+					System.out.println("Button Next Rule is clicked...");
+					
+					((ModelLoader_MODELGEN)modelLoader).setSelectedRuleIndex(combo.getSelectionIndex());
+					
+					
+					((ModelLoader_MODELGEN)modelLoader).wakeUpThread();	
+					
+					//update Graph
+					Resource trgRs = modelLoader.getResourceHandler().getTargetResource();	
+					Resource srcRs = modelLoader.getResourceHandler().getSourceResource();
+					
+					dataTrg.setInstanceModel(trgRs);
+					dataSrc.setInstanceModel(srcRs);
+					
+					visTrg.updateGraph();
+					visSrc.updateGraph();
+					
+					frameSrc.revalidate();
+					frameSrc.repaint();
+					
+					frameTrg.revalidate();
+					frameTrg.repaint();
+					
+					combo.setItems(((ModelLoader_MODELGEN)modelLoader).getRuleNames());
+					combo.select(0);
+				}else {
+					//do nothing
+				}
+			}
+		});
 		
 		
 		shell.setSize(shellSizeX, shellSizeY);
@@ -293,9 +349,9 @@ public class MainWindow {
 		rectangleSrc = compSrc.getBounds();
 		rectangleTrg = compTrg.getBounds();
 		
-	
-        System.out.println("compTrg: " + compTrg.getBounds());
-        System.out.println("compSrc: " + compSrc.getBounds());
+		/*Only for debugging*/
+		//System.out.println("compTrg: " + compTrg.getBounds());
+        //System.out.println("compSrc: " + compSrc.getBounds());
 	}
 	
 	/*
@@ -486,16 +542,21 @@ public class MainWindow {
 	
 	/*
 	 * choose between different model loading options and execute selected choice
+	 * hint - IbexOptions are available after the specific loading model function from ModelLoader is called
 	*/
 	private void modelLocationSelection(String text) {
 		switch (text) {
 		case "Default":
 			System.out.println("selected option: " + text );
 			
+			// use this sequence of calling the methods
+			// otherwise IbexOptions could be null
+			
 			resetShell();
-			createMainWindow();
 			
 			modelLoader.loadFromDefault();
+		
+			createMainWindow();
 			
 			initialiseRelevantInstances();
 			
@@ -506,10 +567,11 @@ public class MainWindow {
 			
 			
 			resetShell();
-			createMainWindow();
 			
 			//generate a new model
-			modelLoader.generateNewModel();				
+			modelLoader.generateNewModel();	
+			
+			createMainWindow();	
 			
 			initialiseRelevantInstances();
 			
@@ -580,13 +642,11 @@ public class MainWindow {
 		dataTrg = new InstanceDiagrammLoader(trgRs, true);
 		
 		
-		visSrc = new Visualizer_TGGDemonstrator(dataSrc, frameSrc, rectangleSrc);
-		visTrg = new Visualizer_TGGDemonstrator(dataTrg, frameTrg, rectangleTrg);
+		visSrc = new TggVisualizer(dataSrc, frameSrc, rectangleSrc);
+		visTrg = new TggVisualizer(dataTrg, frameTrg, rectangleTrg);
 		
 		visSrc.init();
 		visTrg.init();
-		
-		IbexOptions options = ((ModelLoader_INITIAL_FWD)modelLoader).getOptions();
 		
 		GraphManipulator manipSrc = new GraphManipulator(visSrc, dataSrc.getInstanceModel(), dataSrc);
 		this.manipSrc = manipSrc;

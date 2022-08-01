@@ -28,13 +28,18 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 	@Override
 	public void createResourcesFromPath(String pathSrc, String pathTrg) {
 		// TODO Auto-generated method stub
-		bwd = bwd_Demonstrator.apply(pathTrg);
 		
-		options = bwd.getOptions();
-		resourceHandler = bwd.getResourceHandler();
-		
-		source = resourceHandler.getSourceResource();
-		target = resourceHandler.getTargetResource();
+		if (!pathTrg.equals(" ") && !pathTrg.equals("")) {
+			bwd = bwd_Demonstrator.apply(pathTrg);
+			
+			options = bwd.getOptions();
+			resourceHandler = bwd.getResourceHandler();
+			
+			source = resourceHandler.getSourceResource();
+			target = resourceHandler.getTargetResource();
+		}else {
+			System.out.println("Path is empty...");
+		}
 		
 	}
 
