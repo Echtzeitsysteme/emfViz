@@ -25,28 +25,19 @@ public class EdgePlanner {
 	private HashMap<Point2D, Point2D> cameFrom;
 	private HashMap<Point2D, Double> gscore;
 	private HashMap<Point2D, Double> fscore;
-	
-//	private double cellOriginBorderMargin = 0.2;
-	private double velocityPenalty =0.0000005;
-	private double aStarStepsize = 2.0;
-	private double minInterPointDist = 10.0;
-	private double minCurveStrength =2.0;
-	private double edgeSize = 5.0;
 
-//	private boolean log;
+	private double velocityPenalty =0.0000005;
+	private double aStarStepsize = 10.0;
+	private double minInterPointDist = 20.0;
+	private double minCurveStrength =2.0;
+	private double edgeSize = 15.0;
 	
 	private Grid grid;
-	
 	private Envelope bounds;
-//	private mxGeometry targetGeom;
-//	private mxGeometry originGeom;
-	//private double[][] edgeGrid;
 	
 	public LinkedList<Point2D> fullPath;
 	
 	private int pathCutoff = 3;
-	
-//	private int maxIterations = 2000;
 	
 	public EdgePlanner(Object edge, Envelope source, Envelope target, Envelope bounds, Grid grid){//RTree<String, Rectangle> blockTree) {
 		this.edge = edge;
@@ -60,14 +51,6 @@ public class EdgePlanner {
 	
 		possibleOrigins = getCellBorderPoints(sourceCenter, sourceCell);
 		targetPoints = getCellBorderPoints(targetCenter, targetCell);
-//		
-//		this.targetGeom = cellBoundsTarget;
-//		this.originGeom = cellBoundsOrigin;
-		
-//		grid.setGridValues(cellBoundsTarget.getRectangle(), 0);
-//		grid.setGridValues(originGeom.getRectangle(), 0);
-		
-		//this.log = log;
 
 	}
 	
@@ -176,20 +159,8 @@ public class EdgePlanner {
 		fscore.put(start, null);
 		cameFrom.put(start,start);
 		
-//		int it = 0;
 		while (!openSet.isEmpty()) {
-			//edgeGrid.setGridValues(targetGeom.getRectangle(), 0);
-			//edgeGrid.setGridValues(originGeom.getRectangle(), 0);
-			
 			Point2D current = openSet.remove();
-			
-//			if(it++ > maxIterations) {
-//				grid.setGridValues(targetGeom.getRectangle(), 0);
-//				grid.setGridValues(originGeom.getRectangle(), 0);
-//			}
-				
-			//if(log)
-			//	System.out.println(current.toString());
 			
 			if(intersectsRectangle(targetCell, current)) {
 				return constructPath(start, cameFrom.get(current));
@@ -198,7 +169,6 @@ public class EdgePlanner {
 			List<Point2D> neighbours = getNeighbours(current);
 			
 			for(Point2D neighbour : neighbours){
-
 				double t_gscore = gscore.getOrDefault(current, Double.MAX_VALUE) + d(current, neighbour) + velocityPenality(current, neighbour);
 				
 				if (t_gscore < gscore.getOrDefault(neighbour, Double.MAX_VALUE)) {
@@ -208,12 +178,9 @@ public class EdgePlanner {
 					
 					if(!openSet.contains(neighbour)) 
 						openSet.add(neighbour);
-				}
-								
+				}				
 			}
-
 		}
-		
 		return null;
 	}
 	
@@ -299,22 +266,26 @@ public class EdgePlanner {
 		}
 	}
 	
-	private void insertIntoGrid(LinkedList<Point2D> path) {
+	private synchronized void insertIntoGrid(LinkedList<Point2D> path) {
+		List<GridObject> gos = new LinkedList<>();
+		
 		Point2D src = sourceCenter;
 		Iterator<Point2D> itr = path.iterator();
 		Point2D trg = itr.next();
 		
 		Envelope env = envelopeOfSegment(src, trg);
 		Point2D.Double center = new Point2D.Double(env.centre().x, env.centre().y);
-		grid.placeEdge(edge, center, env, Double.MAX_VALUE);
+		gos.add(new GridObject(edge, center, env, 1));
 		while(itr.hasNext()) {
 			src = trg;
 			trg = itr.next();
 			
 			env = envelopeOfSegment(src, trg);
 			center = new Point2D.Double(env.centre().x, env.centre().y);
-			grid.placeEdge(edge, center, env, Double.MAX_VALUE);
+			gos.add(new GridObject(edge, center, env, Double.MAX_VALUE));
 		}
+		
+		grid.insertIntoTree(gos);
 	}
 	
 	private Envelope envelopeOfSegment(Point2D src, Point2D trg) {

@@ -1,9 +1,6 @@
 package graphVisualization;
 
 import java.awt.Frame;
-import java.awt.Point;
-//import java.awt.Polygon;
-//import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,6 +13,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import javax.swing.JScrollPane;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.widgets.Composite;
@@ -23,7 +22,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.Polygon;
 
 import com.mxgraph.layout.mxFastOrganicLayout;
@@ -47,7 +45,6 @@ public class Visualizer {
 	
 	private mxGraph graph;
 	private mxGraphModel graphModel;
-	private mxGraphComponent graphComponent;
 	private DataLoader dataLoader;
 	
 	private int defaultNodeWidth = 80;
@@ -63,9 +60,6 @@ public class Visualizer {
 	
 	private double xStretch ;
 	private double yStretch;
-	private double margin = 0.1;
-	private int minNodeDistanceNodes = 30;
-	private int minNodeDistanceEdges = 10;
 	
 	private ArrayList<mxGeometry> blockedAreas;
 	
@@ -77,9 +71,7 @@ public class Visualizer {
 		dataLoader.loadData();
 		
 		this.shell = shell;
-		composite = new Composite(shell, SWT.EMBEDDED | SWT.NO_BACKGROUND);
-		composite.setVisible(true);
-		frame = SWT_AWT.new_Frame(composite);
+		
 		
 		graph = new mxGraph();
 		graphModel = ((mxGraphModel)graph.getModel());
@@ -98,9 +90,13 @@ public class Visualizer {
 		setUpLayout();
 		runLayout();
 		
-		graphComponent = new mxGraphComponent(graph);
-		frame.add(graphComponent);
-		
+		GraphControl graphControl = new GraphControl(graph);
+//		graphComponent = graphControl;
+		composite = new Composite(shell, SWT.EMBEDDED | SWT.NO_BACKGROUND);
+		frame = SWT_AWT.new_Frame(composite);
+		JScrollPane sp = new JScrollPane(graphControl);
+		sp.setAutoscrolls(true);
+		frame.add(sp);
 	}
 	
 	private void addStyles() {
@@ -206,7 +202,11 @@ public class Visualizer {
 		//System.out.println("SizeY: " + String.valueOf(sizeY));
 		
 		geoFac = new GeometryFactory();
-		grid = new Grid(shellBounds, sizeX, sizeY,  minNodeDistanceNodes);
+		grid = new Grid(geoFac, new Envelope(
+				graph.getGraphBounds().getX(), 
+				graph.getGraphBounds().getX() + graph.getGraphBounds().getWidth(), 
+				graph.getGraphBounds().getY(), 
+				graph.getGraphBounds().getY() + graph.getGraphBounds().getHeight()));
 		
 		blockedAreas = new ArrayList<mxGeometry>();
 		
@@ -234,13 +234,15 @@ public class Visualizer {
 		
 		System.out.println("Placing nodes");
 		placeNodes();
-		/*
+		
 		System.out.println("Routing edges");
 		placeEdges();
-		System.out.println("Placing edge labels");
-		placeLabels();
+		
+		//System.out.println("Placing edge labels");
+		//placeLabels();
+		
 		System.out.println("Ready");
-		*/
+		
 	}
 	
 	private void transformGraphPositionToVisBounds(Point2D.Double position) {
@@ -442,35 +444,27 @@ public class Visualizer {
 						continue;
 					}
 				}
-
-				double[] xcords = new double[8];
-				double[] ycords = new double[8];
 				
-				Coordinate[] coords = new Coordinate[8];
+				Coordinate[] coords = new Coordinate[9];
 				
-				coords[0].x = source.getGeometry().getRectangle().getMinX() - workingAreaWidthMargin;
-				coords[0].y = source.getGeometry().getRectangle().getMinY() - workingAreaHeightMargin;
-				
-				coords[1].x = source.getGeometry().getRectangle().getMaxX() + workingAreaWidthMargin;
-				coords[1].y = source.getGeometry().getRectangle().getMinY() - workingAreaHeightMargin;
-				
-				coords[2].x = source.getGeometry().getRectangle().getMinX() - workingAreaWidthMargin;
-				coords[2].y = source.getGeometry().getRectangle().getMaxY() + workingAreaHeightMargin;
-				
-				coords[3].x = source.getGeometry().getRectangle().getMaxX() + workingAreaWidthMargin;
-				coords[3].y = source.getGeometry().getRectangle().getMaxY() + workingAreaHeightMargin;
-				
-				coords[4].x = terminal.getGeometry().getRectangle().getMinX() - workingAreaWidthMargin;
-				coords[4].y = terminal.getGeometry().getRectangle().getMinY() - workingAreaHeightMargin;
-				
-				coords[5].x = terminal.getGeometry().getRectangle().getMaxX() + workingAreaWidthMargin;
-				coords[5].y = terminal.getGeometry().getRectangle().getMinY() - workingAreaHeightMargin;
-				
-				coords[6].x = terminal.getGeometry().getRectangle().getMinX() - workingAreaWidthMargin;
-				coords[6].y = terminal.getGeometry().getRectangle().getMaxY() + workingAreaHeightMargin;
-				
-				coords[7].x = terminal.getGeometry().getRectangle().getMaxX() + workingAreaWidthMargin;
-				coords[7].y = terminal.getGeometry().getRectangle().getMaxY() + workingAreaHeightMargin;
+				coords[0] = new Coordinate(source.getGeometry().getRectangle().getMinX() - workingAreaWidthMargin, 
+						source.getGeometry().getRectangle().getMinY() - workingAreaHeightMargin);
+				coords[1] = new Coordinate(source.getGeometry().getRectangle().getMaxX() + workingAreaWidthMargin, 
+						source.getGeometry().getRectangle().getMinY() - workingAreaHeightMargin);
+				coords[2] = new Coordinate(source.getGeometry().getRectangle().getMinX() - workingAreaWidthMargin, 
+						source.getGeometry().getRectangle().getMaxY() + workingAreaHeightMargin);
+				coords[3] = new Coordinate(source.getGeometry().getRectangle().getMaxX() + workingAreaWidthMargin, 
+						source.getGeometry().getRectangle().getMaxY() + workingAreaHeightMargin);
+				coords[4] = new Coordinate(terminal.getGeometry().getRectangle().getMinX() - workingAreaWidthMargin, 
+						terminal.getGeometry().getRectangle().getMinY() - workingAreaHeightMargin);
+				coords[5] = new Coordinate(terminal.getGeometry().getRectangle().getMaxX() + workingAreaWidthMargin, 
+						terminal.getGeometry().getRectangle().getMinY() - workingAreaHeightMargin);
+				coords[6] = new Coordinate(terminal.getGeometry().getRectangle().getMinX() - workingAreaWidthMargin, 
+						terminal.getGeometry().getRectangle().getMaxY() + workingAreaHeightMargin);
+				coords[7] = new Coordinate(terminal.getGeometry().getRectangle().getMaxX() + workingAreaWidthMargin, 
+						terminal.getGeometry().getRectangle().getMaxY() + workingAreaHeightMargin);
+				coords[8] = new Coordinate(source.getGeometry().getRectangle().getMinX() - workingAreaWidthMargin, 
+						source.getGeometry().getRectangle().getMinY() - workingAreaHeightMargin);
 				
 				ownArea = geoFac.createPolygon(coords);
 				
@@ -554,8 +548,13 @@ public class Visualizer {
 		
 		private synchronized boolean blocked(Polygon threadArea) {
 			for(Polygon a : activeAreas) {
-				if(a.overlaps(threadArea))
-					return true;	
+				try {
+					if(a.overlaps(threadArea)) {
+						return true;
+					}
+				} catch(Exception e) {
+					return false;
+				}	
 			}
 			
 			return false;
