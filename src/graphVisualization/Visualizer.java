@@ -121,8 +121,17 @@ public class Visualizer {
 		edgeStyle.put(mxConstants.STYLE_OVERFLOW, "fill");
 		stylesheet.putCellStyle("defaultEdges", edgeStyle);
 		
+		Hashtable<String, Object> edgeStyle2 = new Hashtable<String, Object>();
+		edgeStyle2.put(mxConstants.STYLE_FONTCOLOR, "#00000");
+		edgeStyle2.put(mxConstants.STYLE_FONTSIZE, "10");
+		edgeStyle2.put(mxConstants.STYLE_FILLCOLOR, "#FF0000");
+		edgeStyle2.put(mxConstants.ALIGN_LEFT, "1");
+		edgeStyle2.put(mxConstants.STYLE_OVERFLOW, "fill");
+		stylesheet.putCellStyle("brokenEdges", edgeStyle2);
+		
 		//stylesheet.setDefaultVertexStyle(cellStyle);
 		//stylesheet.setDefaultEdgeStyle(edgeStyle);
+		
 	}
 	
 	protected void insertNodeIntoGraph(Node node, double x , double y) {
@@ -298,7 +307,7 @@ public class Visualizer {
 		
 		ArrayList<EdgePlannerThread> activeThreads = new ArrayList<EdgePlannerThread>();
 		LinkedList<Polygon> activeAreas = new LinkedList<Polygon>();
-		synchronizedWorkingAreas synAreas = new synchronizedWorkingAreas(activeAreas);
+		SynchronizedWorkingAreas synAreas = new SynchronizedWorkingAreas(activeAreas);
 		//List<Area> activeAreasSyn = Collections.synchronizedList(activeAreas);
 		
 		Set<Object> copy = new HashSet<Object>(cells.values());
@@ -315,6 +324,12 @@ public class Visualizer {
 			
 			newThread.start();
 			activeThreads.add(newThread);
+			try {
+				newThread.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 		}
 		
@@ -384,7 +399,7 @@ public class Visualizer {
 		private double workingAreaHeightMargin = 30.0;
 		private double workingAreaWidthMargin = 60.0;
 		
-		private synchronizedWorkingAreas activeAreas;
+		private SynchronizedWorkingAreas activeAreas;
 		private Polygon ownArea;
 		private HashMap<Edge, LinkedList<mxPoint>> plottedEdges;
 		
@@ -392,7 +407,7 @@ public class Visualizer {
 		private Grid grid;
 		private mxICell node;
 		
-		public EdgePlannerThread(mxGraphModel graphModel, Grid grid, mxICell cell, HashMap<Edge,LinkedList<mxPoint>> plottedEdges, synchronizedWorkingAreas activeAreas) {
+		public EdgePlannerThread(mxGraphModel graphModel, Grid grid, mxICell cell, HashMap<Edge,LinkedList<mxPoint>> plottedEdges, SynchronizedWorkingAreas activeAreas) {
 			
 			if(cell.getValue() == null)	
 				this.setName("unknown");
@@ -445,26 +460,25 @@ public class Visualizer {
 					}
 				}
 				
-				Coordinate[] coords = new Coordinate[9];
+				Coordinate[] coords = new Coordinate[5];
+				double minX = (source.getGeometry().getRectangle().getMinX()<=terminal.getGeometry().getRectangle().getMinX()) ? 
+						source.getGeometry().getRectangle().getMinX() : 
+							terminal.getGeometry().getRectangle().getMinX();
+				double maxX = (source.getGeometry().getRectangle().getMaxX()>=terminal.getGeometry().getRectangle().getMaxX()) ? 
+						source.getGeometry().getRectangle().getMaxX() : 
+							terminal.getGeometry().getRectangle().getMaxX();
+				double minY = (source.getGeometry().getRectangle().getMinY()<=terminal.getGeometry().getRectangle().getMinY()) ? 
+						source.getGeometry().getRectangle().getMinY() : 
+							terminal.getGeometry().getRectangle().getMinY();
+				double maxY = (source.getGeometry().getRectangle().getMaxY()>=terminal.getGeometry().getRectangle().getMaxY()) ? 
+						source.getGeometry().getRectangle().getMaxY() : 
+							terminal.getGeometry().getRectangle().getMaxY();
 				
-				coords[0] = new Coordinate(source.getGeometry().getRectangle().getMinX() - workingAreaWidthMargin, 
-						source.getGeometry().getRectangle().getMinY() - workingAreaHeightMargin);
-				coords[1] = new Coordinate(source.getGeometry().getRectangle().getMaxX() + workingAreaWidthMargin, 
-						source.getGeometry().getRectangle().getMinY() - workingAreaHeightMargin);
-				coords[2] = new Coordinate(source.getGeometry().getRectangle().getMinX() - workingAreaWidthMargin, 
-						source.getGeometry().getRectangle().getMaxY() + workingAreaHeightMargin);
-				coords[3] = new Coordinate(source.getGeometry().getRectangle().getMaxX() + workingAreaWidthMargin, 
-						source.getGeometry().getRectangle().getMaxY() + workingAreaHeightMargin);
-				coords[4] = new Coordinate(terminal.getGeometry().getRectangle().getMinX() - workingAreaWidthMargin, 
-						terminal.getGeometry().getRectangle().getMinY() - workingAreaHeightMargin);
-				coords[5] = new Coordinate(terminal.getGeometry().getRectangle().getMaxX() + workingAreaWidthMargin, 
-						terminal.getGeometry().getRectangle().getMinY() - workingAreaHeightMargin);
-				coords[6] = new Coordinate(terminal.getGeometry().getRectangle().getMinX() - workingAreaWidthMargin, 
-						terminal.getGeometry().getRectangle().getMaxY() + workingAreaHeightMargin);
-				coords[7] = new Coordinate(terminal.getGeometry().getRectangle().getMaxX() + workingAreaWidthMargin, 
-						terminal.getGeometry().getRectangle().getMaxY() + workingAreaHeightMargin);
-				coords[8] = new Coordinate(source.getGeometry().getRectangle().getMinX() - workingAreaWidthMargin, 
-						source.getGeometry().getRectangle().getMinY() - workingAreaHeightMargin);
+				coords[0] = new Coordinate(minX, minY);
+				coords[1] = new Coordinate(minX, maxY);
+				coords[2] = new Coordinate(maxX, maxY);
+				coords[3] = new Coordinate(maxX, minY);
+				coords[4] = new Coordinate(minX, minY);
 				
 				ownArea = geoFac.createPolygon(coords);
 				
@@ -498,6 +512,8 @@ public class Visualizer {
 				LinkedList<Point2D> edgePath = edgePlanner.planEdge();
 				
 				if(edgePath == null) {
+					edgeGraph.setStyle("brokenEdges");
+					graphModel.setStyle(edgeGraph, "brokenEdges");
 					activeAreas.deallocateWorkingArea(ownArea);
 					continue;
 				}
@@ -519,12 +535,12 @@ public class Visualizer {
 		
 	}
 	
-	public class synchronizedWorkingAreas{
+	public class SynchronizedWorkingAreas{
 		
 		private List<Polygon> activeAreas;
 		private List<Long> activeThreads;
 		
-		public synchronizedWorkingAreas(LinkedList<Polygon> areas) {
+		public SynchronizedWorkingAreas(LinkedList<Polygon> areas) {
 			activeAreas = areas;
 			activeThreads = new LinkedList<Long>();
 			//waitingThreads = new LinkedList<Long>();

@@ -19,7 +19,7 @@ import com.mxgraph.util.mxRectangle;
 public class Grid {
 	public static final double EPS = 0.0001;
 	private GeometryFactory geoFac;
-	private STRtree qtree;
+	private STRtree rTree;
 	private Envelope bounds;
 	double margin = 0.1;
 
@@ -28,18 +28,18 @@ public class Grid {
 
 	public Grid(GeometryFactory geoFac, Envelope bounds) {
 		this.geoFac = geoFac;
-		qtree = new STRtree(4);
+		rTree = new STRtree(4);
 		this.bounds = bounds;
 	}
 
 	public double getCostForArea(Envelope envelope) {
-		if(qtree.isEmpty())
+		if(rTree.isEmpty())
 			return 0.0;
 
 		double cost = 0.0;
 
 		@SuppressWarnings("unchecked")
-		List<Object> query = qtree.query(envelope);
+		List<Object> query = rTree.query(envelope);
 		for (Object object : query) {
 			GridObject go = (GridObject) object;
 			if (go.object() instanceof mxCell cell) {
@@ -61,34 +61,30 @@ public class Grid {
 	
 	@SuppressWarnings({ "unchecked"})
 	public synchronized void insertIntoTree(GridObject go) {
-		System.out.println("#Pre-Insert: d="+qtree.depth()+", n="+qtree.size());
-		if(qtree.isEmpty()) {
-			qtree.insert(go.envolope(), go);
+		if(rTree.isEmpty()) {
+			rTree.insert(go.envolope(), go);
 		} else {
 			STRtree tree = new STRtree();
-			flattenTreeItems(qtree.itemsTree().stream())
+			flattenTreeItems(rTree.itemsTree().stream())
 			.forEach(itm -> tree.insert(((GridObject)itm).envolope(), itm));
 			tree.insert(go.envolope(), go);
-			qtree = tree;
-			qtree.build();
+			rTree = tree;
+			rTree.build();
 		}
-		System.out.println("Post-Insert: d="+qtree.depth()+", n="+qtree.size());
 	}
 	
 	@SuppressWarnings({ "unchecked"})
 	public synchronized void insertIntoTree(List<GridObject> gos) {
-		System.out.println("#Pre-Insert: d="+qtree.depth()+", n="+qtree.size());
-		if(qtree.isEmpty()) {
-			gos.forEach(go -> qtree.insert(go.envolope(), go));
+		if(rTree.isEmpty()) {
+			gos.forEach(go -> rTree.insert(go.envolope(), go));
 		} else {
 			STRtree tree = new STRtree();
-			flattenTreeItems(qtree.itemsTree().stream())
+			flattenTreeItems(rTree.itemsTree().stream())
 			.forEach(itm -> tree.insert(((GridObject)itm).envolope(), itm));
 			gos.forEach(go -> tree.insert(go.envolope(), go));
-			qtree = tree;
-			qtree.build();
+			rTree = tree;
+			rTree.build();
 		}
-		System.out.println("Post-Insert: d="+qtree.depth()+", n="+qtree.size());
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -113,7 +109,6 @@ public class Grid {
 			Envelope insert = Quadtree.ensureExtent(env, margin);
 			GridObject go = new GridObject(object, pos, insert, Double.MAX_VALUE);
 			insertIntoTree(go);
-			System.out.println("Post-Insert: d="+qtree.depth()+", n="+qtree.size());
 			return new mxPoint(pos.x, pos.y);
 		} else {
 			// Search in areas around the initial estimate within a certain radius
