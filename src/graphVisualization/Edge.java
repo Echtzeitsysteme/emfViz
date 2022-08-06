@@ -22,6 +22,9 @@ public class Edge {
 	public EReference ref;
 	public EObject source;
 	public EObject target;
+	
+	public boolean ignored;
+
 
 	public Edge(String styleCategory, EObject source, EObject target, EReference ref) {
 		//this.id = ref;//sourceNID + label + targetNID;
@@ -33,6 +36,8 @@ public class Edge {
 		this.ref = ref;
 		this.source = source;
 		this.target = target;
+		this.ignored = false;
+
 	}
 	
 	public Edge(EObject source, EObject target, EReference ref) {

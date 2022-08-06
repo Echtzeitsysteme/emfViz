@@ -41,6 +41,7 @@ public class VisContentAdapter extends EContentAdapter {
 		System.out.println(notification);
 
 		preProcessNotification(notification);
+		vis.runIncrementalLayout();
 	}
 
 	// here we search for newly added elements that already exist in our graph
@@ -83,6 +84,8 @@ public class VisContentAdapter extends EContentAdapter {
 			}
 			break;
 		}
+		
+		
 	}
 
 	public void addObject(Object obj) {
@@ -151,8 +154,10 @@ public class VisContentAdapter extends EContentAdapter {
 				handleSetNotification(notification);
 				break;
 			}
+			
 		}
 
+		vis.runIncrementalLayout();
 		// clear cache for next iteration
 		resetCache();
 	}

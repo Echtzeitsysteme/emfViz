@@ -13,13 +13,13 @@ public abstract class DataLoader {
 	protected DataLoader() {
 		
 		nodes = new HashSet<Node>();
-		edges = new HashMap<Edge, Edge>();
+		edges = new HashMap<Integer, Edge>();
 		//modelToGraphEdges = new HashMap<Integer,Edge>();
 	}
 
 	//public HashMap<String, String> edgeOpposites;
 	public Collection<Node> nodes;
-	public Map<Edge,Edge> edges;
+	public Map<Integer,Edge> edges;
 	
 	//public Map<Integer,Edge> modelToGraphEdges;
 	

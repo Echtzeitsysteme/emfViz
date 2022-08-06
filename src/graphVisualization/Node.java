@@ -13,11 +13,13 @@ public class Node {
 	public String name;
 	public String styleCategory;
 	public transient EObject eobj;
+	public boolean ignored;
 
 	public Node(String styleCategory, EObject eobj) {
 		this.name = eobj.eClass().getName();
 		this.styleCategory = styleCategory;
 		this.eobj = eobj;
+		this.ignored = false;
 	}
 	
 	public Node(EObject eobj) {

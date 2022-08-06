@@ -55,7 +55,7 @@ public class ClassDiagrammLoader extends DataLoader {
 						
 					
 	
-						edges.put(visEdge, visEdge);
+						edges.put(visEdge.hashCode(), visEdge);
 					}
 					
 				}

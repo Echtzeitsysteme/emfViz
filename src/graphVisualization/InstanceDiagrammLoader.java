@@ -51,7 +51,7 @@ public class InstanceDiagrammLoader extends DataLoader {
 						visEdge.setOppositeId(content.eGet(f).toString()+opp.getName()+content.toString());
 					}
 					
-					edges.put(visEdge, visEdge);
+					edges.put(visEdge.hashCode(), visEdge);
 
 				}
 				else {
@@ -68,7 +68,7 @@ public class InstanceDiagrammLoader extends DataLoader {
 						visEdge.setOppositeId(oMulti.toString() + opp.getName() + content.toString());
 					}
 					
-					edges.put(visEdge, visEdge);
+					edges.put(visEdge.hashCode(), visEdge);
 
 				}
 			}	
