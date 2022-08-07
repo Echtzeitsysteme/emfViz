@@ -52,6 +52,8 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 		source = resourceHandler.getSourceResource();
 		target = resourceHandler.getTargetResource();
 		
+		loadingOption = LoadingOption.SelectedResource;
+		
 	}
 
 	@Override
@@ -69,6 +71,8 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 		
 		source = resourceHandler.getSourceResource();
 		target = resourceHandler.getTargetResource();
+		
+		loadingOption = LoadingOption.Default;
 		
 	}
 
@@ -90,6 +94,7 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 		source = resourceHandler.getSourceResource();
 		target = resourceHandler.getTargetResource();
 		
+		loadingOption = LoadingOption.NewModel;
 		
 		// create empty models  -- falsches vorgehen! --> boolean im constructor im modelgen zur unterscheidung zw. load und createResource
 		
@@ -168,12 +173,13 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 
 
 class ModelgenThread extends Thread{
-
 	
 	private MODELGEN modelgen;
 	private int ruleIndex;
 	
 	private Set<ITGGMatch> matches = new HashSet<> ();
+	
+	
 	
 	public ModelgenThread(MODELGEN m) {
 		this.modelgen = m;
@@ -191,7 +197,8 @@ class ModelgenThread extends Thread{
 		while (true) {
 			//do something
 			System.out.println("Thread is running!");
-		}*/
+		}
+		*/
 	}
 	
 	

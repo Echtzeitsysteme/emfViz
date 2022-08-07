@@ -285,10 +285,11 @@ public class MainWindow {
 		buttonGroupNM.setText("New Model Functionalities");
 		buttonGroupNM.setLayout(new GridLayout(3, true));
 		
+		/*Create a button to execute the next rule*/
 		Button nextRule = new Button(buttonGroupNM, SWT.PUSH);
 		nextRule.setText("Next Rule");
 		
-		
+		/*Dropdown menu to select the next rule*/
 		Combo combo = new Combo(buttonGroupNM, SWT.DROP_DOWN | SWT.READ_ONLY);
 		
 		GridData comboGridData = new GridData(GridData.FILL_HORIZONTAL);
@@ -296,15 +297,19 @@ public class MainWindow {
 		
 		combo.setLayoutData(comboGridData);
 		
-		if (modelLoader instanceof ModelLoader_MODELGEN) {
+		if (modelLoader instanceof ModelLoader_MODELGEN && modelLoader.getLoadingOption() == modelLoader.getLoadingOption().NewModel) {
+			nextRule.setEnabled(true);
+			
 			combo.setItems(((ModelLoader_MODELGEN)modelLoader).getRuleNames());
 			combo.setEnabled(true);
 			combo.select(0);
-		
 		}else {
+			nextRule.setEnabled(false);
+			
 			combo.setItems(new String[]{ });
 			combo.setEnabled(false);
 		}
+		
 		
 		nextRule.addSelectionListener(new SelectionAdapter() {
 			@Override

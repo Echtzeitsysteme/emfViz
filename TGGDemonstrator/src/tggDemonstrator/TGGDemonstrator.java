@@ -1,32 +1,19 @@
 package tggDemonstrator;
 
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.function.Function;
-
 import org.eclipse.emf.ecore.resource.Resource;
-import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGENStopCriterion;
+
 import org.emoflon.ibex.tgg.operational.strategies.modules.IbexExecutable;
 import org.emoflon.ibex.tgg.operational.strategies.modules.TGGResourceHandler;
-import org.emoflon.ibex.tgg.operational.strategies.sync.INITIAL_BWD;
-import org.emoflon.ibex.tgg.operational.strategies.sync.INITIAL_FWD;
-import org.emoflon.ibex.tgg.operational.strategies.sync.SYNC;
-import org.emoflon.ibex.tgg.operational.updatepolicy.IUpdatePolicy;
+import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
 
 import userInterface.MainWindow;
 
-import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
-import org.emoflon.ibex.tgg.operational.matches.ITGGMatch;
-import org.emoflon.ibex.tgg.operational.matches.ImmutableMatchContainer;
-import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGEN;
-
 public abstract class TGGDemonstrator {
 	
-	private MODELGEN modelgen;
+	
+	public enum LoadingOption {Default, NewModel, SelectedResource};
+	protected LoadingOption loadingOption;
 		
 	protected IbexOptions options;
 	protected TGGResourceHandler resourceHandler;
@@ -38,6 +25,11 @@ public abstract class TGGDemonstrator {
 	
 	MainWindow graphVisualizer;
 	
+	/*
+	 * Class constructor
+	 * @param	pP	directory of the project
+	 * @param	wP	directory of the workspace
+	 */
 	public TGGDemonstrator (String pP, String wP) {
 		projectPath = pP;
 		workspacePath = wP;
@@ -52,15 +44,13 @@ public abstract class TGGDemonstrator {
 	}	
 	
 
+	//--------------------- Abstract Methods --------------------------- 
+	
 	/*
-	 * generate a new Model
-	 * this method works only if executable is from type MODELGEN 
+	 * Generates a new Model
+	 * this method should works only if the executable is from type MODELGEN 
 	 */
 	public abstract void generateNewModel();
-	
-	
-	//--------------------- Abstract Methods --------------------- 
-	
 	
 	/*
 	 * Perform loadModels operation from default locations: /instances/src.xmi  /instances/trg.xmi
@@ -97,30 +87,37 @@ public abstract class TGGDemonstrator {
 		this.target = target;
 	}
 	/*
-	 * Return target resource
+	 * Returns target resource
 	 */
 	public Resource getTarget() {
 		return target;
 	}
 	/*
-	 * Return IbexExecutable
+	 * Returns IbexExecutable
 	 */
 	public IbexExecutable getExectuable() {
 		return options.executable();
 	}
 	
 	/*
-	 * Return IbexOptions
+	 * Returns IbexOptions
 	 */
 	public IbexOptions getOptions() {
 		return options;
 	}
 	
 	/*
-	 * Return TGGResourceHandler instance
+	 * Returns TGGResourceHandler instance
 	 */
 	public TGGResourceHandler getResourceHandler() {
 		return resourceHandler;
+	}
+	
+	/*
+	 * Returns value of loadingOption
+	 */
+	public LoadingOption getLoadingOption() {
+		return loadingOption;
 	}
 
 }

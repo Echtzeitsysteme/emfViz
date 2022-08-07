@@ -7,6 +7,8 @@ import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
 import org.emoflon.ibex.tgg.operational.strategies.modules.TGGResourceHandler;
 import org.emoflon.ibex.tgg.operational.strategies.sync.INITIAL_BWD;
 
+import tggDemonstrator.TGGDemonstrator.LoadingOption;
+
 
 public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 	
@@ -37,6 +39,8 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 			
 			source = resourceHandler.getSourceResource();
 			target = resourceHandler.getTargetResource();
+			
+			loadingOption = LoadingOption.SelectedResource;
 		}else {
 			System.out.println("Path is empty...");
 		}
@@ -53,6 +57,8 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 		
 		source = resourceHandler.getSourceResource();
 		target = resourceHandler.getTargetResource();
+		
+		loadingOption = LoadingOption.Default;
 		
 	}
 	
