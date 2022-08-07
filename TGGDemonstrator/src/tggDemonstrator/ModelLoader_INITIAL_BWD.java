@@ -7,6 +7,8 @@ import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
 import org.emoflon.ibex.tgg.operational.strategies.modules.TGGResourceHandler;
 import org.emoflon.ibex.tgg.operational.strategies.sync.INITIAL_BWD;
 
+import tggDemonstrator.TGGDemonstrator.LoadingOption;
+
 
 public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 	
@@ -18,19 +20,30 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 	public ModelLoader_INITIAL_BWD (Function<String, INITIAL_BWD> bwd, String pP, String wP) {
 		super(pP, wP);
 		
+		System.out.println("Initialize ModelLoader_INITIAL_BWD");
 		bwd_Demonstrator = bwd;
+		
+		
+		startVisualisation(this);
 	}
 
 	@Override
 	public void createResourcesFromPath(String pathSrc, String pathTrg) {
 		// TODO Auto-generated method stub
-		bwd = bwd_Demonstrator.apply(pathTrg);
 		
-		options = bwd.getOptions();
-		resourceHandler = bwd.getResourceHandler();
-		
-		source = resourceHandler.getSourceResource();
-		target = resourceHandler.getTargetResource();
+		if (!pathTrg.equals(" ") && !pathTrg.equals("")) {
+			bwd = bwd_Demonstrator.apply(pathTrg);
+			
+			options = bwd.getOptions();
+			resourceHandler = bwd.getResourceHandler();
+			
+			source = resourceHandler.getSourceResource();
+			target = resourceHandler.getTargetResource();
+			
+			loadingOption = LoadingOption.SelectedResource;
+		}else {
+			System.out.println("Path is empty...");
+		}
 		
 	}
 
@@ -45,8 +58,19 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 		source = resourceHandler.getSourceResource();
 		target = resourceHandler.getTargetResource();
 		
+		loadingOption = LoadingOption.Default;
+		
 	}
 	
+	@Override
+	public void generateNewModel() {
+		return;
+	}
+	
+	
+	/*
+	 * backward translation of the target model
+	 */	
 	public void backward() {
 		try {
 			bwd.backward();

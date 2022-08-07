@@ -15,5 +15,5 @@ public abstract class DataLoader {
 	public ArrayList<Node> nodes;
 	public HashMap<String, ArrayList<Edge>> edges;
 	
-	protected abstract void loadData();
+	public abstract void loadData();
 }

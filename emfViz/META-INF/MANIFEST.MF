@@ -6,6 +6,7 @@ Bundle-Version: 1.0.0.qualifier
 Automatic-Module-Name: emfViz
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: com.mxgraph.model,
+ com.mxgraph.swing,
  com.mxgraph.view,
  graphVisualization
 Require-Bundle: org.eclipse.emf.common;bundle-version="2.23.0",

@@ -1,4 +1,4 @@
-package userInterface;
+package visualisation;
 
 import java.awt.*;
 import java.awt.event.*; 

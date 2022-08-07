@@ -12,8 +12,12 @@ public class ModelLoader_SYNC extends TGGDemonstrator{
 	public ModelLoader_SYNC(Function<String, SYNC> sync, String pP, String wP) {
 		super(pP, wP);
 		
+		
+		System.out.println("Initialize ModelLoader_SYNC");
 		sync_demonstrator	= sync;
 		
+		
+		startVisualisation(this);
 	}
 	
 	
@@ -25,6 +29,12 @@ public class ModelLoader_SYNC extends TGGDemonstrator{
 
 	@Override
 	public void loadFromDefault() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void generateNewModel() {
 		// TODO Auto-generated method stub
 		
 	}

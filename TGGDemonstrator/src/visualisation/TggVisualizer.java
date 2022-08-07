@@ -1,27 +1,31 @@
-package graphVisualization;
+package visualisation;
 
 import java.awt.Frame;
 import java.awt.geom.Point2D;
 
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Shell;
 
 import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.view.mxGraph;
 
+import graphVisualization.DataLoader;
+import graphVisualization.Visualizer;
 
-public class Visualizer_TGGDemonstrator extends Visualizer {
+public class TggVisualizer extends Visualizer{
 
-private Frame frame;
 	
-	
-	public Visualizer_TGGDemonstrator(DataLoader dataLoader, Frame frame, Rectangle r) {
+	public TggVisualizer(DataLoader dataLoader, Frame frame, Rectangle r) {
 		super(dataLoader, null);
-	
-		shellBounds = r;
-		this.frame = frame;		
 		
-	}	
+		shellBounds = r;
+		this.frame = frame;	
+	}
+	
+	/*
+	 * create a mxGraph from instanceModel and add this graph to a given frame
+	 */
 	
 	@Override
 	public void init () {
@@ -41,4 +45,5 @@ private Frame frame;
 		graphComponent = new mxGraphComponent(graph);
 		frame.add(graphComponent);
 	}
+
 }
