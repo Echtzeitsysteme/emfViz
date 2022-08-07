@@ -1,40 +1,18 @@
-package userInterface;
-
-
-
-
-
-import java.awt.Frame;
+package visualisation;
 
 
 import org.eclipse.emf.ecore.resource.Resource;
 
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.awt.SWT_AWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Text;
-import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
 
-import tggDemonstrator.ModelLoader_INITIAL_BWD;
-import tggDemonstrator.ModelLoader_INITIAL_FWD;
-import tggDemonstrator.ModelLoader_MODELGEN;
-import tggDemonstrator.ModelLoader_SYNC;
+import java.awt.Frame;
+
 import tggDemonstrator.TGGDemonstrator;
 import graphVisualization.InstanceDiagrammLoader;
 import graphVisualization.Visualizer;
@@ -42,16 +20,13 @@ import graphVisualization.Visualizer;
 
 
 
-public class MainWindow {
+public class DisplayHandler {
 
 	
 	private Display display;
 	private Shell shell;
 	
 	private TGGDemonstrator modelLoader;
-	
-	private int shellSizeX;
-	private int shellSizeY;
 	
 	private Frame frameSrc;
 	private Frame frameTrg;
@@ -68,21 +43,26 @@ public class MainWindow {
 	private Visualizer visSrc;
 	private Visualizer visTrg;
 	
+	private TggLoadModelDisplay loadModelDisplay;
+	private TggVisualizerDisplay tggVisualizerDisplay;
+	private TggSelectResourceDisplay tggSelectResourceDisplay;
+
 	
 	/*
 	 * Constructor - needs a ModelLoader instance
 	 */
-	public MainWindow (TGGDemonstrator modelLoader) {
+	public DisplayHandler (TGGDemonstrator modelLoader) {
 		
 		
 		this.modelLoader = modelLoader;
 		
 		
 		//init display and shell
-		InitUI();
+		if (display == null || shell == null)
+			InitUI();
 		
 		//open start window
-		createResourcLoaderWindow();	
+		openTggLoadModelDisplay();
 	}
 	
 	
@@ -123,7 +103,7 @@ public class MainWindow {
 	 * Removes all widgets from the shell.
 	 * This method is called every time before a new window is opened.
 	 */
-	private void resetShell() {
+	public void resetShell() {
 		for (Control kid : shell.getChildren()) {
 	          kid.dispose();
 	    }
@@ -135,501 +115,6 @@ public class MainWindow {
 	public Shell getShell() {
 		return shell;
 	}
-	/*
-	 * Return model loader instance
-	 */
-	/*public TGGDemonstrator getModelLoader() {
-		return modelLoader;
-	}*/
-	
-	
-	/*
-	 * This is the main window where source and target graph are visualized
-	 */
-	public void createMainWindow() {
-		
-		/* BASIC LAYOUT
-		 * 
-		 * 				shellSizeX
-		 * 	_________________________________
-		 *	|		//area for buttons		|	
-		 * 	|								|	shellSizeY * 0.1
-		 * 	|_______________________________|
-		 * 	|				|				|
-		 * 	|				|				|
-		 * 	|				|				|	
-		 * 	|	//graph		|	//graph		|	
-		 * 	|	//source	|	//target	|	shellSizeY * 0.9
-		 * 	|				|				|
-		 * 	|				|				|
-		 * 	|				|				|
-		 * 	|_______________|_______________|
-		 * 
-		 * 
-		 */
-		
-		//initialize shell layout		
-		shellSizeX = display.getClientArea().width;
-		shellSizeY = display.getClientArea().height;
-		
-		GridLayout grid = new GridLayout();
-		grid.numColumns = 2;
-		grid.makeColumnsEqualWidth = true;
-		
-		shell.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY));
-		
-		
-		shell.setLayout(grid);
-		
-		Composite comp = new Composite(shell, SWT.TOP);
-		//comp.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY));
-		
-		GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
-		gridData.heightHint = (int)(shellSizeY * 0.1);
-		gridData.horizontalSpan = 2;
-		
-		comp.setLayoutData(gridData);
-		comp.setVisible(true);
-		comp.setLayout(new GridLayout(3,true));
-		
-		Composite compSrc = new Composite(shell, SWT.BOTTOM | SWT.EMBEDDED);
-		compSrc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
-		
-		GridData gridDataSrc = new GridData(GridData.FILL_HORIZONTAL);
-		gridDataSrc.heightHint = (int)(shellSizeY * 0.9);
-		//gridData.widthHint = shellSizeX;
-		gridDataSrc.horizontalSpan = 1;
-		
-		compSrc.setLayoutData(gridDataSrc);
-		
-		Composite compTrg = new Composite(shell, SWT.BOTTOM |  SWT.EMBEDDED);
-		compTrg.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_GRAY));
-		
-		GridData gridDataTrg = new GridData(GridData.FILL_HORIZONTAL);
-		gridDataTrg.heightHint = (int)(shellSizeY * 0.9);
-		//gridData.widthHint = shellSizeX;
-		gridDataTrg.horizontalSpan = 1;
-		
-		compTrg.setLayoutData(gridDataTrg);
-		
-		frameSrc = SWT_AWT.new_Frame(compSrc);
-		
-		
-		//System.out.println("src1: " + frameSrc.getBounds());
-		
-		frameTrg = SWT_AWT.new_Frame(compTrg);
-		
-		Group buttonGroupStandrad = new Group(comp, SWT.None);
-		
-		buttonGroupStandrad.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,true));
-		buttonGroupStandrad.setText("Standard Functionalities");
-		buttonGroupStandrad.setLayout(new GridLayout(3, true));
-		
-		Button deleteButton = new Button(buttonGroupStandrad, SWT.PUSH);
-		deleteButton.setText("Delete");
-		deleteButton.setLayoutData(new GridData());
-		
-			
-		deleteButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-            public void widgetSelected(SelectionEvent evt) {
-				System.out.println("delete selected");
-				manipSrc.iterateModel();
-				manipTrg.iterateModel();
-			}
-		});
-		
-		//button to go back to inital window (start window)
-		Button backButton = new Button(buttonGroupStandrad, SWT.PUSH);
-		backButton.setText("Back");
-		
-		backButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-            public void widgetSelected(SelectionEvent evt) {
-				resetShell();
-				createResourcLoaderWindow();
-			}
-		});
-		
-		/*sync, initial_fwd and initial_bwd functionalities*/
-		Group buttonGroupSync = new Group(comp, SWT.None);
-		
-		buttonGroupSync.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,true));
-		buttonGroupSync.setText("Sync Functionalities");
-		buttonGroupSync.setLayout(new GridLayout(3, true));
-		
-		Button syncForward = new Button(buttonGroupSync, SWT.PUSH);
-		syncForward.setText("Sync Forward");
-		syncForward.addSelectionListener(new SelectionAdapter() {
-			@Override
-            public void widgetSelected(SelectionEvent evt) {
-				System.out.println("Start forward translating");
-				forwardTranslation();
-			}
-		});
-		
-		Button syncBackward = new Button(buttonGroupSync, SWT.PUSH);
-		syncBackward.setText("Sync Backward");
-		syncBackward.addSelectionListener(new SelectionAdapter() {
-			@Override
-            public void widgetSelected(SelectionEvent evt) {
-				System.out.println("Start backward translating");
-				backwardTranslation();
-			}
-		});
-		
-		/*new Model functionalities*/
-		Group buttonGroupNM = new Group(comp, SWT.None);
-		
-		buttonGroupNM.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,true));
-		buttonGroupNM.setText("New Model Functionalities");
-		buttonGroupNM.setLayout(new GridLayout(3, true));
-		
-		/*Create a button to execute the next rule*/
-		Button nextRule = new Button(buttonGroupNM, SWT.PUSH);
-		nextRule.setText("Next Rule");
-		
-		/*Dropdown menu to select the next rule*/
-		Combo combo = new Combo(buttonGroupNM, SWT.DROP_DOWN | SWT.READ_ONLY);
-		
-		GridData comboGridData = new GridData(GridData.FILL_HORIZONTAL);
-		comboGridData.horizontalSpan = 2;
-		
-		combo.setLayoutData(comboGridData);
-		
-		if (modelLoader instanceof ModelLoader_MODELGEN && modelLoader.getLoadingOption() == modelLoader.getLoadingOption().NewModel) {
-			nextRule.setEnabled(true);
-			
-			combo.setItems(((ModelLoader_MODELGEN)modelLoader).getRuleNames());
-			combo.setEnabled(true);
-			combo.select(0);
-		}else {
-			nextRule.setEnabled(false);
-			
-			combo.setItems(new String[]{ });
-			combo.setEnabled(false);
-		}
-		
-		
-		nextRule.addSelectionListener(new SelectionAdapter() {
-			@Override
-            public void widgetSelected(SelectionEvent evt) {
-				
-				if (modelLoader instanceof ModelLoader_MODELGEN) {
-				
-					System.out.println("Button Next Rule is clicked...");
-					
-					((ModelLoader_MODELGEN)modelLoader).setSelectedRuleIndex(combo.getSelectionIndex());
-					
-					
-					((ModelLoader_MODELGEN)modelLoader).wakeUpThread();	
-					
-					//update Graph
-					Resource trgRs = modelLoader.getResourceHandler().getTargetResource();	
-					Resource srcRs = modelLoader.getResourceHandler().getSourceResource();
-					
-					dataTrg.setInstanceModel(trgRs);
-					dataSrc.setInstanceModel(srcRs);
-					
-					visTrg.updateGraph();
-					visSrc.updateGraph();
-					
-					frameSrc.revalidate();
-					frameSrc.repaint();
-					
-					frameTrg.revalidate();
-					frameTrg.repaint();
-					
-					combo.setItems(((ModelLoader_MODELGEN)modelLoader).getRuleNames());
-					combo.select(0);
-				}else {
-					//do nothing
-				}
-			}
-		});
-		
-		
-		shell.setSize(shellSizeX, shellSizeY);
-		
-		rectangleSrc = compSrc.getBounds();
-		rectangleTrg = compTrg.getBounds();
-		
-		/*Only for debugging*/
-		//System.out.println("compTrg: " + compTrg.getBounds());
-        //System.out.println("compSrc: " + compSrc.getBounds());
-	}
-	
-	/*
-	 * Window to select between different model loading options.
-	 * It is the initial window (start window)
-	 */
-	public void createResourcLoaderWindow () {
-		
-		shellSizeX = 600;
-		shellSizeY = 180;
-		
-		shell.setLayout(new GridLayout());
-		shell.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY));
-		
-		
-		Composite composite = new Composite(shell, SWT.EMBEDDED);
-		composite.setVisible(true);
-		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,true));
-		composite.setLayout(new GridLayout());
-		
-		
-		Group modelGroup = new Group(composite, SWT.None);
-		modelGroup.setText("Select your model location:");
-		modelGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		modelGroup.setLayout(new GridLayout());
-		
-		Button defaultBT = new Button(modelGroup, SWT.RADIO);
-		defaultBT.setText("Default");
-		
-		Button newModeltBT = new Button(modelGroup, SWT.RADIO);
-		newModeltBT.setText("New Model");
-		
-		Button modelLocationBT = new Button(modelGroup, SWT.RADIO);
-		modelLocationBT.setText("Select Model");
-		
-		Button nextBT = new Button(composite, SWT.PUSH);
-		nextBT.setText("Next");
-		nextBT.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
-		
-		//generate new model is only for MODELGEN available
-		if (modelLoader instanceof ModelLoader_INITIAL_BWD || modelLoader instanceof ModelLoader_INITIAL_FWD || modelLoader instanceof ModelLoader_SYNC) {
-			newModeltBT.setEnabled(false);
-		}
-		
-
-		nextBT.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent pSelectionEvent) {
-				for (Control bt : modelGroup.getChildren()) {
-					if (((Button)bt).getSelection()) {
-						modelLocationSelection(((Button)bt).getText());
-						break;
-					}
-				}
-			}
-		});
-		
-		shell.setSize(shellSizeX, shellSizeY);
-	}
-	
-	/*
-	 * This window will open when option "Select Model" is chosen.
-	 * Window to determine location of source and target model
-	*/
-	public void CreateDirectorySelectionWindow() {
-		shellSizeX = 450;
-		shellSizeY = 280;
-		
-		
-		shell.setLayout(new GridLayout());
-		shell.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY));
-		
-		Composite composite = new Composite(shell, SWT.EMBEDDED);
-		composite.setVisible(true);
-		
-		GridData gridData1 = new GridData(GridData.FILL_BOTH);
-		//gridData1.horizontalSpan = 3;
-		
-		composite.setLayoutData(gridData1);
-		composite.setLayout(new GridLayout());
-		
-		
-		
-		Group srcGroup = new Group(composite, SWT.None);
-		srcGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		srcGroup.setLayout(new GridLayout(2, false));
-		
-		Group trgGroup = new Group(composite, SWT.None);
-		trgGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));	
-		trgGroup.setLayout(new GridLayout(2, false));
-		
-		//create widgets for source location
-		Label srcLabel = new Label(srcGroup, SWT.NONE);
-		srcLabel.setText("Select your source xmi:");
-		
-		Button srcBT = new Button(srcGroup, SWT.PUSH);
-		srcBT.setText("Source xmi");
-		srcBT.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
-		
-		Text srcTxt = new Text(srcGroup, SWT.NONE);
-		
-		GridData gridDataSrc = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gridDataSrc.widthHint = 300;
-				
-		srcTxt.setLayoutData(gridDataSrc);
-		
-		//create widgets for target location		
-		Label trgLabel = new Label(trgGroup, SWT.NONE);
-		trgLabel.setText("Select your target xmi:");
-		
-		Button trgBT = new Button(trgGroup, SWT.PUSH);
-		trgBT.setText("Target xmi");
-		trgBT.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
-		
-		Text trgTxt = new Text(trgGroup, SWT.NONE);
-		
-		GridData gridDataTrg = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gridDataTrg.widthHint = 300;
-		
-		trgTxt.setLayoutData(gridDataTrg);
-		
-		// buttons directory selection listener
-		
-		srcBT.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent pSelectionEvent) {
-				srcTxt.setText(openDirectoryDialog());
-			}
-		});
-		
-		trgBT.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent pSelectionEvent) {
-				trgTxt.setText(openDirectoryDialog());
-			}
-		});
-		
-		//control buttons / composite 
-		Composite compositeCtrl = new Composite(shell, SWT.EMBEDDED);
-		compositeCtrl.setVisible(true);
-		compositeCtrl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		compositeCtrl.setLayout(new RowLayout());
-		
-		Button nextBT = new Button(compositeCtrl, SWT.PUSH);
-		nextBT.setText("Next");
-		nextBT.setAlignment(SWT.CENTER);
-		
-		nextBT.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent pSelectionEvent) {
-				loadModelFromPath(srcTxt.getText(), trgTxt.getText());
-			}
-		});
-		
-		// button to go back to initial window
-		Button backBT = new Button(compositeCtrl, SWT.PUSH);
-		backBT.setText("Back");
-		backBT.setAlignment(SWT.CENTER);
-		
-		//go back to previous window
-		backBT.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent pSelectionEvent) {
-				resetShell();
-				createResourcLoaderWindow();
-			}
-		});
-		
-		//set size of shell
-		shell.setSize(shellSizeX, shellSizeY);	
-		
-		/*
-		 * if ModelLoader is initialized by Inital_BWD_App or Inital_FWD_App
-		 * source or target model are generated from tgg.
-		 */
-		if (modelLoader instanceof ModelLoader_INITIAL_FWD)
-		{
-			trgBT.setEnabled(false);
-			trgLabel.setEnabled(false);
-			trgTxt.setEnabled(false);
-			
-		}else if(modelLoader instanceof ModelLoader_INITIAL_BWD){
-			srcBT.setEnabled(false);
-			srcLabel.setEnabled(false);
-			srcTxt.setEnabled(false);
-		}
-	}
-	
-	/*
-	 * choose between different model loading options and execute selected choice
-	 * hint - IbexOptions are available after the specific loading model function from ModelLoader is called
-	*/
-	private void modelLocationSelection(String text) {
-		switch (text) {
-		case "Default":
-			System.out.println("selected option: " + text );
-			
-			// use this sequence of calling the methods
-			// otherwise IbexOptions could be null
-			
-			resetShell();
-			
-			modelLoader.loadFromDefault();
-		
-			createMainWindow();
-			
-			initialiseRelevantInstances();
-			
-			break;
-			
-		case "New Model":
-			System.out.println("selected option: " + text );
-			
-			
-			resetShell();
-			
-			//generate a new model
-			modelLoader.generateNewModel();	
-			
-			createMainWindow();	
-			
-			initialiseRelevantInstances();
-			
-			break;
-			
-		case "Select Model":
-			System.out.println("selected option: " + text );
-			
-			resetShell();
-			CreateDirectorySelectionWindow();
-			
-			break;
-		}
-	}
-	
-	/*
-	 * start loading source and target model from selected path
-	 */
-	private void loadModelFromPath (String src, String trg) {
-		
-		modelLoader.createResourcesFromPath(src, trg);
-		
-		resetShell();
-		createMainWindow();
-		
-		initialiseRelevantInstances();
-	}
-	
-	/*
-	 *  open a directory dialog window
-	*/
-	public String openDirectoryDialog() {
-		
-		String selectedDir = "";
-		
-		FileDialog directoryDialog = new FileDialog(shell, SWT.OPEN);
-	    
-		String filterExt[] = new String[1];
-		filterExt[0]	= ".xmi";
-		
-		directoryDialog.setFilterPath(selectedDir);
-		directoryDialog.setFilterExtensions(filterExt);
-        
-        if(directoryDialog.open() != null) {
-        	
-        	String dir = directoryDialog.getFilterPath() + System.getProperty( "file.separator" ) + directoryDialog.getFileName();
-            selectedDir = dir;
-            
-            return selectedDir;
-         }
-        
-        return selectedDir;
-	}
 	
 	
 	public GraphManipulator getSrcManipulator() {
@@ -639,6 +124,44 @@ public class MainWindow {
 		return manipTrg;
 	}
 	
+	public void openTggLoadModelDisplay() {
+		resetShell();
+		
+		TggLoadModelDisplay loadModelDisplay = new TggLoadModelDisplay(this, modelLoader, display, shell);
+	}
+	
+	public void openTggVisualizerDisplay() {
+		resetShell();
+		
+		tggVisualizerDisplay = new TggVisualizerDisplay(this, modelLoader, display, shell);
+		
+		frameSrc = tggVisualizerDisplay.getSrcFrame();
+		frameTrg = tggVisualizerDisplay.getTrgFrame();
+		
+		rectangleSrc = tggVisualizerDisplay.getSrcRectangle();
+		rectangleTrg = tggVisualizerDisplay.getTrgRectangle();
+		
+		initialiseRelevantInstances();
+		
+		tggVisualizerDisplay.setGraphManipulatorSrc(manipSrc);
+		tggVisualizerDisplay.setGraphManipulatorTrg(manipTrg);
+		
+		tggVisualizerDisplay.setSrcInstanceDiagrammLoader(dataSrc);
+		tggVisualizerDisplay.setTrgInstanceDiagrammLoader(dataTrg);
+		
+		tggVisualizerDisplay.setTggSrcVisualizer(visSrc);
+		tggVisualizerDisplay.setTggTrgVisualizer(visTrg);
+	}
+	
+	public void openTggResourceSelectionDisplay() {
+		resetShell();
+		
+		tggSelectResourceDisplay = new TggSelectResourceDisplay(this, modelLoader, display, shell);
+	}
+	
+	/*
+	 * Initializes all necessary instances to start the graph visualization
+	 */
 	private void initialiseRelevantInstances() {
 		Resource srcRs = modelLoader.getSource();
 		Resource trgRs = modelLoader.getTarget();
@@ -653,46 +176,10 @@ public class MainWindow {
 		visSrc.init();
 		visTrg.init();
 		
-		GraphManipulator manipSrc = new GraphManipulator(visSrc, dataSrc.getInstanceModel(), dataSrc);
-		this.manipSrc = manipSrc;
-		GraphManipulator manipTrg = new GraphManipulator(visTrg, dataTrg.getInstanceModel(), dataTrg);
-		this.manipTrg = manipTrg;
+		manipSrc = new GraphManipulator(visSrc, dataSrc.getInstanceModel(), dataSrc);
+		manipTrg = new GraphManipulator(visTrg, dataTrg.getInstanceModel(), dataTrg);
 	}
 	
-	/*
-	 * translating forward, only call-able for INITIAL_FWD
-	 */
-	private void forwardTranslation() {
-		if (modelLoader instanceof ModelLoader_INITIAL_FWD){
-			
-			System.out.println("Translating forward...");
-			
-			((ModelLoader_INITIAL_FWD) modelLoader).forward();
-			
-			Resource trgRs = modelLoader.getTarget();			
-			
-			dataTrg.setInstanceModel(trgRs);
-			
-			visTrg.updateGraph();
-					
-		}
-	}
-	
-	private void backwardTranslation() {
-		if (modelLoader instanceof ModelLoader_INITIAL_BWD){
-			
-			System.out.println("Translating backward...");
-			
-			((ModelLoader_INITIAL_BWD) modelLoader).backward();
-			
-			Resource srcRs = modelLoader.getTarget();			
-			
-			dataSrc.setInstanceModel(srcRs);
-			
-			visSrc.updateGraph();
-					
-		}
-	}
 }
 
 

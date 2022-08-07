@@ -5,9 +5,10 @@ import org.eclipse.emf.ecore.resource.Resource;
 
 import org.emoflon.ibex.tgg.operational.strategies.modules.IbexExecutable;
 import org.emoflon.ibex.tgg.operational.strategies.modules.TGGResourceHandler;
-import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
 
-import userInterface.MainWindow;
+import visualisation.DisplayHandler;
+
+import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
 
 public abstract class TGGDemonstrator {
 	
@@ -23,7 +24,7 @@ public abstract class TGGDemonstrator {
 	protected String projectPath;
 	protected String workspacePath;
 	
-	MainWindow graphVisualizer;
+	protected DisplayHandler graphVisualizer;
 	
 	/*
 	 * Class constructor
@@ -39,7 +40,7 @@ public abstract class TGGDemonstrator {
 	 * Start the visualization and initialize the UI
 	 */
 	public void startVisualisation(TGGDemonstrator modelLoader) {
-		graphVisualizer = new MainWindow(modelLoader);
+		graphVisualizer = new DisplayHandler(modelLoader);
 		graphVisualizer.run();
 	}	
 	

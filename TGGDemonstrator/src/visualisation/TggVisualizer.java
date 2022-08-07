@@ -1,4 +1,4 @@
-package userInterface;
+package visualisation;
 
 import java.awt.Frame;
 import java.awt.geom.Point2D;
