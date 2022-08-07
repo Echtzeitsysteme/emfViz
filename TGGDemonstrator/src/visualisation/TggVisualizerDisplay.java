@@ -88,8 +88,8 @@ public class TggVisualizerDisplay {
 		 */
 		
 		//initialize shell layout		
-		shellSizeX = display.getClientArea().width;
-		shellSizeY = display.getClientArea().height;
+		shellSizeX = 1280; //display.getClientArea().width;
+		shellSizeY = 720; //display.getClientArea().height;
 		
 		GridLayout grid = new GridLayout();
 		grid.numColumns = 2;
@@ -101,7 +101,6 @@ public class TggVisualizerDisplay {
 		shell.setLayout(grid);
 		
 		Composite comp = new Composite(shell, SWT.TOP);
-		//comp.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY));
 		
 		GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
 		gridData.heightHint = (int)(shellSizeY * 0.1);
@@ -114,28 +113,29 @@ public class TggVisualizerDisplay {
 		Composite compSrc = new Composite(shell, SWT.BOTTOM | SWT.EMBEDDED);
 		compSrc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		
-		GridData gridDataSrc = new GridData(GridData.FILL_HORIZONTAL);
-		gridDataSrc.heightHint = (int)(shellSizeY * 0.9);
-		//gridData.widthHint = shellSizeX;
+		GridData gridDataSrc = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
+		//gridDataSrc.heightHint = (int)(shellSizeY * 0.9);
 		gridDataSrc.horizontalSpan = 1;
-		
+		gridDataSrc.verticalAlignment = SWT.FILL;
+
+
 		compSrc.setLayoutData(gridDataSrc);
+		
+		
 		
 		Composite compTrg = new Composite(shell, SWT.BOTTOM |  SWT.EMBEDDED);
 		compTrg.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_GRAY));
 		
-		GridData gridDataTrg = new GridData(GridData.FILL_HORIZONTAL);
-		gridDataTrg.heightHint = (int)(shellSizeY * 0.9);
-		//gridData.widthHint = shellSizeX;
+		GridData gridDataTrg = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
+		//gridDataTrg.heightHint = (int)(shellSizeY * 0.9);
 		gridDataTrg.horizontalSpan = 1;
+		gridDataTrg.verticalAlignment = SWT.FILL;
 		
 		compTrg.setLayoutData(gridDataTrg);
 		
+		
+		
 		frameSrc = SWT_AWT.new_Frame(compSrc);
-		
-		
-		//System.out.println("src1: " + frameSrc.getBounds());
-		
 		frameTrg = SWT_AWT.new_Frame(compTrg);
 		
 		Group buttonGroupStandrad = new Group(comp, SWT.None);
@@ -273,8 +273,8 @@ public class TggVisualizerDisplay {
 		rectangleTrg = compTrg.getBounds();
 		
 		/*Only for debugging*/
-		//System.out.println("compTrg: " + compTrg.getBounds());
-        //System.out.println("compSrc: " + compSrc.getBounds());
+		System.out.println("compTrg: " + compTrg.getBounds());
+        System.out.println("compSrc: " + compSrc.getBounds());
 	}
 	
 	/*
