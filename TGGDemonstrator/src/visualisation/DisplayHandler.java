@@ -103,7 +103,7 @@ public class DisplayHandler {
 	 * Removes all widgets from the shell.
 	 * This method is called every time before a new window is opened.
 	 */
-	public void resetShell() {
+	private void resetShell() {
 		for (Control kid : shell.getChildren()) {
 	          kid.dispose();
 	    }
