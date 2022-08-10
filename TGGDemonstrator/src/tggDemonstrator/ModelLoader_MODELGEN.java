@@ -14,7 +14,6 @@ import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGENStopCriterion;
 import org.emoflon.ibex.tgg.operational.updatepolicy.IUpdatePolicy;
 
 import tggDemonstrator.DataObject.Modelgeneration;
-import visualisation.TggVisualizerDisplay;
 
 
 public class ModelLoader_MODELGEN extends TGGDemonstrator {
@@ -22,13 +21,10 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 	
 	private Function<DataObject, MODELGEN> modelgen_demonstrator;
 	private MODELGEN modelgen;
-	private String[] paths	= new String[3];
 	
 	private ModelgenThread thread;
 	private int ruleIndex;
 	private Set<ITGGMatch> matches;
-	
-	private TggVisualizerDisplay vd;
 	
 	
 	public ModelLoader_MODELGEN (Function<DataObject, MODELGEN> modelgen, String pP, String wP) {	
