@@ -3,7 +3,6 @@ package tggDemonstrator;
 
 import java.io.IOException;
 import java.lang.Thread.State;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
@@ -14,13 +13,14 @@ import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGEN;
 import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGENStopCriterion;
 import org.emoflon.ibex.tgg.operational.updatepolicy.IUpdatePolicy;
 
+import tggDemonstrator.DataObject.Modelgeneration;
 import visualisation.TggVisualizerDisplay;
 
 
 public class ModelLoader_MODELGEN extends TGGDemonstrator {
 
 	
-	private Function<String[], MODELGEN> modelgen_demonstrator;
+	private Function<DataObject, MODELGEN> modelgen_demonstrator;
 	private MODELGEN modelgen;
 	private String[] paths	= new String[3];
 	
@@ -31,7 +31,7 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 	private TggVisualizerDisplay vd;
 	
 	
-	public ModelLoader_MODELGEN (Function<String[], MODELGEN> modelgen, String pP, String wP) {	
+	public ModelLoader_MODELGEN (Function<DataObject, MODELGEN> modelgen, String pP, String wP) {	
 		super(pP, wP);
 		
 		
@@ -45,11 +45,11 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 	@Override
 	public void createResourcesFromPath(String pathSrc, String pathTrg) {
 		// TODO Auto-generated method stub
-		paths[0] = pathSrc;
-		paths[1] = pathTrg;
-		paths[2] = "false";
+
 		
-		modelgen = modelgen_demonstrator.apply(paths);
+		DataObject data = new DataObject(pathSrc, pathTrg, projectPath + "/instances/corr.xmi", projectPath + "/instances/protocol.xmi", Modelgeneration.PRE_DEFiNED_MODEL);
+		
+		modelgen = modelgen_demonstrator.apply(data);
 		
 		options = modelgen.getOptions();
 		resourceHandler = modelgen.getResourceHandler();
@@ -63,13 +63,10 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 
 	@Override
 	public void loadFromDefault() {
-		// TODO Auto-generated method stub
 		
-		paths[0] = projectPath + "/instances/src.xmi";
-		paths[1] = projectPath + "/instances/trg.xmi";
-		paths[2] = "false";
+		DataObject data = new DataObject(projectPath + "/instances/src.xmi", projectPath + "/instances/trg.xmi", projectPath + "/instances/corr.xmi", projectPath + "/instances/protocol.xmi", Modelgeneration.PRE_DEFiNED_MODEL);
 		
-		modelgen = modelgen_demonstrator.apply(paths);
+		modelgen = modelgen_demonstrator.apply(data);
 		
 		options = modelgen.getOptions();
 		resourceHandler = modelgen.getResourceHandler();
@@ -87,11 +84,10 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 		
 		System.out.println("Current thread is " + Thread.currentThread().getId());
 		
-		paths[0] = projectPath + "/instances/src.xmi";
-		paths[1] = projectPath + "/instances/trg.xmi";
-		paths[2] = "true";
 		
-		modelgen = modelgen_demonstrator.apply(paths);
+		DataObject data = new DataObject(projectPath + "/instances/src.xmi", projectPath + "/instances/trg.xmi", projectPath + "/instances/corr.xmi", projectPath + "/instances/protocol.xmi", Modelgeneration.NEW_MODEL);
+		
+		modelgen = modelgen_demonstrator.apply(data);
 		
 		options = modelgen.getOptions();
 		resourceHandler = modelgen.getResourceHandler();
