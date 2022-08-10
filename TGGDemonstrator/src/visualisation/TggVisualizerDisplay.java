@@ -1,6 +1,7 @@
 package visualisation;
 
 import java.awt.Frame;
+import java.lang.Thread.State;
 
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.swt.SWT;
@@ -48,6 +49,8 @@ public class TggVisualizerDisplay {
 	
 	private Visualizer visSrc;
 	private Visualizer visTrg;
+	
+	private Combo combo;
 	
 	
 	
@@ -208,7 +211,7 @@ public class TggVisualizerDisplay {
 		nextRule.setText("Next Rule");
 		
 		/*Dropdown menu to select the next rule*/
-		Combo combo = new Combo(buttonGroupNM, SWT.DROP_DOWN | SWT.READ_ONLY);
+		combo = new Combo(buttonGroupNM, SWT.DROP_DOWN | SWT.READ_ONLY);
 		
 		GridData comboGridData = new GridData(GridData.FILL_HORIZONTAL);
 		comboGridData.horizontalSpan = 2;
@@ -260,6 +263,8 @@ public class TggVisualizerDisplay {
 					
 					combo.setItems(((ModelLoader_MODELGEN)modelLoader).getRuleNames());
 					combo.select(0);
+					
+					
 				}else {
 					//do nothing
 				}
@@ -312,6 +317,14 @@ public class TggVisualizerDisplay {
 		}
 	}
 	
+	public void disableComboBox(boolean b) {
+		if(b) {
+			combo.setEnabled(false);
+		}else {
+			combo.setEnabled(true);
+		}
+	}
+	
 	/*------------------------Setter & Getter Methods-------------------------*/
 	
 	public Frame getSrcFrame() {
@@ -353,4 +366,5 @@ public class TggVisualizerDisplay {
 	public void setTrgInstanceDiagrammLoader(InstanceDiagrammLoader dataTrg) {
 		this.dataTrg = dataTrg;
 	}
+	
 }
