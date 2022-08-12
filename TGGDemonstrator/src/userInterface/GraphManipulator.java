@@ -7,9 +7,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.common.util.Enumerator;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EDataType;
+import org.eclipse.emf.ecore.EEnum;
+import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.impl.EClassImpl;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -23,6 +26,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
@@ -46,8 +50,8 @@ public class GraphManipulator {
 	private EObject nodeInModel;
 	private Object nodeInGraph;
 	private mxGraph graph;
-	private EList<EAttribute> attributes;
-	private Map<EAttribute,Text> inputAttr = new HashMap<EAttribute, Text>();
+	private Map<EAttribute,Text> txtMap = new HashMap<EAttribute, Text>();
+	private Map<EAttribute,Combo> enumMap = new HashMap<EAttribute, Combo>();
 	private EObject newObj;
 	private EAttribute errorAttr;
 
@@ -61,7 +65,7 @@ public class GraphManipulator {
 
 	}
 
-	public void iterateModel() {
+	private void iterateModel() {
 		EList<EObject> objects = resource.getContents();
 		Object[] selectedCells = graph.getSelectionCells();
 
@@ -98,10 +102,14 @@ public class GraphManipulator {
 		if (obj.toString().equals(c.getId())) {
 			System.out.println("equal found");
 			nodeInModel = obj;
-			removeNode();
 		}
 		//System.out.println(obj.toString());
 		//System.out.println(c.getId());
+	}
+	
+	public void deleteSelected() {
+		iterateModel();
+		removeNode();
 	}
 
 	private void actionOnNode() {
@@ -137,27 +145,30 @@ public class GraphManipulator {
 	
 	
 	private void removeNode() {
-		vis.getGraph().getModel().remove(nodeInGraph);
-		//((mxCell) nodeInGraph).removeFromParent();
-		EcoreUtil.remove(nodeInModel); // delete wirft Nullpointerexception, aber so wird Kante nicht gelöscht
-		//EmfUtil -> kein delete gefunden
-		//EmoflonUtil -> komplett nicht gefunden
-		//emf listener weiß, welche änderungen vorgenommen wurden
-		System.out.println("removed from model");
-		
-		//vis.getGraph().repaint();
-		
-		Node deleteNode = null;
-		for (Node nodeElement : loader.nodes) {
-			if (nodeElement.id.equals(nodeInModel.toString())) {
-				deleteNode = nodeElement;
+		if(nodeInModel != null) {
+			vis.getGraph().getModel().remove(nodeInGraph);
+			//((mxCell) nodeInGraph).removeFromParent();
+			EcoreUtil.remove(nodeInModel); // delete wirft Nullpointerexception, aber so wird Kante nicht gelöscht
+			//EmfUtil -> kein delete gefunden
+			//EmoflonUtil -> komplett nicht gefunden
+			//emf listener weiß, welche änderungen vorgenommen wurden
+			System.out.println("removed from model");
+			
+			//vis.getGraph().repaint();
+			
+			Node deleteNode = null;
+			for (Node nodeElement : loader.nodes) {
+				if (nodeElement.id.equals(nodeInModel.toString())) {
+					deleteNode = nodeElement;
+				}
 			}
+			if (deleteNode != null) {
+				loader.nodes.remove(deleteNode);
+				System.out.println("removed from list");
+			}
+			vis.getGraph().refresh();
 		}
-		if (deleteNode != null) {
-			loader.nodes.remove(deleteNode);
-			System.out.println("removed from list");
-		}
-		vis.getGraph().refresh();
+		
 	}
 	
 	private void addEdge() {
@@ -173,11 +184,7 @@ public class GraphManipulator {
 		System.out.println("added to list");
 		graph.insertVertex(graph.getDefaultParent(),newNode.id, newNode.name,100,100,80,40);
 		System.out.println("added in graph");
-		attributes = cl.getEAttributes();
-		for(EAttribute attr : cl.getEAttributes()) {
-			System.out.println(attr.getName() + " , " + attr.getEAttributeType().getInstanceTypeName());
-			//cl.eSet(attr, (Integer) 3);
-		}
+		
 		
 		//cl.getEAllStructuralFeatures(); //alle Attribute + Kanten?
 		//EReference Kanten! eindeutig oder null bis n (Liste), isMany 
@@ -185,109 +192,144 @@ public class GraphManipulator {
 		//mxGraph repaint?
 	}
 	
-	public EList<EAttribute> getAttributes() {
-		return attributes;
-	}
 	
-	public void createAttributeWindow(Display display) {
-		Shell shellAttr = new Shell(display);
+	public void setAttributes(Display display) {
 		
-		shellAttr.setText("Set Attributes for new Node");
-		
-		/*shellAttr.addListener(SWT.Close, new Listener() {
-			public void handleEvent(Event event) {
-				System.out.println("close");
-		    }
-		});*/
-		
-		
-		shellAttr.setLayout(new GridLayout());
-		shellAttr.setBackground(shellAttr.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY));
-		
-		Composite composite = new Composite(shellAttr, SWT.EMBEDDED);
-		composite.setVisible(true);
-		
-		GridData gridData1 = new GridData(SWT.FILL, SWT.FILL, true, true);
-		//gridData1.horizontalSpan = 3;
-		
-		composite.setLayoutData(gridData1);
-		composite.setLayout(new GridLayout(3, true));
-		for(EAttribute attr: attributes) {
-			//Group group = new Group(composite, SWT.None);
-			//group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			//group.setLayout(new GridLayout(3, true));
-			Label labelName = new Label(composite, SWT.None);
-			labelName.setText(attr.getName());
-			Label labelValue = new Label(composite, SWT.None);
-			labelValue.setText(attr.getEAttributeType().getInstanceTypeName());
-			Text txt = new Text(composite, SWT.BORDER | SWT.TRAIL);
-			txt.setLayoutData(new GridData(SWT.FILL, SWT.None, true, false));
-			if(attr.getDefaultValueLiteral() != null) txt.setText(newObj.eGet(attr).toString());
+		iterateModel();
+		if(nodeInModel != null) {
+			Shell shellAttr = new Shell(display);
 			
-			//verify that input is of correct type for the attribute
-			//passiert das schon? was passiert im Fehlerfall?
-			/*txt.addVerifyListener(new VerifyListener(){
-			      public void verifyText(VerifyEvent arg0) {
-			          System.out.println("verifying");
-			          
-			        }});*/
-			inputAttr.put(attr, txt);
+			shellAttr.setText("Set Attributes");
 			
-		}
-		
-		
-		
-		//control buttons / composite 
-		Composite compositeCtrl = new Composite(shellAttr, SWT.EMBEDDED);
-		compositeCtrl.setVisible(true);
-		compositeCtrl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		compositeCtrl.setLayout(new RowLayout());
-		
-		Button nextBT = new Button(compositeCtrl, SWT.PUSH |SWT.RIGHT);
-		nextBT.setText("Done");
-		nextBT.setAlignment(SWT.CENTER);
-		
-		nextBT.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent pSelectionEvent) {
+			/*shellAttr.addListener(SWT.Close, new Listener() {
+				public void handleEvent(Event event) {
+					System.out.println("close");
+			    }
+			});*/
+			
+			
+			shellAttr.setLayout(new GridLayout());
+			shellAttr.setBackground(shellAttr.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY));
+			
+			Composite composite = new Composite(shellAttr, SWT.EMBEDDED);
+			composite.setVisible(true);
+			
+			GridData gridData1 = new GridData(SWT.FILL, SWT.FILL, true, true);
+			//gridData1.horizontalSpan = 3;
+			
+			composite.setLayoutData(gridData1);
+			composite.setLayout(new GridLayout(3, true));
+			
+			
+			EList<EAttribute> attributes = nodeInModel.eClass().getEAttributes();
+			/////LÖSCHEN////
+			for(EAttribute attr : attributes) {
+				System.out.println(attr.getName() + " , " + attr.getEAttributeType().getInstanceTypeName());
+				//cl.eSet(attr, (Integer) 3);
+			}
+			for(EAttribute attr: attributes) {
+				//Group group = new Group(composite, SWT.None);
+				//group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+				//group.setLayout(new GridLayout(3, true));
+				Label labelName = new Label(composite, SWT.None);
+				labelName.setText(attr.getName());
+				Label labelValue = new Label(composite, SWT.None);
+				labelValue.setText(attr.getEAttributeType().getInstanceTypeName());
 				
-				try {
-					setAttributes();
-					shellAttr.close();
-				}
-				catch(Exception e) {
-					for (EAttribute attr : inputAttr.keySet()) {
-						if (attr.equals(errorAttr)) {
-							inputAttr.get(attr).setBackground(display.getSystemColor(SWT.COLOR_RED));
-						}
-						else {
-							inputAttr.get(attr).setBackground(display.getSystemColor(SWT.COLOR_WHITE));
-						}
+				if(attr.getEType() instanceof EEnum) {
+					EEnum eenum = (EEnum) attr.getEType();
+					int len = eenum.getELiterals().size();
+					String[] literals = new String[len];
+					int i = 0;
+					for(EEnumLiteral literal : eenum.getELiterals()) {
+						//System.out.println("	" + literal);
+						literals[i] = literal.getName();
+						i++;
 					}
 					
-					
+					Combo combo = new Combo(composite, SWT.DROP_DOWN | SWT.READ_ONLY);
+					combo.setLayoutData(new GridData(SWT.FILL, SWT.None, true, false));
+				    combo.setItems(literals);
+				    combo.setText(nodeInModel.eGet(attr).toString());
+				    enumMap.put(attr,combo);
 				}
+				else {
+					Text txt = new Text(composite, SWT.BORDER | SWT.TRAIL);
+					txt.setLayoutData(new GridData(SWT.FILL, SWT.None, true, false));
+					if(attr.getDefaultValueLiteral() != null) txt.setText(nodeInModel.eGet(attr).toString());
+					txtMap.put(attr, txt);
+				}
+				//verify that input is of correct type for the attribute
+				//passiert das schon? was passiert im Fehlerfall?
+				/*txt.addVerifyListener(new VerifyListener(){
+				      public void verifyText(VerifyEvent arg0) {
+				          System.out.println("verifying");
+				          
+				        }});*/
 				
 			}
-		});
+			
+			//control buttons / composite 
+			Composite compositeCtrl = new Composite(shellAttr, SWT.EMBEDDED);
+			compositeCtrl.setVisible(true);
+			compositeCtrl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			compositeCtrl.setLayout(new RowLayout());
+			
+			Button nextBT = new Button(compositeCtrl, SWT.PUSH |SWT.RIGHT);
+			nextBT.setText("Done");
+			nextBT.setAlignment(SWT.CENTER);
+			
+			nextBT.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent pSelectionEvent) {
+					
+					try {
+						setAttributesInModel();
+						shellAttr.close();
+					}
+					catch(Exception e) {
+						for (EAttribute attr : txtMap.keySet()) {
+							if (attr.equals(errorAttr)) {
+								txtMap.get(attr).setBackground(display.getSystemColor(SWT.COLOR_RED));
+							}
+							else {
+								txtMap.get(attr).setBackground(display.getSystemColor(SWT.COLOR_WHITE));
+							}
+						}
+						
+						
+					}
+					
+				}
+			});
+			
+			
+			//set size of shell
+			shellAttr.setSize(800,400);	
+			shellAttr.open();
+		}
 		
-		
-		//set size of shell
-		shellAttr.setSize(800,400);	
-		shellAttr.open();
 		
 	}
 	
-	private void setAttributes() throws Exception {
-		for (EAttribute attr : inputAttr.keySet()) {
-			System.out.println(inputAttr.get(attr).getText());
+	private void setAttributesInModel() throws Exception {
+		for (EAttribute attr : txtMap.keySet()) {
+			System.out.println(txtMap.get(attr).getText());
 			errorAttr = attr;
 			EDataType type = attr.getEAttributeType();
-			String input = inputAttr.get(attr).getText();
-			newObj.eSet(attr, createFromString(type,input));
-			
+			String input = txtMap.get(attr).getText();
+			//Wird nicht gesetzt??
+			nodeInModel.eSet(attr, createFromString(type,input));
+		}
+		for (EAttribute attr : enumMap.keySet()) {
+			System.out.println(enumMap.get(attr).getText());
+			EDataType type = attr.getEAttributeType();
+			String input = enumMap.get(attr).getText();
+			//Wird nicht gesetzt?? //get instance?
+			nodeInModel.eSet(attr, createFromString(type,input));
 		}
 	}
+	
 	
 	private Object createFromString(EDataType eDataType, String literal) throws Exception
 	{

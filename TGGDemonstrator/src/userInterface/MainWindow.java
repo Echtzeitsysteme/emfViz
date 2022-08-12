@@ -559,7 +559,7 @@ public class MainWindow {
 
 		buttonGroupManip.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		buttonGroupManip.setText("Manipulate Models");
-		buttonGroupManip.setLayout(new GridLayout(3, false));
+		buttonGroupManip.setLayout(new GridLayout(4, false));
 
 		Button deleteButton = new Button(buttonGroupManip, SWT.PUSH);
 		deleteButton.setText("Delete");
@@ -569,11 +569,23 @@ public class MainWindow {
 			@Override
 			public void widgetSelected(SelectionEvent evt) {
 				System.out.println("delete selected");
-				manipSrc.iterateModel();
-				manipTrg.iterateModel();
+				manipSrc.deleteSelected();
+				manipTrg.deleteSelected();
 				// modelLocationSelection("Default");
 				// update graph by loading modified resource
 				// updateVisualizer();
+			}
+		});
+		
+		Button attrButton = new Button(buttonGroupManip, SWT.PUSH);
+		attrButton.setText("Attributes");
+		attrButton.setLayoutData(new GridData());
+
+		attrButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent evt) {
+				manipSrc.setAttributes(display);
+				manipTrg.setAttributes(display);
 			}
 		});
 
@@ -608,7 +620,6 @@ public class MainWindow {
 				public void widgetSelected(SelectionEvent evt) {
 					System.out.println(cl.getName());
 					manipSrc.addNode(cl);
-					manipSrc.createAttributeWindow(display);
 				}
 			});
 
@@ -638,7 +649,6 @@ public class MainWindow {
 				public void widgetSelected(SelectionEvent evt) {
 					System.out.println(cl.getName());
 					manipTrg.addNode(cl);
-					manipTrg.createAttributeWindow(display);
 				}
 			});
 
