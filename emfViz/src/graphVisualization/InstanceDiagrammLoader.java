@@ -27,7 +27,7 @@ public class InstanceDiagrammLoader extends DataLoader {
 	}
 
 	@Override
-	protected void loadData() {
+	public void loadData() {
 		
 		List<EObject> content = instanceModel.getContents();
 		for(EObject oPack : content) {				
