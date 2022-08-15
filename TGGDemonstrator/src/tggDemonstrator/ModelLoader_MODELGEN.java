@@ -225,22 +225,18 @@ class ModelgenThread extends Thread{
 			@Override
 			public ITGGMatch chooseOneMatch(ImmutableMatchContainer matchContainer) {
 				
-
-				//System.out.println("Thread sleeps again for a very long time!");
 				
 				ITGGMatch match = null;
-				/*
+				
 				try {
 					
 					matches = matchContainer.getMatches();
 					
+					System.out.println("Thread " + getId() + " sleeps for a very long time!");
 					sleep(Long.MAX_VALUE);
-					//sleep(1000);
+
 					
 				} catch (InterruptedException e) {
-					
-					
-					
 					
 					if (ruleIndex >= 0 && matches.size() - 1 == ruleIndex) {
 						
@@ -254,34 +250,9 @@ class ModelgenThread extends Thread{
 						//if no rule is selected then just use the next one
 						match = matchContainer.getNext();
 					}
-					
-					System.out.println("the rule " + match.getRuleName() + " will be performed");
-					
-					//return match;
-					 
-					 
-				}*/
-				
-				//return matchContainer.getNext();
-				/*
-				if (ruleIndex >= 0 && matches.size() - 1 == ruleIndex) {
-					
-					//System.out.println(matchContainer.getMatches().size());
-					
-					Object[] t = matches.toArray();
-					match = (ITGGMatch)t[ruleIndex];
-		
-					
-				}else {
-					//if no rule is selected then just use the next one
-					match = matchContainer.getNext();
 				}
-				
-				*/
-				
-				//match = matchContainer.getNext();
-				
-				match = getSelectedMatch();
+
+				//match = getSelectedMatch();
 				
 				System.out.println("the rule " + match.getRuleName() + " will be performed");
 				
