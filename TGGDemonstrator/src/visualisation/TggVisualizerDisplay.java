@@ -1,8 +1,12 @@
 package visualisation;
 
 import java.awt.Frame;
-import java.lang.Thread.State;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.impl.EClassImpl;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
@@ -16,6 +20,8 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 
 import graphVisualization.InstanceDiagrammLoader;
@@ -49,8 +55,6 @@ public class TggVisualizerDisplay {
 	
 	private Visualizer visSrc;
 	private Visualizer visTrg;
-	
-	private Combo combo;
 	
 	
 	
@@ -111,7 +115,7 @@ public class TggVisualizerDisplay {
 		
 		comp.setLayoutData(gridData);
 		comp.setVisible(true);
-		comp.setLayout(new GridLayout(3,true));
+		comp.setLayout(new GridLayout(4,true));
 		
 		Composite compSrc = new Composite(shell, SWT.BOTTOM | SWT.EMBEDDED);
 		compSrc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
@@ -141,28 +145,29 @@ public class TggVisualizerDisplay {
 		frameSrc = SWT_AWT.new_Frame(compSrc);
 		frameTrg = SWT_AWT.new_Frame(compTrg);
 		
-		Group buttonGroupStandrad = new Group(comp, SWT.None);
+		//initializeButtons(comp);
+		initButtons(comp);
+
+		shell.setSize(shellSizeX, shellSizeY);
 		
-		buttonGroupStandrad.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,true));
-		buttonGroupStandrad.setText("Standard Functionalities");
-		buttonGroupStandrad.setLayout(new GridLayout(3, true));
+		rectangleSrc = compSrc.getBounds();
+		rectangleTrg = compTrg.getBounds();
 		
-		Button deleteButton = new Button(buttonGroupStandrad, SWT.PUSH);
-		deleteButton.setText("Delete");
-		deleteButton.setLayoutData(new GridData());
+		/*Only for debugging*/
+		System.out.println("compTrg: " + compTrg.getBounds());
+        System.out.println("compSrc: " + compSrc.getBounds());
+	}
+	
+	/*initialize all buttons for the main display*/
+	private void initButtons(Composite comp) {
+		Group buttonGroupStandard = new Group(comp, SWT.None);
 		
-			
-		deleteButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-            public void widgetSelected(SelectionEvent evt) {
-				System.out.println("delete selected");
-				manipSrc.iterateModel();
-				manipTrg.iterateModel();
-			}
-		});
+		buttonGroupStandard.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,true));
+		buttonGroupStandard.setText("Standard Functionalities");
+		buttonGroupStandard.setLayout(new GridLayout(3, true));
 		
 		//button to go back to start window
-		Button backButton = new Button(buttonGroupStandrad, SWT.PUSH);
+		Button backButton = new Button(buttonGroupStandard, SWT.PUSH);
 		backButton.setText("Back");
 		
 		backButton.addSelectionListener(new SelectionAdapter() {
@@ -171,6 +176,108 @@ public class TggVisualizerDisplay {
 				handler.openTggLoadModelDisplay();
 			}
 		});
+		
+		// buttons for manipulating the model
+		Group buttonGroupManip = new Group(comp, SWT.None);
+
+		buttonGroupManip.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		buttonGroupManip.setText("Manipulate Model");
+		buttonGroupManip.setLayout(new GridLayout(4, false));
+
+		Button deleteButton = new Button(buttonGroupManip, SWT.PUSH);
+		deleteButton.setText("Delete");
+		deleteButton.setLayoutData(new GridData());
+
+		deleteButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent evt) {
+				System.out.println("delete selected");
+				manipSrc.deleteSelected();
+				manipTrg.deleteSelected();
+				// modelLocationSelection("Default");
+				// update graph by loading modified resource
+				// updateVisualizer();
+			}
+		});
+		
+		Button attrButton = new Button(buttonGroupManip, SWT.PUSH);
+		attrButton.setText("Attributes");
+		attrButton.setLayoutData(new GridData());
+
+		attrButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent evt) {
+				manipSrc.setAttributes(display);
+				manipTrg.setAttributes(display);
+			}
+		});
+
+		Button popupButton = new Button(buttonGroupManip, SWT.PUSH);
+		popupButton.setText("New Node");
+
+		Menu popupMenu = new Menu(popupButton);
+		MenuItem srcItem = new MenuItem(popupMenu, SWT.CASCADE);
+		srcItem.setText("Source");
+
+		Menu srcMenu = new Menu(popupMenu);
+		srcItem.setMenu(srcMenu);
+
+		List<EClassImpl> srcClasses = new ArrayList<EClassImpl>();
+		// modelLoader.getOptions().tgg.tgg().getSrc().get(0).eContents();
+		// ibxopt.tgg.tgg().getSrc().get(0).eContents(); //sind die Klassen da drin?
+		for (EObject obj : modelLoader.getOptions().tgg.tgg().getSrc().get(0).eContents()) {
+			if (obj instanceof EClassImpl) {
+				EClassImpl node = (EClassImpl) obj;
+				if (!((EClass)node).isAbstract()) { // isabstract führt nicht zu Ausschluss von Staff??
+					srcClasses.add(node);
+				}
+
+			}
+		}
+		for (EClassImpl cl : srcClasses) {
+
+			MenuItem classItem = new MenuItem(srcMenu, SWT.NONE);
+			classItem.setText(cl.getName());
+			classItem.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent evt) {
+					System.out.println(cl.getName());
+					manipSrc.addNode(cl);
+				}
+			});
+
+		}
+
+		MenuItem trgItem = new MenuItem(popupMenu, SWT.CASCADE);
+		trgItem.setText("Target");
+
+		Menu trgMenu = new Menu(popupMenu);
+		trgItem.setMenu(trgMenu);
+		List<EClassImpl> trgClasses = new ArrayList<EClassImpl>();
+		// modelLoader.getOptions().tgg.tgg().getTrg().get(0).eContents();
+		// ibxopt.tgg.tgg().getSrc().get(0).eContents(); //sind die Klassen da drin?
+		for (EObject obj : modelLoader.getOptions().tgg.tgg().getTrg().get(0).eContents()) {
+			if (obj instanceof EClassImpl) {
+				EClassImpl node = (EClassImpl) obj;
+				trgClasses.add(node);
+			}
+		}
+		for (EClassImpl cl : trgClasses) {
+
+			MenuItem classItem = new MenuItem(trgMenu, SWT.NONE);
+			classItem.setText(cl.getName());
+
+			classItem.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent evt) {
+					System.out.println(cl.getName());
+					manipTrg.addNode(cl);
+				}
+			});
+
+		}
+
+		popupButton.setMenu(popupMenu);
 		
 		/*sync, initial_fwd and initial_bwd functionalities*/
 		Group buttonGroupSync = new Group(comp, SWT.None);
@@ -211,7 +318,7 @@ public class TggVisualizerDisplay {
 		nextRule.setText("Next Rule");
 		
 		/*Dropdown menu to select the next rule*/
-		combo = new Combo(buttonGroupNM, SWT.DROP_DOWN | SWT.READ_ONLY);
+		Combo combo = new Combo(buttonGroupNM, SWT.DROP_DOWN | SWT.READ_ONLY);
 		
 		GridData comboGridData = new GridData(GridData.FILL_HORIZONTAL);
 		comboGridData.horizontalSpan = 2;
@@ -263,24 +370,13 @@ public class TggVisualizerDisplay {
 					
 					combo.setItems(((ModelLoader_MODELGEN)modelLoader).getRuleNames());
 					combo.select(0);
-					
-					
 				}else {
 					//do nothing
 				}
 			}
 		});
-		
-		
-		shell.setSize(shellSizeX, shellSizeY);
-		
-		rectangleSrc = compSrc.getBounds();
-		rectangleTrg = compTrg.getBounds();
-		
-		/*Only for debugging*/
-		System.out.println("compTrg: " + compTrg.getBounds());
-        System.out.println("compSrc: " + compSrc.getBounds());
 	}
+	
 	
 	/*
 	 * translating forward, only call-able for INITIAL_FWD
@@ -314,14 +410,6 @@ public class TggVisualizerDisplay {
 			
 			visSrc.updateGraph();
 					
-		}
-	}
-	
-	public void disableComboBox(boolean b) {
-		if(b) {
-			combo.setEnabled(false);
-		}else {
-			combo.setEnabled(true);
 		}
 	}
 	
@@ -366,5 +454,4 @@ public class TggVisualizerDisplay {
 	public void setTrgInstanceDiagrammLoader(InstanceDiagrammLoader dataTrg) {
 		this.dataTrg = dataTrg;
 	}
-	
 }
