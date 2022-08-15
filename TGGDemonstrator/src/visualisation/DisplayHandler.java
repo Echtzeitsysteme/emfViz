@@ -151,6 +151,8 @@ public class DisplayHandler {
 		
 		tggVisualizerDisplay.setTggSrcVisualizer(visSrc);
 		tggVisualizerDisplay.setTggTrgVisualizer(visTrg);
+		
+		
 	}
 	
 	public void openTggResourceSelectionDisplay() {

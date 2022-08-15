@@ -8,18 +8,19 @@ import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
 import org.emoflon.ibex.tgg.operational.strategies.modules.TGGResourceHandler;
 import org.emoflon.ibex.tgg.operational.strategies.sync.INITIAL_FWD;
 
+import tggDemonstrator.DataObject.Modelgeneration;
 import tggDemonstrator.TGGDemonstrator.LoadingOption;
 
 public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 
 	
 	
-	private Function<String, INITIAL_FWD> fwd_demonstrator;
+	private Function<DataObject, INITIAL_FWD> fwd_demonstrator;
 	private INITIAL_FWD fwd;
 	//private IbexOptions options;
 	private TGGResourceHandler resourceHandler;
 	
-	public ModelLoader_INITIAL_FWD(Function<String, INITIAL_FWD> fwd, String pP, String wP) {
+	public ModelLoader_INITIAL_FWD(Function<DataObject, INITIAL_FWD> fwd, String pP, String wP) {
 		// TODO Auto-generated constructor stub
 		super(pP, wP);
 		
@@ -34,7 +35,9 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 		
 		if (!pathSrc.equals(" ") && !pathSrc.equals("")) {
 			
-			fwd = fwd_demonstrator.apply(pathSrc);
+			DataObject data = new DataObject(pathSrc, "","","", Modelgeneration.DEFAULT);
+			
+			fwd = fwd_demonstrator.apply(data);
 			
 			options = fwd.getOptions();
 			resourceHandler = fwd.getResourceHandler();
@@ -51,7 +54,10 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 	
 	@Override
 	public void loadFromDefault() {
-		fwd = fwd_demonstrator.apply(projectPath + "/instances/src.xmi");
+		
+		DataObject data = new DataObject(projectPath + "/instances/src.xmi", "","","", Modelgeneration.DEFAULT);
+		
+		fwd = fwd_demonstrator.apply(data);
 		
 		options = fwd.getOptions();
 		resourceHandler = fwd.getResourceHandler();

@@ -2,7 +2,7 @@ package tggDemonstrator;
 
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.lang.Thread.State;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
@@ -13,20 +13,21 @@ import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGEN;
 import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGENStopCriterion;
 import org.emoflon.ibex.tgg.operational.updatepolicy.IUpdatePolicy;
 
+import tggDemonstrator.DataObject.Modelgeneration;
+
 
 public class ModelLoader_MODELGEN extends TGGDemonstrator {
 
 	
-	private Function<String[], MODELGEN> modelgen_demonstrator;
+	private Function<DataObject, MODELGEN> modelgen_demonstrator;
 	private MODELGEN modelgen;
-	private String[] paths	= new String[3];
 	
 	private ModelgenThread thread;
 	private int ruleIndex;
 	private Set<ITGGMatch> matches;
 	
 	
-	public ModelLoader_MODELGEN (Function<String[], MODELGEN> modelgen, String pP, String wP) {	
+	public ModelLoader_MODELGEN (Function<DataObject, MODELGEN> modelgen, String pP, String wP) {	
 		super(pP, wP);
 		
 		
@@ -40,11 +41,11 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 	@Override
 	public void createResourcesFromPath(String pathSrc, String pathTrg) {
 		// TODO Auto-generated method stub
-		paths[0] = pathSrc;
-		paths[1] = pathTrg;
-		paths[2] = "false";
+
 		
-		modelgen = modelgen_demonstrator.apply(paths);
+		DataObject data = new DataObject(pathSrc, pathTrg, projectPath + "/instances/corr.xmi", projectPath + "/instances/protocol.xmi", Modelgeneration.PRE_DEFiNED_MODEL);
+		
+		modelgen = modelgen_demonstrator.apply(data);
 		
 		options = modelgen.getOptions();
 		resourceHandler = modelgen.getResourceHandler();
@@ -58,13 +59,10 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 
 	@Override
 	public void loadFromDefault() {
-		// TODO Auto-generated method stub
 		
-		paths[0] = projectPath + "/instances/src.xmi";
-		paths[1] = projectPath + "/instances/trg.xmi";
-		paths[2] = "false";
+		DataObject data = new DataObject(projectPath + "/instances/src.xmi", projectPath + "/instances/trg.xmi", projectPath + "/instances/corr.xmi", projectPath + "/instances/protocol.xmi", Modelgeneration.PRE_DEFiNED_MODEL);
 		
-		modelgen = modelgen_demonstrator.apply(paths);
+		modelgen = modelgen_demonstrator.apply(data);
 		
 		options = modelgen.getOptions();
 		resourceHandler = modelgen.getResourceHandler();
@@ -82,11 +80,10 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 		
 		System.out.println("Current thread is " + Thread.currentThread().getId());
 		
-		paths[0] = projectPath + "/instances/src.xmi";
-		paths[1] = projectPath + "/instances/trg.xmi";
-		paths[2] = "true";
 		
-		modelgen = modelgen_demonstrator.apply(paths);
+		DataObject data = new DataObject(projectPath + "/instances/src.xmi", projectPath + "/instances/trg.xmi", projectPath + "/instances/corr.xmi", projectPath + "/instances/protocol.xmi", Modelgeneration.NEW_MODEL);
+		
+		modelgen = modelgen_demonstrator.apply(data);
 		
 		options = modelgen.getOptions();
 		resourceHandler = modelgen.getResourceHandler();
@@ -107,7 +104,7 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 		modelgen.setStopCriterion(stop);
 		
 		// Start new thread
-		thread = new ModelgenThread(modelgen);
+		thread = new ModelgenThread(modelgen, this);
 		thread.setName("Modelgen Thread");
 		thread.start();
 		
@@ -168,6 +165,10 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 	public int getSelectedRuleIndex() {
 		return ruleIndex;
 	}
+	
+	public State getModelgenThreadState() {
+		return thread.getState();
+	}
 }
 
 
@@ -178,11 +179,14 @@ class ModelgenThread extends Thread{
 	private int ruleIndex;
 	
 	private Set<ITGGMatch> matches = new HashSet<> ();
+	private ITGGMatch selectedMatch;
 	
 	
+	private ModelLoader_MODELGEN modelLoader;
 	
-	public ModelgenThread(MODELGEN m) {
+	public ModelgenThread(MODELGEN m, ModelLoader_MODELGEN modelLoader) {
 		this.modelgen = m;
+		this.modelLoader = modelLoader;
 		ruleIndex = -1;
 	}
 	
@@ -199,6 +203,8 @@ class ModelgenThread extends Thread{
 			System.out.println("Thread is running!");
 		}
 		*/
+		
+		while (true) {}
 	}
 	
 	
@@ -219,19 +225,18 @@ class ModelgenThread extends Thread{
 			@Override
 			public ITGGMatch chooseOneMatch(ImmutableMatchContainer matchContainer) {
 				
-
-				System.out.println("Thread sleeps again for a very long time!");
+				
+				ITGGMatch match = null;
 				
 				try {
 					
 					matches = matchContainer.getMatches();
 					
+					System.out.println("Thread " + getId() + " sleeps for a very long time!");
 					sleep(Long.MAX_VALUE);
+
 					
 				} catch (InterruptedException e) {
-					
-					
-					ITGGMatch match = null;
 					
 					if (ruleIndex >= 0 && matches.size() - 1 == ruleIndex) {
 						
@@ -245,13 +250,13 @@ class ModelgenThread extends Thread{
 						//if no rule is selected then just use the next one
 						match = matchContainer.getNext();
 					}
-					
-					System.out.println("the rule " + match.getRuleName() + " will be performed");
-					
-					return match;
 				}
+
+				//match = getSelectedMatch();
 				
-				return null;
+				System.out.println("the rule " + match.getRuleName() + " will be performed");
+				
+				return match;
 						
 			}
 		});
@@ -272,7 +277,20 @@ class ModelgenThread extends Thread{
 		ruleIndex = i;
 	}
 	
+	public ITGGMatch getSelectedMatch() {
+		ITGGMatch match = null;
+		
+		if (ruleIndex >= 0 && matches != null) {
+		
+			Object[] t = matches.toArray();
+			match = (ITGGMatch)t[ruleIndex];
+		}
+		return match;
+	}
+	
 	public Set<ITGGMatch> getMatches(){
+		matches =  modelgen.getMatchContainer().getMatches();
+		
 		return matches;
 	}
 }

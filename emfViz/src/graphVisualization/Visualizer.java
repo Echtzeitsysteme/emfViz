@@ -162,7 +162,12 @@ public class Visualizer {
 	 * 
 	*/
 	public void updateGraph() {
+		
+		
 		if (((InstanceDiagrammLoader) dataLoader).getInstanceModel() != null) {
+		
+			System.out.println("Updating UI...");
+			
 			this.dataLoader.loadData();
 			
 			for (Component c : frame.getComponents()) {
@@ -180,6 +185,8 @@ public class Visualizer {
 			
 			graphComponent = new mxGraphComponent(graph);
 			frame.add(graphComponent);
+			
+			System.out.println("UI update is finished.");
 		}
 	}
 	
