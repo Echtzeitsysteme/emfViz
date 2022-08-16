@@ -162,7 +162,7 @@ public class TggVisualizerDisplay {
 	private void initButtons(Composite comp) {
 		Group buttonGroupStandard = new Group(comp, SWT.None);
 		
-		buttonGroupStandard.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,true));
+		buttonGroupStandard.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,false));
 		buttonGroupStandard.setText("Standard Functionalities");
 		buttonGroupStandard.setLayout(new GridLayout(3, true));
 		
@@ -180,7 +180,7 @@ public class TggVisualizerDisplay {
 		// buttons for manipulating the model
 		Group buttonGroupManip = new Group(comp, SWT.None);
 
-		buttonGroupManip.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		buttonGroupManip.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		buttonGroupManip.setText("Manipulate Model");
 		buttonGroupManip.setLayout(new GridLayout(4, false));
 
@@ -231,6 +231,7 @@ public class TggVisualizerDisplay {
 				if (!((EClass)node).isAbstract()) { // isabstract führt nicht zu Ausschluss von Staff??
 					srcClasses.add(node);
 				}
+				
 
 			}
 		}
@@ -282,7 +283,7 @@ public class TggVisualizerDisplay {
 		/*sync, initial_fwd and initial_bwd functionalities*/
 		Group buttonGroupSync = new Group(comp, SWT.None);
 		
-		buttonGroupSync.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,true));
+		buttonGroupSync.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,false));
 		buttonGroupSync.setText("Sync Functionalities");
 		buttonGroupSync.setLayout(new GridLayout(3, true));
 		
@@ -309,7 +310,7 @@ public class TggVisualizerDisplay {
 		/*new Model functionalities*/
 		Group buttonGroupNM = new Group(comp, SWT.None);
 		
-		buttonGroupNM.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,true));
+		buttonGroupNM.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,false));
 		buttonGroupNM.setText("New Model Functionalities");
 		buttonGroupNM.setLayout(new GridLayout(3, true));
 		
