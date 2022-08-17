@@ -14,6 +14,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import tggDemonstrator.ModelLoader_INITIAL_BWD;
 import tggDemonstrator.ModelLoader_INITIAL_FWD;
+import tggDemonstrator.ModelLoader_MODELGEN;
 import tggDemonstrator.ModelLoader_SYNC;
 import tggDemonstrator.TGGDemonstrator;
 
@@ -77,9 +78,10 @@ public class TggLoadModelDisplay {
 		nextBT.setText("Next");
 		nextBT.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		
-		//generate new model is only for MODELGEN available
-		if (modelLoader instanceof ModelLoader_INITIAL_BWD || modelLoader instanceof ModelLoader_INITIAL_FWD || modelLoader instanceof ModelLoader_SYNC) {
-			newModeltBT.setEnabled(false);
+		
+		if (modelLoader instanceof ModelLoader_MODELGEN) {
+			defaultBT.setEnabled(false);
+			modelLocationBT.setEnabled(false);
 		}
 		
 

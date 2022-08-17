@@ -3,10 +3,15 @@ package tggDemonstrator;
 import java.io.IOException;
 import java.util.function.Function;
 
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Group;
+import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
 import org.emoflon.ibex.tgg.operational.strategies.modules.TGGResourceHandler;
 import org.emoflon.ibex.tgg.operational.strategies.sync.INITIAL_FWD;
 
 import tggDemonstrator.DataObject.Modelgeneration;
+import tggDemonstrator.TGGDemonstrator.LoadingOption;
 
 public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 
@@ -28,11 +33,21 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 	}
 
 	@Override
-	public void createResourcesFromPath(String pathSrc, String pathTrg) {
+	public void createResourcesFromPath(String pathSrc, String pathLoc) {
+		
+		String pathLocTemp = pathLoc;
 		
 		if (!pathSrc.equals(" ") && !pathSrc.equals("")) {
 			
-			DataObject data = new DataObject(pathSrc, "","","", Modelgeneration.DEFAULT);
+			if (pathLocTemp.equals(" ") && pathLocTemp.equals("")) {
+				pathLocTemp = projectPath + "/instances/";
+			}
+			
+			DataObject data = new DataObject(pathSrc, 
+					pathLocTemp + "trg.xmi", 
+					pathLocTemp + "corr.xmi",
+					pathLocTemp + "protocol.xmi",
+					Modelgeneration.DEFAULT);
 			
 			fwd = fwd_demonstrator.apply(data);
 			
@@ -52,7 +67,11 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 	@Override
 	public void loadFromDefault() {
 		
-		DataObject data = new DataObject(projectPath + "/instances/src.xmi", "","","", Modelgeneration.DEFAULT);
+		DataObject data = new DataObject(projectPath + "/instances/src.xmi", 
+				projectPath + "/instances/trg.xmi", 
+				projectPath + "/instances/corr.xmi",
+				projectPath + "/instances/protocol.xmi", 
+				Modelgeneration.DEFAULT);
 		
 		fwd = fwd_demonstrator.apply(data);
 		
@@ -65,16 +84,44 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 		loadingOption = LoadingOption.Default;
 	}
 	
+	
+	
+	/*
+	 * creates an empty model 
+	 */
 	@Override
 	public void generateNewModel() {
-		return;
+	
+		DataObject data = new DataObject(projectPath + "/instances/src.xmi", 
+				projectPath + "/instances/trg.xmi", 
+				projectPath + "/instances/corr.xmi",
+				projectPath + "/instances/protocol.xmi", 
+				Modelgeneration.NEW_MODEL);
+		
+		fwd = fwd_demonstrator.apply(data);
+				
+		options = fwd.getOptions();
+		resourceHandler = fwd.getResourceHandler();
+		
+		source = resourceHandler.getSourceResource();
+		target = resourceHandler.getTargetResource();
+		
+		loadingOption = LoadingOption.Default;
 	}
 	
+
+	@Override
+	public String buttonTranslateTxt() {
+		// TODO Auto-generated method stub
+		return "Translate Forward";
+	}
+
 	
 	/*
 	 * forward translation of the source model
 	 */
-	public void forward() {
+	@Override
+	public void buttonTranslateFunction() {
 		try {
 			fwd.forward();
 			
@@ -85,6 +132,25 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+	}
+
+	@Override
+	public Combo createComboBox(Group g) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean isFrameSourceActive() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	@Override
+	public boolean isFrameTargetActive() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

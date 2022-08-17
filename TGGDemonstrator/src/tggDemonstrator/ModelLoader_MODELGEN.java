@@ -7,6 +7,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
 
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Group;
 import org.emoflon.ibex.tgg.operational.matches.ITGGMatch;
 import org.emoflon.ibex.tgg.operational.matches.ImmutableMatchContainer;
 import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGEN;
@@ -169,6 +173,42 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 	
 	public State getModelgenThreadState() {
 		return thread.getState();
+	}
+
+	@Override
+	public String buttonTranslateTxt() {
+		// TODO Auto-generated method stub
+		return "New Model";
+	}
+
+	@Override
+	public void buttonTranslateFunction() {
+		// TODO Auto-generated method stub
+		//next step functionalities
+		
+		System.out.println("Button Next Rule is clicked...");
+		
+		
+		
+		wakeUpThread();	
+		
+		
+	}
+	@Override
+	public Combo createComboBox(Group g) {
+		return new Combo(g, SWT.DROP_DOWN | SWT.READ_ONLY);
+	}
+
+	@Override
+	public boolean isFrameSourceActive() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isFrameTargetActive() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }
 

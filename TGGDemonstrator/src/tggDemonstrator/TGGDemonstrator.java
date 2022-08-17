@@ -1,13 +1,18 @@
 package tggDemonstrator;
 
+
 import org.eclipse.emf.ecore.resource.Resource;
-import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
+
 import org.emoflon.ibex.tgg.operational.strategies.modules.IbexExecutable;
 import org.emoflon.ibex.tgg.operational.strategies.modules.TGGResourceHandler;
 
 import visualisation.DisplayHandler;
+import visualisation.UserControlArea;
 
-public abstract class TGGDemonstrator {
+import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
+
+public abstract class TGGDemonstrator implements UserControlArea{
+	
 	
 	public enum LoadingOption {Default, NewModel, SelectedResource};
 	protected LoadingOption loadingOption;

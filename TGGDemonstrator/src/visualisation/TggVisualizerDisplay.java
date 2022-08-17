@@ -7,11 +7,10 @@ import java.util.List;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.impl.EClassImpl;
-import org.eclipse.emf.ecore.resource.Resource;
+
+import org.eclipse.swt.events.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -19,7 +18,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
@@ -110,40 +111,67 @@ public class TggVisualizerDisplay {
 		Composite comp = new Composite(shell, SWT.TOP);
 		
 		GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
-		gridData.heightHint = (int)(shellSizeY * 0.1);
+		//gridData.heightHint = (int)(shellSizeY * 0.1);
 		gridData.horizontalSpan = 2;
 		
 		comp.setLayoutData(gridData);
 		comp.setVisible(true);
-		comp.setLayout(new GridLayout(4,true));
+		comp.setLayout(new GridLayout(3,true));
 		
 		Composite compSrc = new Composite(shell, SWT.BOTTOM | SWT.EMBEDDED);
 		compSrc.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		
 		GridData gridDataSrc = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
-		//gridDataSrc.heightHint = (int)(shellSizeY * 0.9);
 		gridDataSrc.horizontalSpan = 1;
 		gridDataSrc.verticalAlignment = SWT.FILL;
 
 
 		compSrc.setLayoutData(gridDataSrc);
 		
-		
-		
+		compSrc.addListener(SWT.MouseDown, new Listener() {
+
+			@Override
+			public void handleEvent(Event event) {
+				// TODO Auto-generated method stub
+				System.out.println(event);
+			}
+			
+		});
+
 		Composite compTrg = new Composite(shell, SWT.BOTTOM |  SWT.EMBEDDED);
 		compTrg.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_GRAY));
 		
 		GridData gridDataTrg = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
-		//gridDataTrg.heightHint = (int)(shellSizeY * 0.9);
 		gridDataTrg.horizontalSpan = 1;
 		gridDataTrg.verticalAlignment = SWT.FILL;
 		
 		compTrg.setLayoutData(gridDataTrg);
 		
+		compTrg.addListener(SWT.MouseDown, new Listener() {
+
+			@Override
+			public void handleEvent(Event event) {
+				// TODO Auto-generated method stub
+				System.out.println(event);
+			}
+			
+		});
+		
+		
+		
 		
 		
 		frameSrc = SWT_AWT.new_Frame(compSrc);
+		
+		//frameSrc.addMouseListener(new MListener());
+		
+		
 		frameTrg = SWT_AWT.new_Frame(compTrg);
+		
+		//frameTrg.addMouseListener(new MListener());
+		
+		
+		
 		
 		//initializeButtons(comp);
 		initButtons(comp);
@@ -160,6 +188,7 @@ public class TggVisualizerDisplay {
 	
 	/*initialize all buttons for the main display*/
 	private void initButtons(Composite comp) {
+		
 		Group buttonGroupStandard = new Group(comp, SWT.None);
 		
 		buttonGroupStandard.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,true));
@@ -177,11 +206,15 @@ public class TggVisualizerDisplay {
 			}
 		});
 		
-		// buttons for manipulating the model
+		// TODO: add an reset button?
+		
+		/* buttons to create a complete new model or modify an existing model*/
+		/* buttons are only activated for fwd, bwd or sync strategy*/
+
 		Group buttonGroupManip = new Group(comp, SWT.None);
 
 		buttonGroupManip.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		buttonGroupManip.setText("Manipulate Model");
+		buttonGroupManip.setText("Model Manipulation");
 		buttonGroupManip.setLayout(new GridLayout(4, false));
 
 		Button deleteButton = new Button(buttonGroupManip, SWT.PUSH);
@@ -279,139 +312,53 @@ public class TggVisualizerDisplay {
 
 		popupButton.setMenu(popupMenu);
 		
-		/*sync, initial_fwd and initial_bwd functionalities*/
-		Group buttonGroupSync = new Group(comp, SWT.None);
+		/*model generation functionalities (depending on strategy)*/
+		Group buttonGroupModelGeneration = new Group(comp, SWT.None);
 		
-		buttonGroupSync.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,true));
-		buttonGroupSync.setText("Sync Functionalities");
-		buttonGroupSync.setLayout(new GridLayout(3, true));
+		buttonGroupModelGeneration.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,true));
+		buttonGroupModelGeneration.setText("Model Generation");
+		buttonGroupModelGeneration.setLayout(new GridLayout(3, true));
 		
-		Button syncForward = new Button(buttonGroupSync, SWT.PUSH);
-		syncForward.setText("Sync Forward");
-		syncForward.addSelectionListener(new SelectionAdapter() {
-			@Override
-            public void widgetSelected(SelectionEvent evt) {
-				System.out.println("Start forward translating");
-				forwardTranslation();
-			}
-		});
+		Button translateButton = new Button(buttonGroupModelGeneration, SWT.PUSH);
+		translateButton.setText(modelLoader.buttonTranslateTxt());
 		
-		Button syncBackward = new Button(buttonGroupSync, SWT.PUSH);
-		syncBackward.setText("Sync Backward");
-		syncBackward.addSelectionListener(new SelectionAdapter() {
-			@Override
-            public void widgetSelected(SelectionEvent evt) {
-				System.out.println("Start backward translating");
-				backwardTranslation();
-			}
-		});
 		
-		/*new Model functionalities*/
-		Group buttonGroupNM = new Group(comp, SWT.None);
+		Combo combo = modelLoader.createComboBox(buttonGroupModelGeneration);
 		
-		buttonGroupNM.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,true));
-		buttonGroupNM.setText("New Model Functionalities");
-		buttonGroupNM.setLayout(new GridLayout(3, true));
-		
-		/*Create a button to execute the next rule*/
-		Button nextRule = new Button(buttonGroupNM, SWT.PUSH);
-		nextRule.setText("Next Rule");
-		
-		/*Dropdown menu to select the next rule*/
-		Combo combo = new Combo(buttonGroupNM, SWT.DROP_DOWN | SWT.READ_ONLY);
-		
-		GridData comboGridData = new GridData(GridData.FILL_HORIZONTAL);
-		comboGridData.horizontalSpan = 2;
-		
-		combo.setLayoutData(comboGridData);
-		
-		if (modelLoader instanceof ModelLoader_MODELGEN && modelLoader.getLoadingOption() == modelLoader.getLoadingOption().NewModel) {
-			nextRule.setEnabled(true);
+		if (combo != null) {
+			GridData comboGridData = new GridData(GridData.FILL_HORIZONTAL);
+			comboGridData.horizontalSpan = 2;
 			
-			combo.setItems(((ModelLoader_MODELGEN)modelLoader).getRuleNames());
-			combo.setEnabled(true);
+			combo.setLayoutData(comboGridData);
+			
 			combo.select(0);
-		}else {
-			nextRule.setEnabled(false);
-			
-			combo.setItems(new String[]{ });
-			combo.setEnabled(false);
 		}
 		
-		
-		nextRule.addSelectionListener(new SelectionAdapter() {
+		translateButton.addSelectionListener(new SelectionAdapter() {
 			@Override
             public void widgetSelected(SelectionEvent evt) {
+				System.out.println("translate button is pressed!");
 				
-				if (modelLoader instanceof ModelLoader_MODELGEN) {
-				
-					System.out.println("Button Next Rule is clicked...");
-					
+				if (modelLoader instanceof ModelLoader_MODELGEN && combo != null) {
 					((ModelLoader_MODELGEN)modelLoader).setSelectedRuleIndex(combo.getSelectionIndex());
-					
-					
-					((ModelLoader_MODELGEN)modelLoader).wakeUpThread();	
-					
-					//update Graph
-					Resource trgRs = modelLoader.getResourceHandler().getTargetResource();	
-					Resource srcRs = modelLoader.getResourceHandler().getSourceResource();
-					
-					dataTrg.setInstanceModel(trgRs);
-					dataSrc.setInstanceModel(srcRs);
-					
-//					visTrg.updateGraph();
-//					visSrc.updateGraph();
-					
-					frameSrc.revalidate();
-					frameSrc.repaint();
-					
-					frameTrg.revalidate();
-					frameTrg.repaint();
-					
+				}
+				
+				modelLoader.buttonTranslateFunction();
+				
+				if (modelLoader instanceof ModelLoader_MODELGEN && combo != null) {
 					combo.setItems(((ModelLoader_MODELGEN)modelLoader).getRuleNames());
 					combo.select(0);
-				}else {
-					//do nothing
 				}
 			}
 		});
-	}
-	
-	
-	/*
-	 * translating forward, only call-able for INITIAL_FWD
-	 */
-	private void forwardTranslation() {
-		if (modelLoader instanceof ModelLoader_INITIAL_FWD){
-			
-			System.out.println("Translating forward...");
-			
-			((ModelLoader_INITIAL_FWD) modelLoader).forward();
-			
-			Resource trgRs = modelLoader.getTarget();			
-			
-			dataTrg.setInstanceModel(trgRs);
-			
-//			visTrg.updateGraph();
-					
+		
+		//disable button they are not needed for this strategy
+		if (modelLoader instanceof ModelLoader_MODELGEN) {
+			popupButton.setEnabled(false);
+			deleteButton.setEnabled(false);
 		}
 	}
 	
-	private void backwardTranslation() {
-		if (modelLoader instanceof ModelLoader_INITIAL_BWD){
-			
-			System.out.println("Translating backward...");
-			
-			((ModelLoader_INITIAL_BWD) modelLoader).backward();
-			
-			Resource srcRs = modelLoader.getTarget();			
-			
-			dataSrc.setInstanceModel(srcRs);
-			
-//			visSrc.updateGraph();
-					
-		}
-	}
 	
 	/*------------------------Setter & Getter Methods-------------------------*/
 	
@@ -455,3 +402,4 @@ public class TggVisualizerDisplay {
 		this.dataTrg = dataTrg;
 	}
 }
+

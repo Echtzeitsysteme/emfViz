@@ -3,17 +3,24 @@ package tggDemonstrator;
 import java.io.IOException;
 import java.util.function.Function;
 
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Group;
+import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
+import org.emoflon.ibex.tgg.operational.strategies.modules.TGGResourceHandler;
 import org.emoflon.ibex.tgg.operational.strategies.sync.INITIAL_BWD;
+
+import tggDemonstrator.DataObject.Modelgeneration;
+import tggDemonstrator.TGGDemonstrator.LoadingOption;
 
 
 public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 	
-	private Function<String, INITIAL_BWD> bwd_Demonstrator;
+	private Function<DataObject, INITIAL_BWD> bwd_Demonstrator;
 	private INITIAL_BWD bwd;
 	
 	
 	
-	public ModelLoader_INITIAL_BWD (Function<String, INITIAL_BWD> bwd, String pP, String wP) {
+	public ModelLoader_INITIAL_BWD (Function<DataObject, INITIAL_BWD> bwd, String pP, String wP) {
 		super(pP, wP);
 		
 		System.out.println("Initialize ModelLoader_INITIAL_BWD");
@@ -24,11 +31,24 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 	}
 
 	@Override
-	public void createResourcesFromPath(String pathSrc, String pathTrg) {
+	public void createResourcesFromPath(String pathLoc, String pathTrg) {
 		// TODO Auto-generated method stub
 		
+		String pathLocTemp = pathLoc;
+		
 		if (!pathTrg.equals(" ") && !pathTrg.equals("")) {
-			bwd = bwd_Demonstrator.apply(pathTrg);
+			
+			if (pathLocTemp.equals(" ") && pathLocTemp.equals("")) {
+				pathLocTemp = projectPath + "/instances/";
+			}
+			
+			DataObject data = new DataObject(pathLocTemp + "src.xmi", 
+					pathTrg, 
+					pathLocTemp + "corr.xmi",
+					pathLocTemp + "protocol.xmi", 
+					Modelgeneration.NEW_MODEL);
+			
+			bwd = bwd_Demonstrator.apply(data);
 			
 			options = bwd.getOptions();
 			resourceHandler = bwd.getResourceHandler();
@@ -46,7 +66,13 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 	@Override
 	public void loadFromDefault() {
 		// TODO Auto-generated method stub
-		bwd = bwd_Demonstrator.apply(projectPath + "/instances/trg.xmi");
+		DataObject data = new DataObject(projectPath + "/instances/src.xmi", 
+				projectPath + "/instances/trg.xmi", 
+				projectPath + "/instances/corr.xmi",
+				projectPath + "/instances/protocol.xmi", 
+				Modelgeneration.NEW_MODEL);
+		
+		bwd = bwd_Demonstrator.apply(data);
 		
 		options = bwd.getOptions();
 		resourceHandler = bwd.getResourceHandler();
@@ -58,16 +84,42 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 		
 	}
 	
+	/*
+	 * creates an empty model 
+	 */
 	@Override
 	public void generateNewModel() {
-		return;
+	
+		DataObject data = new DataObject(projectPath + "/instances/src.xmi", 
+				projectPath + "/instances/trg.xmi", 
+				projectPath + "/instances/corr.xmi",
+				projectPath + "/instances/protocol.xmi", 
+				Modelgeneration.NEW_MODEL);
+		
+		bwd = bwd_Demonstrator.apply(data);
+				
+		options = bwd.getOptions();
+		resourceHandler = bwd.getResourceHandler();
+		
+		source = resourceHandler.getSourceResource();
+		target = resourceHandler.getTargetResource();
+		
+		loadingOption = LoadingOption.Default;
 	}
 	
+
+	@Override
+	public String buttonTranslateTxt() {
+		// TODO Auto-generated method stub
+		return "Translate Backward";
+	}
+
 	
 	/*
 	 * backward translation of the target model
-	 */	
-	public void backward() {
+	 */
+	@Override
+	public void buttonTranslateFunction() {
 		try {
 			bwd.backward();
 			
@@ -76,6 +128,25 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+	}
+
+	@Override
+	public Combo createComboBox(Group g) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean isFrameSourceActive() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isFrameTargetActive() {
+		// TODO Auto-generated method stub
+		return true;
 	}
 
 }
