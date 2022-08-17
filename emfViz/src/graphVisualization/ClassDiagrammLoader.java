@@ -1,6 +1,5 @@
 package graphVisualization;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.emf.ecore.EObject;
@@ -23,7 +22,7 @@ public class ClassDiagrammLoader extends DataLoader {
 	
 	
 	@Override
-	protected void loadData() {
+	public void loadData() {
 		//ArrayList<EClassImpl> nodes = new ArrayList<EClassImpl>();
 		//HashMap<String, ArrayList<EReference>> edges = new HashMap<String, ArrayList<EReference>>();
 		

@@ -3,13 +3,10 @@ package tggDemonstrator;
 import java.io.IOException;
 import java.util.function.Function;
 
-import org.eclipse.emf.ecore.resource.Resource;
-import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
 import org.emoflon.ibex.tgg.operational.strategies.modules.TGGResourceHandler;
 import org.emoflon.ibex.tgg.operational.strategies.sync.INITIAL_FWD;
 
 import tggDemonstrator.DataObject.Modelgeneration;
-import tggDemonstrator.TGGDemonstrator.LoadingOption;
 
 public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 

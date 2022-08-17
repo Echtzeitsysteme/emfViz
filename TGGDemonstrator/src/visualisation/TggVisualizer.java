@@ -4,7 +4,6 @@ import java.awt.Frame;
 import java.awt.geom.Point2D;
 
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Shell;
 
 import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
@@ -17,7 +16,7 @@ public class TggVisualizer extends Visualizer{
 
 	
 	public TggVisualizer(DataLoader dataLoader, Frame frame, Rectangle r) {
-		super(dataLoader, null);
+		super(null, dataLoader);
 		
 		shellBounds = r;
 		this.frame = frame;	
@@ -30,7 +29,7 @@ public class TggVisualizer extends Visualizer{
 	@Override
 	public void init () {
 		
-		this.dataLoader.loadData();
+		dataLoader.loadData();
 		
 		defaultNodePosition = new Point2D.Double(((double) shellBounds.width) * 0.5 - defaultNodeWidth * 0.5 , ((double) shellBounds.height) * 0.5 - defaultNodeHeight * 0.5);
 		

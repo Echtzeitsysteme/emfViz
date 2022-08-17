@@ -359,8 +359,8 @@ public class TggVisualizerDisplay {
 					dataTrg.setInstanceModel(trgRs);
 					dataSrc.setInstanceModel(srcRs);
 					
-					visTrg.updateGraph();
-					visSrc.updateGraph();
+//					visTrg.updateGraph();
+//					visSrc.updateGraph();
 					
 					frameSrc.revalidate();
 					frameSrc.repaint();
@@ -392,7 +392,7 @@ public class TggVisualizerDisplay {
 			
 			dataTrg.setInstanceModel(trgRs);
 			
-			visTrg.updateGraph();
+//			visTrg.updateGraph();
 					
 		}
 	}
@@ -408,7 +408,7 @@ public class TggVisualizerDisplay {
 			
 			dataSrc.setInstanceModel(srcRs);
 			
-			visSrc.updateGraph();
+//			visSrc.updateGraph();
 					
 		}
 	}

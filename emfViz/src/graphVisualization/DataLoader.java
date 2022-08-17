@@ -1,6 +1,5 @@
 package graphVisualization;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,5 +25,5 @@ public abstract class DataLoader {
 	// unique mapping from eObject to ID of associated visualization
 	public Map<EObject, Integer> eobjIdmap;
 	
-	protected abstract void loadData();
+	public abstract void loadData();
 }

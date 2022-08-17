@@ -1,7 +1,5 @@
 package graphVisualization;
 
-import java.util.Objects;
-
 import org.eclipse.emf.ecore.EObject;
 
 public class Node {
