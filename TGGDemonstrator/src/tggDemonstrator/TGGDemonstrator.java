@@ -7,10 +7,11 @@ import org.emoflon.ibex.tgg.operational.strategies.modules.IbexExecutable;
 import org.emoflon.ibex.tgg.operational.strategies.modules.TGGResourceHandler;
 
 import visualisation.DisplayHandler;
+import visualisation.UserControlArea;
 
 import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
 
-public abstract class TGGDemonstrator {
+public abstract class TGGDemonstrator implements UserControlArea{
 	
 	
 	public enum LoadingOption {Default, NewModel, SelectedResource};

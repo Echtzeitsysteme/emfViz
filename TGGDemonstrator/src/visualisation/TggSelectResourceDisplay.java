@@ -9,6 +9,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
@@ -47,7 +48,7 @@ public class TggSelectResourceDisplay {
 	*/
 	private void CreateDirectorySelectionWindow() {
 		shellSizeX = 450;
-		shellSizeY = 280;
+		shellSizeY = 300;
 		
 		
 		shell.setLayout(new GridLayout());
@@ -102,22 +103,6 @@ public class TggSelectResourceDisplay {
 		
 		trgTxt.setLayoutData(gridDataTrg);
 		
-		// buttons directory selection listener
-		
-		srcBT.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent pSelectionEvent) {
-				srcTxt.setText(openDirectoryDialog());
-			}
-		});
-		
-		trgBT.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent pSelectionEvent) {
-				trgTxt.setText(openDirectoryDialog());
-			}
-		});
-		
 		//control buttons / composite 
 		Composite compositeCtrl = new Composite(shell, SWT.EMBEDDED);
 		compositeCtrl.setVisible(true);
@@ -148,24 +133,64 @@ public class TggSelectResourceDisplay {
 			}
 		});
 		
-		//set size of shell
-		shell.setSize(shellSizeX, shellSizeY);	
-		
 		/*
 		 * if ModelLoader is initialized by Inital_BWD_App or Inital_FWD_App
 		 * source or target model are generated from tgg.
 		 */
 		if (modelLoader instanceof ModelLoader_INITIAL_FWD)
 		{
+			/*
 			trgBT.setEnabled(false);
 			trgLabel.setEnabled(false);
 			trgTxt.setEnabled(false);
+			*/
+			
+			trgLabel.setText("Porject location");
+			trgBT.setText("Select location");
+			
+			// buttons directory selection listener
+			
+			srcBT.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent pSelectionEvent) {
+					srcTxt.setText(openFileDialog());
+				}
+			});
+			
+			trgBT.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent pSelectionEvent) {
+					trgTxt.setText(openDirectoryDialog());
+				}
+			});
 			
 		}else if(modelLoader instanceof ModelLoader_INITIAL_BWD){
-			srcBT.setEnabled(false);
+			/*srcBT.setEnabled(false);
 			srcLabel.setEnabled(false);
 			srcTxt.setEnabled(false);
+			*/
+			srcLabel.setText("Porject location");
+			srcBT.setText("Select location");
+			
+			// buttons directory selection listener
+			
+			srcBT.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent pSelectionEvent) {
+					srcTxt.setText(openDirectoryDialog());
+				}
+			});
+			
+			trgBT.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent pSelectionEvent) {
+					trgTxt.setText(openFileDialog());
+				}
+			});
 		}
+		
+		//set size of shell
+		shell.setSize(shellSizeX, shellSizeY);	
 	}
 	
 	
@@ -183,12 +208,13 @@ public class TggSelectResourceDisplay {
 	/*
 	 *  open a directory dialog window
 	*/
-	public String openDirectoryDialog() {
+	public String openFileDialog() {
 		
 		String selectedDir = "";
 		
 		FileDialog directoryDialog = new FileDialog(shell, SWT.OPEN);
 	    
+		
 		String filterExt[] = new String[1];
 		filterExt[0]	= ".xmi";
 		
@@ -198,6 +224,28 @@ public class TggSelectResourceDisplay {
         if(directoryDialog.open() != null) {
         	
         	String dir = directoryDialog.getFilterPath() + System.getProperty( "file.separator" ) + directoryDialog.getFileName();
+            selectedDir = dir;
+            
+            return selectedDir;
+         }
+        
+        return selectedDir;
+	}
+	
+public String openDirectoryDialog() {
+		
+		String selectedDir = "";
+		
+		DirectoryDialog directoryDialog = new DirectoryDialog(shell, SWT.OPEN);
+	    
+		
+		
+		directoryDialog.setFilterPath(selectedDir);
+	
+        
+        if(directoryDialog.open() != null) {
+        	
+        	String dir = directoryDialog.getFilterPath() + System.getProperty( "file.separator" );
             selectedDir = dir;
             
             return selectedDir;

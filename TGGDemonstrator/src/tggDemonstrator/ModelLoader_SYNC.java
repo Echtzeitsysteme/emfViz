@@ -2,6 +2,8 @@ package tggDemonstrator;
 
 import java.util.function.Function;
 
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Group;
 import org.emoflon.ibex.tgg.operational.strategies.sync.SYNC;
 
 public class ModelLoader_SYNC extends TGGDemonstrator{
@@ -45,6 +47,41 @@ public class ModelLoader_SYNC extends TGGDemonstrator{
 	
 	public void syncBackward() {
 		
+	}
+
+
+	@Override
+	public String buttonTranslateTxt() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public void buttonTranslateFunction() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public Combo createComboBox(Group g) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public boolean isFrameSourceActive() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	@Override
+	public boolean isFrameTargetActive() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }
