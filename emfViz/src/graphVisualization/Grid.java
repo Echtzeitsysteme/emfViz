@@ -1,11 +1,8 @@
 package graphVisualization;
 
 import java.awt.Point;
-//import java.awt.Rectangle;
-import org.eclipse.swt.graphics.Rectangle;
+import java.awt.Rectangle;
 import java.awt.geom.Point2D;
-
-
 
 import com.mxgraph.util.mxPoint;
 
@@ -19,28 +16,30 @@ public class Grid {
 	private double visWidth;
 	private double visHeight;
 	
-	private Rectangle shellBounds;
+	private org.eclipse.swt.graphics.Rectangle shellBounds;
 	
 	double visXOffset;
 	double visYOffset;
 	private double visXCap;
 	private double visYCap;
+	
+	//controls distance to GUI Border
 	double margin =0.1;
-	private double minNodeDistance = 10;
 	
 	private double horizontalGridDist;
 	private double verticalGridDist;
 
 	public Point2D.Double defaultNodePosition;
 	
-	private int blockMarginX = 5;
-	private int blockMarginY = 5;
+	//padding around each Node
+	private int blockMarginX;
+	private int blockMarginY;
 	
-	private int maxDistanceToOrigin = 4;
+	private int maxDistanceToOrigin = 50;
 	
-	public Grid(Rectangle shellBounds2, int sizeX, int sizeY, double blockMargin) {
+	public Grid(org.eclipse.swt.graphics.Rectangle shellBounds, int sizeX, int sizeY, double blockMargin) {
 		
-		this.shellBounds = shellBounds2;
+		this.shellBounds = shellBounds;
 		
 		grid = new double[sizeX][sizeY];
 		maxXindx = sizeX -1;
@@ -48,8 +47,9 @@ public class Grid {
 		
 		calculateGraphBounds();
 		
-		horizontalGridDist =  Math.max((double)(1-margin )* this.shellBounds.width / (double)sizeX , 1);
-		verticalGridDist = Math.max((double)(1-margin )* this.shellBounds.height / (double)sizeY, 1);
+		//span of grid
+		horizontalGridDist =  Math.max((double)(1-margin )* shellBounds.width / (double)sizeX , 1);
+		verticalGridDist = Math.max((double)(1-margin )* shellBounds.height / (double)sizeY, 1);
 		
 		this.blockMarginX = (int) Math.ceil(blockMargin / horizontalGridDist);
 		this.blockMarginY = (int) Math.ceil(blockMargin / verticalGridDist);
@@ -66,15 +66,15 @@ public class Grid {
 		visWidth = (1-margin)*shellBounds.width;
 		visHeight = (1-margin)*shellBounds.height;
 		
+		//minimum coordinates
 		visXOffset = visX + margin * 0.5 * shellBounds.width;
 		visYOffset = visY + margin * 0.5 * shellBounds.height;
 		
+		//maximum coordinates
 		visXCap = visX + (1- 3*margin )* shellBounds.width;
 		visYCap = visY + (1- 3*margin )* shellBounds.height;
 		
-		//System.out.println("Vis X cap: " + String.valueOf(visXCap));
-		//System.out.println("Vis Y cap: " + String.valueOf(visYCap));
-		
+		//default placement for unconnected nodes
 		defaultNodePosition = new Point2D.Double();
 		defaultNodePosition.x = visX + 0.5 * visWidth;
 		defaultNodePosition.y =  visY + 0.5 * visHeight;
@@ -85,6 +85,7 @@ public class Grid {
 		return new mxPoint(Math.min(gridX * horizontalGridDist + visXOffset, visXCap), Math.min(gridY * verticalGridDist + visYOffset, visYCap));
 	}
 	
+	// set all grid values within area
 	public void setGridValues(java.awt.Rectangle area, double val) {
 		
 
@@ -103,12 +104,12 @@ public class Grid {
 	}
 	
 	
+	// returns sum of all grid values within area at point x and y
 	public double getCostForArea(java.awt.Rectangle area, int gridX, int gridY, boolean terminateEarly) {
 		
 		
 		int xRange = (int) Math.ceil( area.width/(double)horizontalGridDist);
 		int yRange = (int) Math.ceil( area.height/(double)verticalGridDist);
-		
 		
 		double cost = 0.0;
 	
@@ -118,6 +119,7 @@ public class Grid {
 			
 				cost += grid[i][j];
 				
+				// early termination for placement of labels and nodes
 				if(terminateEarly && cost != 0)
 					return 1;
 				
@@ -127,11 +129,11 @@ public class Grid {
 		return cost;
 	}
 	
-		
+	
+	//estimate corresponding point in grid to absolute position
 	Point primeGridSearch(Point2D.Double p) {
 			
 		
-			
 			int yIdx = (int) Math.min(Math.max(0,(Math.round((p.y - visYOffset)/(double)verticalGridDist))), maxYindx);
 			int xIdx = (int) Math.min(Math.max(0,(Math.round((p.x - visXOffset)/(double)horizontalGridDist))), maxXindx);
 			
@@ -146,24 +148,23 @@ public class Grid {
 	public mxPoint getFreeGridPosition(Point2D.Double initialPosition, java.awt.Rectangle geometry){
 		
 		Point origin = primeGridSearch(initialPosition);
-		java.awt.Rectangle includedArea =  (java.awt.Rectangle) geometry.clone();
+		java.awt.Rectangle includedArea =  (Rectangle) geometry.clone();
 				
-		
+	
 		for(int d = 0 ; d < maxDistanceToOrigin; d++) {
 			
 			for(int y = Math.max(origin.y - d, 0);  y <= Math.min(origin.y +  d, maxYindx); y += Math.max(1,2*d)) {
 				
 				
 				for(int x = Math.max(origin.x - d, 0);  x <= Math.min(origin.x +  d, maxXindx); x += Math.max(1,2*d)) {
-					
-					includedArea.setLocation(x,y);
-					
-					
+			
 					if(getCostForArea(includedArea, x, y, true) == 0) {
 						
-						setGridValues(includedArea, Double.MAX_VALUE);
-						return getAbsolutePosition(x, y);
+						mxPoint absolutePosition =  getAbsolutePosition(x, y);
+						includedArea.setLocation((int)absolutePosition.getX(),(int) absolutePosition.getY());	
+						return absolutePosition;
 					}
+					
 					
 				}
 				

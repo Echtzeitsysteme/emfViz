@@ -1,8 +1,6 @@
 package graphVisualization;
 
 import java.awt.Point;
-import java.awt.geom.Point2D;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -15,10 +13,11 @@ import com.mxgraph.model.mxGeometry;
 
 public class EdgePlanner {
 
-	private ArrayList<Point> targetPoints;
+	// Astar params
+	private LinkedList<Point> targetPoints;
 	private Point centerTarget;
 	
-	private ArrayList<Point> possibleOrigins;
+	private LinkedList<Point> possibleOrigins;
 	
 	private HashMap<Point,Point> cameFrom;
 	private HashMap<Point, Double> gscore;
@@ -26,21 +25,24 @@ public class EdgePlanner {
 	
 	private double cellOriginBorderMargin = 0.2;
 	private double velocityPenalty =0.0000005;
+	
+	//stepsize in grid
 	private int aStarStepsize = 2;
+	
+	//////////////////
+	
+	// Parameters for reducing via points
 	private double minInterPointDist = 10;
 	private double minCurveStrength =2;
-	private int maxIterations = 1000;
-	
+
+	// visualization grid
 	private Grid edgeGrid;
-	
-	//private RTree<String, Rectangle> blockTree;
-	private ArrayList<mxGeometry> blockedAreas;
 	
 	private mxGeometry targetGeom;
 	private mxGeometry originGeom;
 	//private double[][] edgeGrid;
 	
-	public ArrayList<Point> fullPath;
+	public LinkedList<Point> fullPath;
 	
 	private int pathCutoff = 3;
 	
@@ -59,16 +61,15 @@ public class EdgePlanner {
 		
 		this.edgeGrid = edgeGrid;
 		
-		edgeGrid.setGridValues(cellBoundsTarget.getRectangle(), 0);
-		edgeGrid.setGridValues(originGeom.getRectangle(), 0);
+
 
 	}
 	
-	
-	private ArrayList<Point> getCellBorderPoints(Point nodePosition, mxGeometry cellBounds) {
+	// Get points in the grid that lie on the border of a node. These are used as starting points
+	private LinkedList<Point> getCellBorderPoints(Point nodePosition, mxGeometry cellBounds) {
 		
 		
-		ArrayList<Point> borderPoints = new ArrayList<Point>();
+		LinkedList<Point> borderPoints = new LinkedList<Point>();
 
 		
 		Point topLeft = new Point();
@@ -111,14 +112,17 @@ public class EdgePlanner {
 		return rectangle.getMinX() < p.x && p.x < rectangle.getMaxX() && p.y > rectangle.getMinY() && p.y < rectangle.getMaxY();
 	}
 	
+	// Use Euclidean distance to target center as Astar heuristic + Value of next grid point (cost estimation)
 	private double h(Point start) {
 		return Math.sqrt(Math.pow(start.x - centerTarget.x , 2) + Math.pow(start.y - centerTarget.y, 2)) + edgeGrid.GetGridValue(Math.max(0,start.x - (int)edgeGrid.visXOffset),Math.max(0,start.y - (int)edgeGrid.visYOffset));
 	}
+	
 	
 	private double d(Point p1, Point p2) {
 		return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
 	}
 	
+	// Enforced straight edges
 	private double velocityPenality(Point current, Point next) {
 		
 		
@@ -136,9 +140,10 @@ public class EdgePlanner {
 		return velocityPenalty* (Math.abs(velXCurrent - velXPrev) + Math.abs(velYCurrent- velYPrev));
 	}
 	
-	private ArrayList<Point> getNeighbours(Point p){
+	// Get neighbouring points in the grid which are possible candidates for the next Astar iteration
+	private LinkedList<Point> getNeighbours(Point p){
 		
-		ArrayList<Point> neighbours = new ArrayList<Point>();
+		LinkedList<Point> neighbours = new LinkedList<Point>();
 		
 		
 		for(int i = -aStarStepsize; i <= aStarStepsize; i += aStarStepsize) {
@@ -161,25 +166,30 @@ public class EdgePlanner {
 		return neighbours;
 	}
 	
-	private ArrayList<Point> constructPath(Point start, Point endPoint){
+	
+	// Build edge path from points with minimal costs
+	private LinkedList<Point> constructPath(Point start, Point endPoint){
 
-		ArrayList<Point> path = new ArrayList<Point>();
+		LinkedList<Point> path = new LinkedList<Point>();
 		
 		Point p = endPoint;
 		
 		
 		while(p != start) {
-			path.add(0, p);
+			path.addFirst(p);
 			p = cameFrom.get(p);
 		}
 		
-		path.add(0, start);	
+		path.addFirst(start);	
 		return path;
 		
 	}
 	
-	private ArrayList<Point> AStar(Point start, List<Point> targets){
+	private LinkedList<Point> AStar(Point start, List<Point> targets){
 		
+		edgeGrid.setGridValues(targetGeom.getRectangle(), 0);
+		edgeGrid.setGridValues(originGeom.getRectangle(), 0);
+		// neutralize the blocked grid points from target and source to allow for a good convergence
 		
 		fscoreComparator comp = new fscoreComparator();
 		PriorityQueue<Point> openSet = new PriorityQueue<Point>(comp);
@@ -197,9 +207,10 @@ public class EdgePlanner {
 		
 		while (!openSet.isEmpty()) {
 			
-			
+			// candidates are sorted by minimal distance to the target node center
 			Point current = openSet.remove();
-			
+
+			// termination condition: check if current candidate is within target bounds
 			if(intersectsRectangle(targetGeom.getRectangle(), current)) {
 				return constructPath(start, cameFrom.get(current));
 			}
@@ -208,6 +219,7 @@ public class EdgePlanner {
 			
 			for(Point neighbour : neighbours){
 
+				// final point cost = gscore + distance to neighbour + velocityPenalty
 				double t_gscore = gscore.getOrDefault(current, Double.MAX_VALUE) + d(current, neighbour) + velocityPenality(current, neighbour);
 				
 				if (t_gscore < gscore.getOrDefault(neighbour, Double.MAX_VALUE)) {
@@ -220,7 +232,6 @@ public class EdgePlanner {
 					if(!openSet.contains(neighbour)) 
 						openSet.add(neighbour);
 
-					
 					
 				}
 								
@@ -275,22 +286,25 @@ public class EdgePlanner {
 			if(fullPath == null)
 				continue;
 			
+			// reblock target and source grid points
 			edgeGrid.setGridValues(targetGeom.getRectangle(), Double.MAX_VALUE);
 			edgeGrid.setGridValues(originGeom.getRectangle(), Double.MAX_VALUE);
 
+			//start reducing waypoints
 			Point[] derivate = getSecondDerivate(fullPath);
 			
-			ArrayList<Integer> interestingIndices = findCurves(derivate);
+			// only use points that represent local extremes of the second derivative aka curves
+			LinkedList<Integer> interestingIndices = findCurves(derivate);
 			
+			//also keep last and first viapoints
 			if(fullPath.size() > 2 * pathCutoff) {
-				interestingIndices.add(0, pathCutoff - 1);
+				interestingIndices.addFirst(pathCutoff - 1);
 				interestingIndices.add(fullPath.size()-pathCutoff);
 			}
 			else {
-				interestingIndices.add(0, 0);
+				interestingIndices.addFirst(0);
 				interestingIndices.add(fullPath.size()-1);
 			}
-
 			
 			LinkedList<Point> reducedPath = new LinkedList<Point>();
 			
@@ -299,13 +313,13 @@ public class EdgePlanner {
 				reducedPath.add(fullPath.get(idx));
 			}
 			
-			
+			//assemble final edge path
 			reduceWayPoints(reducedPath);
 			
 			return reducedPath;
 
 		}
-		
+		// reblock target and source grid points if no path has been found
 		edgeGrid.setGridValues(targetGeom.getRectangle(), Double.MAX_VALUE);
 		edgeGrid.setGridValues(originGeom.getRectangle(), Double.MAX_VALUE);
 		
@@ -314,16 +328,16 @@ public class EdgePlanner {
 		
 	}
 	
-	
-	private void reduceWayPoints(LinkedList<Point> reducedPath){
+	// enforce viapoints to have a certain distance to each other
+	private void reduceWayPoints(LinkedList<Point> fullPath){
 		
-		for(int i = 0; i < reducedPath.size() -1; i++){
+		for(int i = 0; i < fullPath.size() -1; i++){
 			
-			Point currentWayPoint = reducedPath.get(i);
-			Point nextWayPoint = reducedPath.get(i+1);
+			Point currentWayPoint = fullPath.get(i);
+			Point nextWayPoint = fullPath.get(i+1);
 			
 			if(currentWayPoint.distance(nextWayPoint.x, nextWayPoint.y) < minInterPointDist){
-				reducedPath.remove(i+1);			
+				fullPath.remove(i+1);			
 				i--;
 			}
 			
@@ -332,7 +346,7 @@ public class EdgePlanner {
 	}
 	
 	
-	private Point[] getSecondDerivate(ArrayList<Point> valueList) {
+	private Point[] getSecondDerivate(LinkedList<Point> valueList) {
 
 		Point[] derivate = new Point[valueList.size()];
 		Point[] valueArr = valueList.toArray(new Point[0]);
@@ -351,9 +365,10 @@ public class EdgePlanner {
 		
 	}
 	
-	private ArrayList<Integer> findCurves(Point[] derivate){
+	// search for local extremes of the discrete second derivative
+	private LinkedList<Integer> findCurves(Point[] derivate){
 		
-		ArrayList<Integer> foundIdx = new ArrayList<Integer>();
+		LinkedList<Integer> foundIdx = new LinkedList<Integer>();
 		
 		for(int i = 2; i < derivate.length-3; i++) {
 			
@@ -373,7 +388,6 @@ public class EdgePlanner {
 		
 		return foundIdx;
 	}
-	
 	
 
 }

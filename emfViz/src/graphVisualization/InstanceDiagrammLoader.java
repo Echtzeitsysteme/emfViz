@@ -10,24 +10,18 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.impl.EClassImpl;
 import org.eclipse.emf.ecore.resource.Resource;
 
-
 public class InstanceDiagrammLoader extends DataLoader {
 	
 	private Resource instanceModel;
-	private boolean internalEdgesOnly;
 
-	public InstanceDiagrammLoader(Resource loadedResource, boolean internalEdgesOnly) {
+	public InstanceDiagrammLoader(Resource loadedResource) {
 		super();
 		
 		instanceModel = loadedResource;
-		
-		this.internalEdgesOnly = internalEdgesOnly;
-		
-		System.out.println("Instance Model: " + instanceModel.getURI().toString());
 	}
 
 	@Override
-	public void loadData() {
+	protected void loadData() {
 		
 		List<EObject> content = instanceModel.getContents();
 		for(EObject oPack : content) {				
@@ -38,39 +32,16 @@ public class InstanceDiagrammLoader extends DataLoader {
 	
 	private void collectContentHierarchichal(EObject content) {
 		
-		nodes.add(new Node(content.toString(),content.eClass().getName(), "defaultNode"));
+		nodes.add(new Node("defaultNode", content));
 		
 		for(EStructuralFeature f : ((EClassImpl)content.eClass()).getEAllStructuralFeatures()) {
 			
-			if(f instanceof EReference) {
+			if(f instanceof EReference ref) {
 					
-				if(!edges.containsKey(content.toString())) {						
-					ArrayList<Edge> outgoingEdges = new ArrayList<Edge>();
-					edges.put(content.toString(), outgoingEdges);
-				}
-				
-				
 				
 				if(!f.isMany()) {
 					
-					if((EObject) content.eGet(f) == null) {
-						continue;
-					}
-					
-					if(internalEdgesOnly) {	
-						
-						if(! ((EObject) content.eGet(f)).eResource().getURI().equals(instanceModel.getURI()))
-								continue;
-					}
-					
-					EObject target = (EObject) content.eGet(f);
-					
-					if (target == null) {
-						continue;
-					}
-					
-					Edge visEdge = new Edge(f.getName(), "defaultEdge", content.toString(), target.toString());
-					
+					Edge visEdge = new Edge("defaultEdge", content, ((EObject) content.eGet(f)), ref);
 					
 					EReference opp = ((EReference) f).getEOpposite();
 					
@@ -79,35 +50,25 @@ public class InstanceDiagrammLoader extends DataLoader {
 						//edgeOpposites.put(f.toString(), opp.toString());
 						visEdge.setOppositeId(content.eGet(f).toString()+opp.getName()+content.toString());
 					}
-					edges.get(content.toString()).add(visEdge);
 					
-						
+					edges.put(visEdge.hashCode(), visEdge);
+
 				}
 				else {
 												
 				EList<EObject> values = (EList<EObject>) content.eGet(f);
-				
-				if (values == null) {
-					continue;
-				}
-				
 				EReference opp = ((EReference) f).getEOpposite();
 				
 				for(EObject oMulti : values) {
 					
-					if(internalEdgesOnly) {						
-						if(! oMulti.eResource().getURI().equals(instanceModel.getURI()) )
-								continue;
-					}
 					
-					
-					Edge visEdge = new Edge(f.getName(), "defaultEdge", content.toString(), oMulti.toString());
+					Edge visEdge = new Edge("defaultEdge", content, oMulti, ref);
 					
 					if(opp != null) {
 						visEdge.setOppositeId(oMulti.toString() + opp.getName() + content.toString());
 					}
 					
-					edges.get(content.toString()).add(visEdge);
+					edges.put(visEdge.hashCode(), visEdge);
 
 				}
 			}	
@@ -119,14 +80,6 @@ public class InstanceDiagrammLoader extends DataLoader {
 			collectContentHierarchichal(containedContent);
 		}
 			
-	}
-	
-	public Resource getInstanceModel () {
-		return instanceModel;
-	}
-	
-	public void setInstanceModel(Resource instanceModel) {
-		this.instanceModel = instanceModel;
 	}
 	
 	/*private void loadResource(String path) {

@@ -10,6 +10,7 @@ import org.eclipse.emf.ecore.impl.EClassImpl;
 import org.emoflon.smartemf.runtime.SmartPackage;
 
 
+
 public class ClassDiagrammLoader extends DataLoader {
 	
 	SmartPackage metaModel;
@@ -22,7 +23,7 @@ public class ClassDiagrammLoader extends DataLoader {
 	
 	
 	@Override
-	public void loadData() {
+	protected void loadData() {
 		//ArrayList<EClassImpl> nodes = new ArrayList<EClassImpl>();
 		//HashMap<String, ArrayList<EReference>> edges = new HashMap<String, ArrayList<EReference>>();
 		
@@ -32,19 +33,19 @@ public class ClassDiagrammLoader extends DataLoader {
 				EClassImpl node = (EClassImpl) o;
 				
 				//nodes.add(node);
-				nodes.add(new Node(node.getName(), node.getName(), "defaultNode"));
+				nodes.add(new Node("defaultNode", node));
 						
 				List<EStructuralFeature> features = node.getEAllStructuralFeatures();
 				
 				//ArrayList<EReference> refs = new ArrayList<EReference>();
 				
-				ArrayList<Edge> outgoingEdges = new ArrayList<Edge>();
 				
-				for(EStructuralFeature f : features) {
+				for(EStructuralFeature f : features ) {
 					
-					if(f instanceof EReference) {
-		
-						Edge visEdge = new Edge(f.getName(), "defaultEdge", node.getName(), f.getEType().getName());
+					if(f instanceof EReference ref) {
+						
+						
+						Edge visEdge = new Edge("defaultEdge", node, ((EObject) node.eGet(ref)),  ref);
 						
 						EReference opp = ((EReference) f).getEOpposite();
 						
@@ -52,12 +53,14 @@ public class ClassDiagrammLoader extends DataLoader {
 							visEdge.setOppositeId(f.getEType().getName()+opp.getName()+node.getName());
 						}
 						
-						outgoingEdges.add(visEdge);
+					
+	
+						edges.put(visEdge.hashCode(), visEdge);
 					}
 					
 				}
 				
-				edges.put(node.getName(), outgoingEdges);
+				
 			}
 		}
 		

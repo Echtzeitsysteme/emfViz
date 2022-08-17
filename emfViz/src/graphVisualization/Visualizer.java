@@ -1,10 +1,9 @@
 package graphVisualization;
 
-
-import java.awt.Component;
 import java.awt.Frame;
 import java.awt.Point;
-
+import java.awt.Polygon;
+import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,10 +12,11 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
@@ -33,76 +33,52 @@ import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxStylesheet;
 
-
-
 public class Visualizer {
 	
-	// add graph to this frame
-	protected Frame frame;
-	
-	protected mxGraph graph;
-	protected mxGraphModel graphModel;
-	protected mxGraphComponent graphComponent;
-	protected DataLoader dataLoader;
-	
-	protected Point2D.Double defaultNodePosition;
-	protected int defaultNodeWidth = 80;
-	protected int defaultNodeHeight = 40;
-	
-	// determines max size of the graph
-	protected Rectangle shellBounds;
-	
-	private mxFastOrganicLayout preLayout;
-	private Grid nodeGrid;
-	private Grid edgeGrid;
-	
-	private double graphCenterX ;
-	private double graphCenterY;
-	
-	private double xStretch ;
-	private double yStretch;
-	private double margin = 0.1;
-	private int minNodeDistanceNodes = 30;
-	private int minNodeDistanceEdges = 10;
-	
-	private ArrayList<mxGeometry> blockedAreas;
-	
+	//Gui
 	private Shell shell;
 	private Composite composite;
+	private Frame frame;
 	
-	public Visualizer(DataLoader dataLoader, Shell shell) {
-		if (((InstanceDiagrammLoader) dataLoader).getInstanceModel() != null) {
-			this.dataLoader = dataLoader;
-			this.shell = shell;
-			
-			//just for debugging
-			/*
-			for (int i = 0; i < dataLoader.nodes.size(); i++) {
-				System.out.println(dataLoader.nodes.get(i).toString());
-				
-			}
-			
-			for (ArrayList<Edge> e : dataLoader.edges.values()) {
-				for (Edge edge : e) {
-					System.out.println(edge.toString());
-				}
-				
-			}*/		
-			
-		} else {
-			return;
-		}
-		
-	}
+	//mxGraph elements
+	private mxGraph graph;
+	private mxGraphModel graphModel;
+	private mxGraphComponent graphComponent;
 	
-	/*
-	 * First, create a new frame and add it to the shell
-	 * Second, create a mxGraph from instanceModel and add it to the frame created previously
-	 */	
-	public void init () {
+	//contains data from eMoflon model
+	private DataLoader dataLoader;
+	
+	
+	private int defaultNodeWidth = 80;
+	private int defaultNodeHeight = 40;
+	private Point2D.Double defaultNodePosition;
+	
+	//primitive layout algorithm
+	private customFastOrganicLayout preLayout;
+	
+	//layout grid
+	private Grid grid;
+	
+	// transformation variables
+	private double graphCenterX ;
+	private double graphCenterY;
+	private double xStretch ;
+	private double yStretch;
+	
+	//margin to GUI border
+	private double margin = 0.1;
+	
+	//spacing around placed nodes and labels
+	private int minNodeDistanceNodes = 15;
+	
+	
+	public Visualizer(Shell shell, DataLoader dataLoader) {
 		
-		this.dataLoader.loadData();
+		this.dataLoader = dataLoader;
+		dataLoader.loadData();
 		
+		//set up GUI
+		this.shell = shell;
 		composite = new Composite(shell, SWT.EMBEDDED | SWT.NO_BACKGROUND);
 		composite.setVisible(true);
 		frame = SWT_AWT.new_Frame(composite);
@@ -110,33 +86,34 @@ public class Visualizer {
 		graph = new mxGraph();
 		graphModel = ((mxGraphModel)graph.getModel());
 		
-		shellBounds = shell.getBounds();
-		
-		//System.out.println("Monitor bounds:" + monitorBounds.toString());
+		org.eclipse.swt.graphics.Rectangle shellBounds = shell.getBounds();
 		
 		defaultNodePosition = new Point2D.Double(((double) shellBounds.width) * 0.4 - defaultNodeWidth *0.5, ((double) shellBounds.height) * 0.4- defaultNodeHeight *0.5);
-		//defaultNodePosition = new Point2D.Double(shellBounds.width, shellBounds.height);
-		//System.out.println("Shell bounds:" + shell.getBounds().toString());
-		//System.out.println("Default Position:" + defaultNodePosition.toString());
 		
 		addStyles();
+		
+		//insert graph data
 		insertDataIntoGraph();
+		
+		//set basic layout settings
 		setUpLayout();
-		runLayout();
+		
+		//layout every inserted element
+		runTotalLayout();
 		
 		graphComponent = new mxGraphComponent(graph);
 		frame.add(graphComponent);
-	}
 		
+	}
 	
-	protected void addStyles() {
+	private void addStyles() {
 		
 		mxStylesheet stylesheet = graph.getStylesheet();
 		Hashtable<String, Object> cellStyle = new Hashtable<String, Object>();
 		cellStyle.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_RECTANGLE);
 		cellStyle.put(mxConstants.STYLE_OPACITY, 50);
 		cellStyle.put(mxConstants.STYLE_FONTCOLOR, "#00000");
-		cellStyle.put(mxConstants.STYLE_FONTSIZE, "10");
+		cellStyle.put(mxConstants.STYLE_FONTSIZE, "13");
 		cellStyle.put(mxConstants.STYLE_FILLCOLOR, "#FFFFFF");
 		cellStyle.put(mxConstants.ALIGN_CENTER, "1");
 		cellStyle.put(mxConstants.STYLE_OVERFLOW, "hidden");
@@ -145,125 +122,96 @@ public class Visualizer {
 		
 		Hashtable<String, Object> edgeStyle = new Hashtable<String, Object>();
 		edgeStyle.put(mxConstants.STYLE_FONTCOLOR, "#00000");
-		edgeStyle.put(mxConstants.STYLE_FONTSIZE, "8");
+		edgeStyle.put(mxConstants.STYLE_FONTSIZE, "10");
 		edgeStyle.put(mxConstants.STYLE_FILLCOLOR, "#FFFFFF");
 		edgeStyle.put(mxConstants.ALIGN_LEFT, "1");
 		edgeStyle.put(mxConstants.STYLE_OVERFLOW, "fill");
 		stylesheet.putCellStyle("defaultEdges", edgeStyle);
 		
-		//stylesheet.setDefaultVertexStyle(cellStyle);
-		//stylesheet.setDefaultEdgeStyle(edgeStyle);
 	}
 	
-	
-	/*
-	 * update mxGraph
-	 * TODO: dosen't work correctly - instead of updating the graph generates the function a complete new graph
-	 * 
-	*/
-	public void updateGraph() {
+	protected void insertNodeIntoGraph(Node node, double x , double y) {
 		
+		graph.insertVertex(graph.getDefaultParent(), String.valueOf(node.hashCode()), node, x, y, defaultNodeWidth, defaultNodeHeight, node.styleCategory);
 		
-		if (((InstanceDiagrammLoader) dataLoader).getInstanceModel() != null) {
-		
-			System.out.println("Updating UI...");
-			
-			this.dataLoader.loadData();
-			
-			for (Component c : frame.getComponents()) {
-				frame.remove(c);
-			}
-			
-			graph = new mxGraph();
-			graphModel = ((mxGraphModel)graph.getModel());
-			
-			
-			addStyles();
-			insertDataIntoGraph();
-			setUpLayout();
-			runLayout();
-			
-			graphComponent = new mxGraphComponent(graph);
-			frame.add(graphComponent);
-			
-			System.out.println("UI update is finished.");
-		}
 	}
 	
-	protected void insertDataIntoGraph() {
-		
+	protected void insertNodeIntoGraph(Node node) {
+
 		double centerX = graph.getGraphBounds().getCenterX();
 		double centerY = graph.getGraphBounds().getCenterY();
-	
 		
-		for(Node n: dataLoader.nodes) {
-			graph.insertVertex(graph.getDefaultParent(),n.id, n.name, defaultNodePosition.x - centerX, defaultNodePosition.y - centerY, defaultNodeWidth, defaultNodeHeight, n.styleCategory);
-		}
-		
-		mxGraphModel graphModel = (mxGraphModel) graph.getModel();
-		
-		for(ArrayList<Edge> outgoingEdges : dataLoader.edges.values()) {
-			
-			
-			for(Edge e : outgoingEdges) {
-				graph.insertEdge(graph.getDefaultParent(), e.id, e.label, graphModel.getCell(e.sourceNID), graphModel.getCell(e.targetNID),e.styleCategory);
-			}
-			
-		}
-		
-		centerX = graph.getGraphBounds().getCenterX();
-		centerY = graph.getGraphBounds().getCenterY();
+		insertNodeIntoGraph(node,defaultNodePosition.x - centerX, defaultNodePosition.y - centerY);
+		dataLoader.nodes.add(node);
 	}
 	
-	protected void setUpLayout() {
+	protected void insertEdgeIntoGraph(Edge edge) {
+		graph.insertEdge(graph.getDefaultParent(), String.valueOf(edge.hashCode()), edge, graphModel.getCell(edge.getSourceID()), graphModel.getCell(edge.getTargetID()),edge.styleCategory);
+		dataLoader.edges.put(edge.hashCode(),edge);
+	}
+	
+	protected void removeNodeInGraph(Node node) {
+		removeElement(String.valueOf(node.hashCode()));
+		dataLoader.nodes.remove(node);
+	}
+	
+	protected void removeEdgeInGraph(Edge edge) {
+		removeElement(String.valueOf(edge.hashCode()));
+		dataLoader.edges.remove(edge);
+	}
+	
+	
+	private void removeElement(String hashCode) {
 		
-		preLayout = new mxFastOrganicLayout(graph);
+		Object[] cells = new Object[] {graphModel.getCell(hashCode)};
+		
+		graph.removeCells(cells);
+	}
+	
+	
+	private void insertDataIntoGraph() {
+
+		
+		for(Node n: dataLoader.nodes) {
+			insertNodeIntoGraph(n);
+		}
+		
+		for(Edge edge : dataLoader.edges.values()) {
+			insertEdgeIntoGraph(edge);
+		}
+		
+	}
+	
+	private void setUpLayout() {
+		
+		preLayout = new customFastOrganicLayout(graph);
 		preLayout.setForceConstant(150);
-		preLayout.setMinDistanceLimit(4);
+		preLayout.setMinDistanceLimit(8);
 		preLayout.setUseInputOrigin(false);
 		preLayout.setDisableEdgeStyle(false);
 		
-		//Rectangle shellBounds = panel.getBounds();
-		//Rectangle shellBounds = frame.getBounds();
+		org.eclipse.swt.graphics.Rectangle shellBounds = shell.getBounds();
 		
-		
-		double hWRatio = (double) shellBounds.height / (double)shellBounds.width;
-		
-		int baseSize = Math.min(dataLoader.nodes.size() * dataLoader.nodes.size(), shellBounds.height * shellBounds.width);
-
-		
-		int sizeX = (int) Math.ceil(Math.sqrt(baseSize));
-		int sizeY = (int) Math.ceil(Math.sqrt(baseSize));
-		
-		nodeGrid = new Grid(shellBounds, sizeX, sizeY,  minNodeDistanceNodes);
-		edgeGrid = new Grid(shellBounds,(int)Math.floor((1-margin ) * shellBounds.width), (int) Math.floor((1-margin ) * shellBounds.height), minNodeDistanceEdges);
-		
-		blockedAreas = new ArrayList<mxGeometry>();
-		
+		//Initialize grid with size of the shell and a point distance of 1
+		grid = new Grid(shellBounds,(int)Math.floor((1-margin ) *shellBounds.width), (int) Math.floor((1-margin ) *shellBounds.height), minNodeDistanceNodes);		
 	}
 	
 	private void updateGraphShellTransformation() {
-	
+		
+		// Graph bounds will be strechted to monitor bounds. Set up the transformation of element coordinates accordingly.
 		double graphWidth = graph.getGraphBounds().getWidth();
 		double graphHeight = graph.getGraphBounds().getHeight();
 		
 		graphCenterX = graph.getGraphBounds().getCenterX();
 		graphCenterY = graph.getGraphBounds().getCenterY();
 		
-		
-		
-		xStretch = (shellBounds.width * (1 - nodeGrid.margin)) / graphWidth;
-		yStretch = (shellBounds.height * (1 - nodeGrid.margin)) / graphHeight;
-
-		//System.out.println(xStretch + " : " + yStretch);
-		
+		xStretch = (shell.getMonitor().getClientArea().width *(1-grid.margin))/graphWidth;
+		yStretch = (shell.getMonitor().getClientArea().height*(1-grid.margin))/graphHeight;
 	}
 	
-	protected void runLayout() {
+	private void runLayout() {
 
 		preLayout.execute(graph.getDefaultParent());
-		
-		blockedAreas.clear();
 		
 		System.out.println("Placing nodes");
 		placeNodes();
@@ -273,10 +221,45 @@ public class Visualizer {
 		placeLabels();
 		System.out.println("Ready");
 		
+		setIgnoreStatus(true);
 	}
 	
-	private void transformGraphPositionToVisBounds(Point2D.Double position) {
+	// Layout new elements only. Others keep their positions / routed paths.
+	public void runIncrementalLayout() {
+		runLayout();
+	}
+	
+	public void runTotalLayout() {
 		
+		setIgnoreStatus(false);
+		runLayout();
+		
+	}
+	
+	// Change ignore status of every element in the mxGraph
+	private void setIgnoreStatus(boolean ignored) {
+		
+		Map<String,Object> cells = graphModel.getCells();	
+		for(Object cell : cells.values()) {
+			
+			mxCell c = (mxCell) cell;
+		
+			if(c.isEdge()) {
+				((Edge)c.getValue()).ignored = ignored;
+				continue;
+			}
+				
+			if(c.isVertex()){
+				((Node)c.getValue()).ignored = ignored;
+				continue;
+			}
+
+		}
+		
+	}
+	
+	
+	private void transformGraphPositionToVisBounds(Point2D.Double position) {
 		
 		position.x = Math.max((position.x - graphCenterX) * xStretch + defaultNodePosition.x,0);
 		position.y = Math.max((position.y - graphCenterY) * yStretch + defaultNodePosition.y,0);
@@ -290,49 +273,57 @@ public class Visualizer {
 		updateGraphShellTransformation();
 		
 		Map<String,Object> cells = graphModel.getCells();	
+		
+		
 		for(Object cell : cells.values()) {
 			
 			mxCell c = (mxCell) cell;
+			
 			mxGeometry geom = c.getGeometry();
 			
 			if(geom == null || c.isEdge())
+				continue;
+			if(((Node)c.getValue()).ignored)
 				continue;
 			
 			Point2D.Double position = new Point2D.Double( geom.getX(), geom.getY() );
 			
 			transformGraphPositionToVisBounds(position);
 			
-			mxPoint nearestGridPoint = nodeGrid.getFreeGridPosition(position, c.getGeometry().getRectangle());
+			//get free grid point with minimal collisions to other elements near the origin that was proposed by the fastOrganic layout.
+			mxPoint nearestGridPoint = grid.getFreeGridPosition(position, c.getGeometry().getRectangle());
 			
 			if (nearestGridPoint == null) {
-				System.out.println("Node grid position not found");
+				//keep original guess
 				nearestGridPoint = new mxPoint(position.x, position.y);						
 			}
-					
-			//System.out.println("Final pos: " + nearestGridPoint.toString());
-			
-			
-			//System.out.println("Old geom: " + c.getGeometry().toString() + " With rectangle: "+ c.getGeometry().getRectangle().toString());
-			
+	
+			// move cell to calculated origin
 			Object[] cellsToMove = {cell};				
 			graph.moveCells(cellsToMove,  nearestGridPoint.getX() - geom.getX(), nearestGridPoint.getY() - geom.getY());
 			
-			//System.out.println("New geom: " + c.getGeometry().toString() + " With rectangle: " + c.getGeometry().getRectangle().toString());
-			blockedAreas.add(c.getGeometry());
+			//block grid
+			grid.setGridValues(c.getGeometry().getRectangle(), Double.MAX_VALUE);
+			
+			((Node)c.getValue()).ignored = true;
 			
 		}
 		
-		for(mxGeometry g : blockedAreas) {
-			edgeGrid.setGridValues(g.getRectangle(), Double.MAX_VALUE);
-		}
 		
 	}
 	
 	private void placeEdges() {
 		
-		HashMap<String, ArrayList<mxPoint>> plottedEdges = new HashMap<String, ArrayList<mxPoint>>();
-		Map<String,Object> cells = graphModel.getCells();	
+		// Already plotted Edges
+		HashMap<Edge, LinkedList<mxPoint>> plottedEdges = new HashMap<Edge,LinkedList<mxPoint>>();
 		
+		Map<String,Object> cells = graphModel.getCells();
+		
+		//Multithreading overhead
+		ArrayList<EdgePlannerThread> activeThreads = new ArrayList<EdgePlannerThread>();
+		LinkedList<Area> activeAreas = new LinkedList<Area>();
+		synchronizedWorkingAreas synAreas = new synchronizedWorkingAreas(activeAreas);
+
 		for(Object cell : cells.values()) {
 			
 			mxCell node = (mxCell) cell;
@@ -340,91 +331,25 @@ public class Visualizer {
 			if(node.isEdge())
 				continue;
 			
+			if((Node)node.getValue() == null)
+				continue;
 			
-			System.out.println("Node: " + node.getValue());
+			// Start a new thread for every node with outgoing edges
+			EdgePlannerThread newThread = new EdgePlannerThread(graphModel,grid,node, plottedEdges, synAreas);
 			
-			for(int i = 0; i < node.getEdgeCount(); i++) {
-				
-				mxICell edgeGraph = node.getEdgeAt(i);
-				
-				mxICell source = edgeGraph.getTerminal(true);
-				mxICell terminal = edgeGraph.getTerminal(false);
-				
-				mxGeometry geometry = edgeGraph.getGeometry();
-				if (geometry == null)
-				{
-					geometry = new mxGeometry();
-					geometry.setRelative(true);
-				}
-				else
-				{
-					geometry = (mxGeometry) geometry.clone();
-				}
-				
-				//ID: HospitalExample.impl.NurseImpl@2ca923bb (name: Stefanie Jones, staffID: 7)worksHospitalExample.impl.DepartmentImpl@64ec96c6 (dID: 2, maxRoomCount: 4)
-				
-				
-				String edgeId = source.getId().toString()+edgeGraph.getValue().toString()+terminal.getId().toString();
-				
-				
-				Edge edge = null;
-				
-				for(Edge outgoingEdge : dataLoader.edges.get(source.getId())){
-									
-					if(outgoingEdge.id.equals(edgeId)) {
-						edge = outgoingEdge;
-						break;
-					}
-				}
-				
-				
-				if(edge.oppositeId != null) {
-							
-					
-					if(plottedEdges.containsKey(edge.oppositeId)) { 						
-						ArrayList<mxPoint> oppositePlot = (ArrayList<mxPoint>) plottedEdges.get(edge.oppositeId).clone();					
-						Collections.reverse(oppositePlot);		
-						geometry.setPoints(oppositePlot);
-						graphModel.setGeometry(edgeGraph, geometry);
+			newThread.start();
+			activeThreads.add(newThread);
+			
+		}
+		
+		for(EdgePlannerThread t : activeThreads) {
 
-						continue;
-					}
-
-				}
-
-				
-				Point sourceCenter = new Point();
-				sourceCenter.x = (int) source.getGeometry().getCenterX();
-				sourceCenter.y = (int) source.getGeometry().getCenterY();
-				
-				Point targetCenter = new Point();
-				targetCenter.x = (int) terminal.getGeometry().getCenterX();
-				targetCenter.y = (int)terminal.getGeometry().getCenterY();
-				
-				
-				
-				EdgePlanner edgePlanner = new EdgePlanner(sourceCenter, targetCenter, source.getGeometry(), terminal.getGeometry(), edgeGrid); 
-				
-				LinkedList<Point> edgePath = edgePlanner.planEdge();
-				
-				if(edgePath == null)
-					continue;
-				
-				ArrayList<mxPoint> points = new ArrayList<mxPoint>();
-				
-				for(Point p : edgePath) {
-					points.add(new mxPoint(p.x, p.y));
-				}
-						
-				geometry.setPoints(points);
-				graphModel.setGeometry(edgeGraph, geometry);
-				
-				plottedEdges.put(edgeId, points);
-
-
+			try {
+				t.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			
-
 		}
 	}
 	
@@ -432,7 +357,7 @@ public class Visualizer {
 		
 		Map<String,Object> cells = graphModel.getCells();	
 		
-		LabelPlanner lP = new LabelPlanner(nodeGrid);
+		LabelPlanner lP = new LabelPlanner(grid);
 		
 		for(Object cell : cells.values()) {
 			
@@ -440,6 +365,9 @@ public class Visualizer {
 			
 			if(!c.isEdge()) 
 				continue;
+			if(((Edge)c.getValue()).ignored)
+				continue;
+			
 			
 			mxGeometry geometry = graphModel.getGeometry(c);
 
@@ -455,30 +383,250 @@ public class Visualizer {
 			
 			
 			mxCellState edgeState = graph.getView().getState(c);
+			//extract corresponding edge (viapoints)
 			List<mxPoint> edgePath = edgeState.getAbsolutePoints();
 			
 			mxRectangle labelBounds = edgeState.getLabelBounds();
-			
-			//System.out.println("EdgePath " + edgePath.toString());
-			mxPoint pos = lP.planLabel(labelBounds, edgePath);
-			
-			//System.out.println("New Pos: " + String.valueOf(pos.getX()) + " , " + String.valueOf(pos.getY()));
+			mxPoint pos = lP.planLabel(labelBounds, edgePath, edgeState.getLabel());
 			
 			labelBounds.setX(pos.getX());
 			labelBounds.setY(pos.getY());
 			
+			//block area in grid
 			edgeState.setLabelBounds(labelBounds);
-			
-			nodeGrid.setGridValues(labelBounds.getRectangle(), Double.MAX_VALUE);
+			grid.setGridValues(labelBounds.getRectangle(), Double.MAX_VALUE);
 			
 		}
 		
 	}
 	
 	
-	public mxGraph getGraph() {
-		return graph;
+	private class EdgePlannerThread extends Thread{
+		
+		private int workingAreaHeightMargin = 30;
+		private int workingAreaWidthMargin = 60;
+		
+		private synchronizedWorkingAreas activeAreas;
+		private Area ownArea;
+		private HashMap<Edge, LinkedList<mxPoint>> plottedEdges;
+		
+		private mxGraphModel graphModel;
+		private Grid grid;
+		private mxICell node;
+		
+		public EdgePlannerThread(mxGraphModel graphModel,Grid grid, mxICell cell, HashMap<Edge,LinkedList<mxPoint>> plottedEdges, synchronizedWorkingAreas activeAreas) {
+			
+			if(cell.getValue() == null)	
+				this.setName("unknown");
+			else {
+				// identify thread
+				this.setName(cell.getValue().toString());
+			}
+			
+			this.graphModel = graphModel;
+			this.grid = grid;
+			this.node = cell;
+			
+			this.plottedEdges = plottedEdges;
+			this.activeAreas = activeAreas;
+			
+		}
+		
+		public void run() {
+			
+			for(int i = 0; i < node.getEdgeCount(); i++) {
+				
+				mxICell mxedgeInGraph = node.getEdgeAt(i);
+				mxICell source = mxedgeInGraph.getTerminal(true);
+				mxICell terminal = mxedgeInGraph.getTerminal(false);
+				
+				//only route outgoing edges
+				if(!source.getId().toString().equals(node.getId().toString())) {
+					continue;
+				}
+				
+				if(((Edge)mxedgeInGraph.getValue()).ignored)
+					continue;
+				
+
+				mxGeometry geometry = mxedgeInGraph.getGeometry();
+				if (geometry == null)
+				{
+					geometry = new mxGeometry();
+					geometry.setRelative(true);
+				}
+				else
+				{
+					geometry = (mxGeometry) geometry.clone();
+				}
+				
+				
+				
+				
+				int[] xcords = new int[8];
+				int[] ycords = new int[8];
+				
+				Point sourceCenter = new Point();
+				sourceCenter.x = (int) source.getGeometry().getCenterX();
+				sourceCenter.y = (int) source.getGeometry().getCenterY();
+				
+				Point targetCenter = new Point();
+				targetCenter.x = (int) terminal.getGeometry().getCenterX();
+				targetCenter.y = (int)terminal.getGeometry().getCenterY();
+				
+				xcords[0] = (int) source.getGeometry().getRectangle().getMinX() - workingAreaWidthMargin;
+				ycords[0] = (int) source.getGeometry().getRectangle().getMinY() - workingAreaHeightMargin;
+				
+				xcords[1] = (int) source.getGeometry().getRectangle().getMaxX() + workingAreaWidthMargin;
+				ycords[1] = (int) source.getGeometry().getRectangle().getMinY() - workingAreaHeightMargin;
+				
+				xcords[2] = (int) source.getGeometry().getRectangle().getMinX() - workingAreaWidthMargin;
+				ycords[2] = (int) source.getGeometry().getRectangle().getMaxY() + workingAreaHeightMargin;
+				
+				xcords[3] = (int) source.getGeometry().getRectangle().getMaxX() + workingAreaWidthMargin;
+				ycords[3] = (int) source.getGeometry().getRectangle().getMaxY() + workingAreaHeightMargin;
+				
+				xcords[4] = (int) terminal.getGeometry().getRectangle().getMinX() - workingAreaWidthMargin;
+				ycords[4] = (int) terminal.getGeometry().getRectangle().getMinY() - workingAreaHeightMargin;
+				
+				xcords[5] = (int) terminal.getGeometry().getRectangle().getMaxX() + workingAreaWidthMargin;
+				ycords[5] = (int) terminal.getGeometry().getRectangle().getMinY() - workingAreaHeightMargin;
+				
+				xcords[6] = (int) terminal.getGeometry().getRectangle().getMinX() - workingAreaWidthMargin;
+				ycords[6] = (int) terminal.getGeometry().getRectangle().getMaxY() + workingAreaHeightMargin;
+				
+				xcords[7] = (int) terminal.getGeometry().getRectangle().getMaxX() + workingAreaWidthMargin;
+				ycords[7] = (int) terminal.getGeometry().getRectangle().getMaxY() + workingAreaHeightMargin;
+				
+				Polygon s = new Polygon(xcords,ycords, 8);
+			
+				// build a bounding box encompassing target and source node geometries as well as the space in between them.
+				ownArea = new Area(s.getBounds2D());
+				
+				boolean allocated = false;
+				while(!allocated) {
+					
+					// try to rout current edge -> check if required area is currently worked on
+					allocated = activeAreas.allocateWorkingArea(ownArea);
+					
+					if(allocated)
+						break;
+					
+					synchronized(activeAreas) {
+						try {
+							// wait if it is
+							activeAreas.wait();
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+					
+					}
+					
+					
+				}
+				
+				Edge edge = (Edge) mxedgeInGraph.getValue();
+				
+				//check if an opposite for the current edge was specified
+				if(edge.ref.getEOpposite() != null) {
+
+				Edge oppositeEdge = dataLoader.edges.get(Objects.hash(edge.target, edge.ref.getEOpposite(),edge.source));
+				
+					// if it was already plotted use the reverse of its path
+					if(plottedEdges.containsKey(oppositeEdge)) { 						
+						LinkedList<mxPoint> oppositePlot = (LinkedList<mxPoint>) plottedEdges.get(oppositeEdge).clone();					
+						Collections.reverse(oppositePlot);		
+						geometry.setPoints(oppositePlot);
+						graphModel.setGeometry(mxedgeInGraph, geometry);
+
+						activeAreas.deallocateWorkingArea(ownArea);
+						continue;
+					}
+
+				}
+
+				
+				//use EdgePlanner class for routing
+				EdgePlanner edgePlanner = new EdgePlanner(sourceCenter, targetCenter, source.getGeometry(), terminal.getGeometry(), grid); 
+				
+				LinkedList<Point> edgePath = edgePlanner.planEdge();
+				
+				if(edgePath == null) {
+					activeAreas.deallocateWorkingArea(ownArea);
+					continue;
+				}
+				
+				LinkedList<mxPoint> points = new LinkedList<mxPoint>();
+				
+				for(Point p : edgePath) {
+					points.add(new mxPoint(p.x, p.y));
+				}
+				
+				//set edge via points
+				geometry.setPoints(points);
+				graphModel.setGeometry(mxedgeInGraph, geometry);
+				
+				plottedEdges.put(edge, points);
+				activeAreas.deallocateWorkingArea(ownArea);
+	
+
+			}
+			
+		}
+		
+		
 	}
+	
+	public class synchronizedWorkingAreas{
+		
+		private List<Area> activeAreas;
+		
+		public synchronizedWorkingAreas(LinkedList<Area> areas) {
+			activeAreas = areas;
+		}
+		
+		public synchronized boolean allocateWorkingArea(Area threadArea) {
+			
+			// check if area collides with areas that are currently worked on by other threads
+			if(blocked(threadArea)) {
+
+				return false;
+			}
+			else {
+				activeAreas.add(threadArea);
+				
+			}
+			
+			return true;
+		}
+		
+		public synchronized void deallocateWorkingArea(Area threadArea) {
+			
+			activeAreas.remove(threadArea);		
+			this.notifyAll();
+
+		}
+		
+		private synchronized boolean blocked(Area threadArea) {
+			
+			for(Area a : activeAreas) {
+				
+				Area copy = (Area) a.clone();
+				copy.intersect(threadArea);
+				
+				// if intersection is empty for all active areas new area can be savely worked on since it has no collisions
+				if(!copy.isEmpty())
+					return true;
+			}
+			
+			return false;
+			
+		}
+		
+	}
+	
 }
 	
 	
