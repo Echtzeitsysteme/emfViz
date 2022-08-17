@@ -1,6 +1,5 @@
 package tggDemonstrator;
 
-
 import org.eclipse.emf.ecore.resource.Resource;
 import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
 import org.emoflon.ibex.tgg.operational.strategies.modules.IbexExecutable;
@@ -9,7 +8,6 @@ import org.emoflon.ibex.tgg.operational.strategies.modules.TGGResourceHandler;
 import visualisation.DisplayHandler;
 
 public abstract class TGGDemonstrator {
-	
 	
 	public enum LoadingOption {Default, NewModel, SelectedResource};
 	protected LoadingOption loadingOption;

@@ -13,6 +13,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 
 import graphVisualization.InstanceDiagrammLoader;
+import graphVisualization.VisContentAdapter;
 import graphVisualization.Visualizer;
 import tggDemonstrator.TGGDemonstrator;
 
@@ -45,16 +46,16 @@ public class DisplayHandler {
 	private TggLoadModelDisplay loadModelDisplay;
 	private TggVisualizerDisplay tggVisualizerDisplay;
 	private TggSelectResourceDisplay tggSelectResourceDisplay;
+	
+	public static VisContentAdapter srcContentAdapter;
+	public static VisContentAdapter trgContentAdapter;
 
 	
 	/*
 	 * Constructor - needs a ModelLoader instance
 	 */
 	public DisplayHandler (TGGDemonstrator modelLoader) {
-		
-		
 		this.modelLoader = modelLoader;
-		
 		
 		//init display and shell
 		if (display == null || shell == null)
@@ -173,6 +174,10 @@ public class DisplayHandler {
 		
 		visSrc = new TggVisualizer(dataSrc, frameSrc, rectangleSrc);
 		visTrg = new TggVisualizer(dataTrg, frameTrg, rectangleTrg);
+
+		// connect resource with visualisation to keep both in sync
+		srcContentAdapter = new VisContentAdapter(srcRs, visSrc);
+		trgContentAdapter = new VisContentAdapter(trgRs, visTrg);
 		
 		visSrc.init();
 		visTrg.init();
@@ -181,6 +186,13 @@ public class DisplayHandler {
 		manipTrg = new GraphManipulator(visTrg, dataTrg.getInstanceModel(), dataTrg);
 	}
 	
+	public static void updateGraph() {
+		System.out.println("UPDATE GRAPH");
+		if(srcContentAdapter != null)
+			srcContentAdapter.processNotifications();
+		if(trgContentAdapter != null)
+			trgContentAdapter.processNotifications();
+	}
 }
 
 

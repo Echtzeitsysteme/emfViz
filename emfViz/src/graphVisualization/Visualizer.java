@@ -190,7 +190,8 @@ public class Visualizer {
 		preLayout.setUseInputOrigin(false);
 		preLayout.setDisableEdgeStyle(false);
 
-		org.eclipse.swt.graphics.Rectangle shellBounds = shell.getBounds();
+		if(shellBounds == null)
+			shellBounds = shell.getBounds();
 
 		// Initialize grid with size of the shell and a point distance of 1
 		grid = new Grid(shellBounds, (int) Math.floor((1 - margin) * shellBounds.width),
@@ -207,8 +208,8 @@ public class Visualizer {
 		graphCenterX = graph.getGraphBounds().getCenterX();
 		graphCenterY = graph.getGraphBounds().getCenterY();
 
-		xStretch = (shell.getMonitor().getClientArea().width * (1 - grid.margin)) / graphWidth;
-		yStretch = (shell.getMonitor().getClientArea().height * (1 - grid.margin)) / graphHeight;
+		xStretch = (shellBounds.width * (1 - grid.margin)) / graphWidth;
+		yStretch = (shellBounds.height * (1 - grid.margin)) / graphHeight;
 	}
 
 	protected void runLayout() {

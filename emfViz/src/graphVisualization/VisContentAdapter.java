@@ -27,6 +27,7 @@ public class VisContentAdapter extends EContentAdapter {
 	public VisContentAdapter(Resource r, Visualizer vis) {
 		this.vis = vis;
 		resource = r;
+		r.eAdapters().add(this);
 //		if(r instanceof SmartEMFResource smartResource) {
 //			cascadingNotifications = smartResource.getCascade();
 //		}
@@ -50,6 +51,7 @@ public class VisContentAdapter extends EContentAdapter {
 		case Notification.REMOVING_ADAPTER:
 			removeObject(notification.getOldValue());
 			break;
+			
 		case Notification.REMOVE:
 			if (notification.getFeature() == null)
 				removeObject(notification.getOldValue());
@@ -58,6 +60,7 @@ public class VisContentAdapter extends EContentAdapter {
 					removeObject(notification.getOldValue());
 			}
 			break;
+			
 		case Notification.ADD:
 			if (notification.getFeature() == null)
 				addObject(notification.getNewValue());
@@ -66,10 +69,13 @@ public class VisContentAdapter extends EContentAdapter {
 					addObject(notification.getNewValue());
 			}
 			break;
+			
 		case Notification.ADD_MANY:
 			throw new IllegalArgumentException("Add Many notifications are not supported yet");
+			
 		case Notification.REMOVE_MANY:
 			throw new IllegalArgumentException("Remove Many notifications are not supported yet");
+			
 		case Notification.SET:
 			if (notification.getFeature() instanceof EReference ref) {
 				if(ref.isContainment()) {

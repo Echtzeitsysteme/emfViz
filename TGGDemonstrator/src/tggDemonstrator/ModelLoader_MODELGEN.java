@@ -14,6 +14,7 @@ import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGENStopCriterion;
 import org.emoflon.ibex.tgg.operational.updatepolicy.IUpdatePolicy;
 
 import tggDemonstrator.DataObject.Modelgeneration;
+import visualisation.DisplayHandler;
 
 
 public class ModelLoader_MODELGEN extends TGGDemonstrator {
@@ -225,9 +226,10 @@ class ModelgenThread extends Thread{
 			@Override
 			public ITGGMatch chooseOneMatch(ImmutableMatchContainer matchContainer) {
 				
-				
 				ITGGMatch match = null;
 				
+				// DIRTY - MAKE THIS NON-STATIC
+				DisplayHandler.updateGraph();
 				try {
 					
 					matches = matchContainer.getMatches();
