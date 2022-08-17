@@ -1,4 +1,4 @@
-package GraphVisualizer;
+package Example;
 
 import java.io.File;
 
@@ -18,9 +18,11 @@ import graphVisualization.InstanceDiagrammLoader;
 // First add emfViz project to your's project build path via 'Properties' -> 'Java Build Path' -> 'Projects' -> 'Classpath' -> 'Add' 
 import graphVisualization.Visualizer;
 
-public class Main_emfViz {
+public class ExampleMain {
 	
 	public static void main(String[] args) {
+		
+
 		
         Display display = new Display();
  
@@ -36,7 +38,8 @@ public class Main_emfViz {
         URI base = URI.createPlatformResourceURI("/", true);
         
         //Assuming your instance model is contained in an .xmi file, path can be adjusted accordingly
-		URI uri =  URI.createURI("/HospitalExample/hospital.xmi");
+		URI uri =  URI.createURI("hospital.xmi");
+		System.out.println(uri.devicePath());
 		
 		ResourceSet rs = new ResourceSetImpl();
 		rs.getResourceFactoryRegistry().getExtensionToFactoryMap()
@@ -46,7 +49,7 @@ public class Main_emfViz {
 			rs.getURIConverter().getURIMap().put(URI.createPlatformResourceURI("/", true), URI.createFileURI(new File("../").getCanonicalPath() + File.separator));
 			}
 		catch(Exception e) {
-			System.out.println(e.getMessage());
+			System.out.print(e.getMessage());
 		}
 		
 		Resource.Factory.Registry reg = Resource.Factory.Registry.INSTANCE;
@@ -61,17 +64,15 @@ public class Main_emfViz {
 		instanceModel.load(null);
 		}
 		catch(Exception e) {
-			System.out.println(e.getMessage());
+			System.out.print(e.getMessage());
 		}
         
-		//Create an instace of the InstaceDiagrammLoader class with the loaded resource
-		InstanceDiagrammLoader data = new InstanceDiagrammLoader(instanceModel, true);
+		//Create an instance of the InstaceDiagrammLoader class with the loaded resource
+		InstanceDiagrammLoader data = new InstanceDiagrammLoader(instanceModel);
 
         //Create instance of the graph visualizer
 		//Visualization will be loaded by its constructor
-        Visualizer vis = new Visualizer(data, shell);
-        
-        vis.init();
+        Visualizer vis = new Visualizer(shell, data);
         
         shell.open();
         while (!shell.isDisposed()) {
@@ -82,9 +83,6 @@ public class Main_emfViz {
         display.dispose();
         
 
-       
 	}
 
 }
-
-

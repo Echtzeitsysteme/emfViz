@@ -54,7 +54,7 @@ public class Visualizer {
 	private Point2D.Double defaultNodePosition;
 	
 	//primitive layout algorithm
-	private customFastOrganicLayout preLayout;
+	private CustomFastOrganicLayout preLayout;
 	
 	//layout grid
 	private Grid grid;
@@ -184,7 +184,7 @@ public class Visualizer {
 	
 	private void setUpLayout() {
 		
-		preLayout = new customFastOrganicLayout(graph);
+		preLayout = new CustomFastOrganicLayout(graph);
 		preLayout.setForceConstant(150);
 		preLayout.setMinDistanceLimit(8);
 		preLayout.setUseInputOrigin(false);
