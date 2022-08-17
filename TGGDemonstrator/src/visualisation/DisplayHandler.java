@@ -40,8 +40,8 @@ public class DisplayHandler {
 	private InstanceDiagrammLoader dataSrc;
 	private InstanceDiagrammLoader dataTrg;
 	
-	private Visualizer visSrc;
-	private Visualizer visTrg;
+	private TggVisualizer visSrc;
+	private TggVisualizer visTrg;
 	
 	private TggLoadModelDisplay loadModelDisplay;
 	private TggVisualizerDisplay tggVisualizerDisplay;

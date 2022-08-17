@@ -46,4 +46,7 @@ public class TggVisualizer extends Visualizer{
 		frame.add(graphComponent);
 	}
 
+	public Frame getFrame() {
+		return frame;
+	}
 }

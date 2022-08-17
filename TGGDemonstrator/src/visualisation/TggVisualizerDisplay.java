@@ -200,6 +200,22 @@ public class TggVisualizerDisplay {
 			}
 		});
 		
+		Button edgeButton = new Button(buttonGroupManip, SWT.PUSH);
+		edgeButton.setText("Test Edge");
+		edgeButton.setLayoutData(new GridData());
+
+		edgeButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent evt) {
+				System.out.println("testing edge features");
+				manipSrc.addEdge(display);
+				manipTrg.addEdge(display);
+				// modelLocationSelection("Default");
+				// update graph by loading modified resource
+				// updateVisualizer();
+			}
+		});
+		
 		Button attrButton = new Button(buttonGroupManip, SWT.PUSH);
 		attrButton.setText("Attributes");
 		attrButton.setLayoutData(new GridData());

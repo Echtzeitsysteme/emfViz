@@ -14,6 +14,7 @@ import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.impl.EClassImpl;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -33,10 +34,12 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.emoflon.ibex.common.emf.EMFManipulationUtils;
 import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
 
 import com.mxgraph.model.mxCell;
 import com.mxgraph.view.mxGraph;
+import com.mxgraph.util.mxEvent;
 
 import graphVisualization.InstanceDiagrammLoader;
 import graphVisualization.Node;
@@ -44,35 +47,45 @@ import graphVisualization.Visualizer;
 
 public class GraphManipulator {
 
-	private Visualizer vis;
+	private TggVisualizer vis;
 	private Resource resource;
 	private InstanceDiagrammLoader loader;
 	private EObject nodeInModel;
 	private Object nodeInGraph;
+	private Object edgeInGraph;
 	private mxGraph graph;
 	private Map<EAttribute,Text> txtMap = new HashMap<EAttribute, Text>();
 	private Map<EAttribute,Combo> enumMap = new HashMap<EAttribute, Combo>();
 	private EObject newObj;
 	private EAttribute errorAttr;
+	private EReference eRefSelected;
 
-	public GraphManipulator(Visualizer vis, Resource resource, InstanceDiagrammLoader loader) {
+	public GraphManipulator(TggVisualizer vis, Resource resource, InstanceDiagrammLoader loader) {
 
 		this.vis = vis;
 		this.resource = resource;
 		this.loader = loader;
 		graph = vis.getGraph();
 		//PopupFrame popup = new PopupFrame(vis);
+		/*graph.getModel().addListener(mxEvent.CHANGE, refreshHandler {
+		    var changes = evt.getProperty('edit').changes;
+		    for (var i = 0; i < changes.length; i++) {   
+		        if (changes[i].constructor.name ==  "mxTerminalChange") {
+		          // DO SOMETHING
+		        }
+		      }
+		});*/
+		//actionOnNode();
 
 	}
 
 	private void iterateModel() {
 		EList<EObject> objects = resource.getContents();
 		Object[] selectedCells = graph.getSelectionCells();
-
 		if (selectedCells.length > 0) {
 			System.out.println("selected");
 			for (Object selected : selectedCells) {
-				nodeInGraph = selected;
+				//nodeInGraph = selected;
 				for (EObject eObject : objects) {
 
 					/*
@@ -86,16 +99,16 @@ public class GraphManipulator {
 					 * 
 					 * } }
 					 */
-					iterateModelHierarchical(eObject, selected, loader);
+					iterateModelHierarchical(eObject, selected);
 				}
 			}
 		}
 
 	}
 
-	private void iterateModelHierarchical(EObject obj, Object comp, InstanceDiagrammLoader loader) {
+	private void iterateModelHierarchical(EObject obj, Object comp) {
 		for (EObject eobj : obj.eContents()) {
-			iterateModelHierarchical(eobj, comp, loader);
+			iterateModelHierarchical(eobj, comp);
 		}
 
 		mxCell c = (mxCell) comp;
@@ -103,8 +116,10 @@ public class GraphManipulator {
 			System.out.println("equal found");
 			nodeInModel = obj;
 		}
-		//System.out.println(obj.toString());
-		//System.out.println(c.getId());
+		if(c.isEdge()) {
+			edgeInGraph = c;
+			
+		}
 	}
 	
 	public void deleteSelected() {
@@ -114,7 +129,7 @@ public class GraphManipulator {
 
 	private void actionOnNode() {
 		// open menu on node or on background
-		/*final PopupMenu popupmenu = new PopupMenu("Edit");   
+		final PopupMenu popupmenu = new PopupMenu("Edit");   
         
 		MenuItem delete = new MenuItem("Delete");  
 		MenuItem newEdge = new MenuItem("New edge");  
@@ -124,34 +139,31 @@ public class GraphManipulator {
         newEdge.setActionCommand("NE");
         popupmenu.add(delete);  
         popupmenu.add(newEdge);
-        //statt frame auf knoten?
+       
         Frame f = vis.getFrame();
+        f.add(popupmenu);
 		f.addMouseListener(new MouseAdapter() {  
-            public void mouseClicked(MouseEvent e) {              
-                popupmenu.show(f , e.getX(), e.getY());  
+            public void mouseClicked(MouseEvent e) {
+            	if(e.isPopupTrigger()) {
+            		popupmenu.show(f , e.getX(), e.getY());  
+                    System.out.println("clicked");
+            	}
+                
             } 
 		});
-		
-		
-		
-		f.add(popupmenu);   
-        f.setSize(400,400);  
+		 
         f.setLayout(null);  
-        f.setVisible(true); */
-		
-		
+        //f.setVisible(true); 	
 	}
 	
 	
 	
 	private void removeNode() {
 		if(nodeInModel != null) {
-			vis.getGraph().getModel().remove(nodeInGraph);
+			graph.getModel().remove(nodeInGraph);
+			EMFManipulationUtils.delete(nodeInModel);
 			//((mxCell) nodeInGraph).removeFromParent();
-			EcoreUtil.remove(nodeInModel); // delete wirft Nullpointerexception, aber so wird Kante nicht gelöscht
-			//EmfUtil -> kein delete gefunden
-			//EmoflonUtil -> komplett nicht gefunden
-			//emf listener weiß, welche änderungen vorgenommen wurden
+			//EcoreUtil.remove(nodeInModel); // delete wirft Nullpointerexception, aber so wird Kante nicht gelöscht
 			System.out.println("removed from model");
 			
 			//vis.getGraph().repaint();
@@ -166,13 +178,120 @@ public class GraphManipulator {
 				loader.nodes.remove(deleteNode);
 				System.out.println("removed from list");
 			}
-			vis.getGraph().refresh();
+			graph.refresh();
 		}
 		
 	}
 	
-	private void addEdge() {
+	public void addEdge(Display display) {
+		iterateModel();
+		if(edgeInGraph != null) {
+			Object source = graph.getModel().getTerminal(edgeInGraph, true);
+			Object target = graph.getModel().getTerminal(edgeInGraph, false);
+			
+			EList<EObject> objects = resource.getContents();
+			for(EObject obj : objects) {
+				iterateModelHierarchical(obj, source);
+			}
+			EObject src = nodeInModel;
+			
+			for(EObject obj : objects) {
+				iterateModelHierarchical(obj, target);
+			}
+			EObject trg = nodeInModel;
+
+			EList<EReference> edges = src.eClass().getEAllReferences();
+			/////LÖSCHEN////
+			for (EReference eRef : edges) {
+				System.out.println(eRef.getEType().getName());
+				
+			}
+			for (EReference eRef : edges) {
+				if(eRef.getEType().getName().equals(trg.eClass().getName())) {
+					System.out.println("edge type: " + eRef.getName());
+					EMFManipulationUtils.createEdge(src, trg, eRef); //schon im Modell oder noch hinzufügen?
+				}
+				
+			}
+		}
 		
+	}
+	
+	/*not needed if edge type is detected automatically*/
+	private void createEReferenceSelectionWindow(Display display, EObject src, EObject trg) {
+		Shell shellEdges = new Shell(display);
+		
+		shellEdges.setText("Select Edge Type");
+		
+		shellEdges.setLayout(new GridLayout());
+		shellEdges.setBackground(shellEdges.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY));
+		
+		Composite composite = new Composite(shellEdges, SWT.EMBEDDED);
+		composite.setVisible(true);
+		
+		GridData gridData1 = new GridData(SWT.FILL, SWT.FILL, true, true);
+		//gridData1.horizontalSpan = 3;
+		
+		composite.setLayoutData(gridData1);
+		composite.setLayout(new GridLayout(2, true));
+		
+		
+		EList<EReference> edges = src.eClass().getEAllReferences();
+		/////LÖSCHEN////
+		for (EReference eRef : edges) {
+			System.out.println(eRef);
+			
+		}
+		Label labelName = new Label(composite, SWT.None);
+		labelName.setText("Select Edge Type:");
+		int len = edges.size();
+		String[] literals = new String[len];
+		int i = 0;
+		for (EReference eRef : edges) {
+			if(true) { //Bedingung anpassen
+				literals[i] = eRef.getName();
+				i++;
+			}
+		}
+
+		Combo combo = new Combo(composite, SWT.DROP_DOWN | SWT.READ_ONLY);
+		combo.setLayoutData(new GridData(SWT.FILL, SWT.None, true, false));
+	    combo.setItems(literals);
+	    //combo.setText(nodeInModel.eGet(attr).toString());
+	    //enumMap.put(attr,combo);
+
+		
+		//control buttons / composite 
+		Composite compositeCtrl = new Composite(shellEdges, SWT.EMBEDDED);
+		compositeCtrl.setVisible(true);
+		compositeCtrl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		compositeCtrl.setLayout(new RowLayout());
+		
+		Button nextBT = new Button(compositeCtrl, SWT.PUSH |SWT.RIGHT);
+		nextBT.setText("Done");
+		nextBT.setAlignment(SWT.CENTER);
+		
+		nextBT.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent pSelectionEvent) {
+				
+				//combo.get text in ereference umwandeln, createedge übergeben
+				System.out.println(combo.getText());
+				for (EReference eRef : edges) {
+					if(eRef.getName().equals(combo.getText())) {
+						EMFManipulationUtils.createEdge(src, trg, eRef); //schon im Modell oder noch hinzufügen?
+						//Typ von EReference muss dazu passen, sonst ClassCast Exception --> direkt auswählen?
+					}
+					
+				}
+				shellEdges.close();
+			}
+		});
+		
+		
+		//set size of shell
+		shellEdges.setSize(800,400);	
+		shellEdges.open();
 	}
 	
 	public void addNode(EClass cl) {
@@ -191,6 +310,7 @@ public class GraphManipulator {
 		//Tutorial vogella
 		//mxGraph repaint?
 	}
+	
 	
 	
 	public void setAttributes(Display display) {
