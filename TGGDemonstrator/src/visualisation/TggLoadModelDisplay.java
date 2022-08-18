@@ -77,13 +77,6 @@ public class TggLoadModelDisplay {
 		Button nextBT = new Button(composite, SWT.PUSH);
 		nextBT.setText("Next");
 		nextBT.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
-		
-		
-		if (modelLoader instanceof ModelLoader_MODELGEN) {
-			defaultBT.setEnabled(false);
-			modelLocationBT.setEnabled(false);
-		}
-		
 
 		nextBT.addSelectionListener(new SelectionAdapter() {
 			@Override

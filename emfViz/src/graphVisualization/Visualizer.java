@@ -216,11 +216,12 @@ public class Visualizer {
 
 		preLayout.execute(graph.getDefaultParent());
 
-		System.out.println("Placing nodes");
+		System.out.println("Build graph");
+		//System.out.println("Placing nodes");
 		placeNodes();
-		System.out.println("Routing edges");
+		//System.out.println("Routing edges");
 		placeEdges();
-		System.out.println("Placing edge labels");
+		//System.out.println("Placing edge labels");
 		placeLabels();
 		System.out.println("Ready");
 

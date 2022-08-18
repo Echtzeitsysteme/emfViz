@@ -47,7 +47,7 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 					pathLocTemp + "trg.xmi", 
 					pathLocTemp + "corr.xmi",
 					pathLocTemp + "protocol.xmi",
-					Modelgeneration.DEFAULT);
+					Modelgeneration.LOAD_MODEL);
 			
 			fwd = fwd_demonstrator.apply(data);
 			
@@ -71,7 +71,7 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 				projectPath + "/instances/trg.xmi", 
 				projectPath + "/instances/corr.xmi",
 				projectPath + "/instances/protocol.xmi", 
-				Modelgeneration.DEFAULT);
+				Modelgeneration.LOAD_MODEL);
 		
 		fwd = fwd_demonstrator.apply(data);
 		

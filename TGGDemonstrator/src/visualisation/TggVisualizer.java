@@ -1,6 +1,8 @@
 package visualisation;
 
 import java.awt.Frame;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 
 import org.eclipse.swt.graphics.Rectangle;
@@ -36,6 +38,11 @@ public class TggVisualizer extends Visualizer{
 		graph = new mxGraph();
 		graphModel = ((mxGraphModel)graph.getModel());
 		
+		
+		
+		
+		
+		
 		addStyles();
 		insertDataIntoGraph();
 		setUpLayout();
@@ -43,6 +50,22 @@ public class TggVisualizer extends Visualizer{
 		
 		graphComponent = new mxGraphComponent(graph);
 		frame.add(graphComponent);
+		
+		graphComponent.getGraphControl().addMouseListener(new MouseAdapter()
+		{
+		
+			public void mouseReleased(MouseEvent e)
+			{
+				Object cell = graphComponent.getCellAt(e.getX(), e.getY());
+				
+				if (cell != null)
+				{
+					System.out.println("cell="+graph.getLabel(cell));
+				}
+				
+				System.out.println(e);
+			}
+		});
 	}
 
 }

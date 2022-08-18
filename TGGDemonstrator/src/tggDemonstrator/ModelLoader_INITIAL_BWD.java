@@ -46,7 +46,7 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 					pathTrg, 
 					pathLocTemp + "corr.xmi",
 					pathLocTemp + "protocol.xmi", 
-					Modelgeneration.NEW_MODEL);
+					Modelgeneration.LOAD_MODEL);
 			
 			bwd = bwd_Demonstrator.apply(data);
 			
@@ -70,7 +70,7 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 				projectPath + "/instances/trg.xmi", 
 				projectPath + "/instances/corr.xmi",
 				projectPath + "/instances/protocol.xmi", 
-				Modelgeneration.NEW_MODEL);
+				Modelgeneration.LOAD_MODEL);
 		
 		bwd = bwd_Demonstrator.apply(data);
 		

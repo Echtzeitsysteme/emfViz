@@ -2,7 +2,7 @@ package tggDemonstrator;
 
 
 public class DataObject {
-	public enum Modelgeneration {NEW_MODEL, PRE_DEFiNED_MODEL, DEFAULT}
+	public enum Modelgeneration {NEW_MODEL, LOAD_MODEL}
 	private Modelgeneration modelgenOption;
 	private String sourcePath;
 	private String targetPath;

@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
 
-import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Group;
@@ -18,6 +17,7 @@ import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGENStopCriterion;
 import org.emoflon.ibex.tgg.operational.updatepolicy.IUpdatePolicy;
 
 import tggDemonstrator.DataObject.Modelgeneration;
+import visualisation.CallbackHandler;
 import visualisation.DisplayHandler;
 
 
@@ -48,7 +48,10 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 		// TODO Auto-generated method stub
 
 		
-		DataObject data = new DataObject(pathSrc, pathTrg, projectPath + "/instances/corr.xmi", projectPath + "/instances/protocol.xmi", Modelgeneration.PRE_DEFiNED_MODEL);
+		DataObject data = new DataObject(pathSrc, pathTrg, 
+				projectPath + "/instances/corr.xmi", 
+				projectPath + "/instances/protocol.xmi", 
+				Modelgeneration.LOAD_MODEL);
 		
 		modelgen = modelgen_demonstrator.apply(data);
 		
@@ -65,7 +68,11 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 	@Override
 	public void loadFromDefault() {
 		
-		DataObject data = new DataObject(projectPath + "/instances/src.xmi", projectPath + "/instances/trg.xmi", projectPath + "/instances/corr.xmi", projectPath + "/instances/protocol.xmi", Modelgeneration.PRE_DEFiNED_MODEL);
+		DataObject data = new DataObject(projectPath + "/instances/src.xmi", 
+				projectPath + "/instances/trg.xmi", 
+				projectPath + "/instances/corr.xmi", 
+				projectPath + "/instances/protocol.xmi", 
+				Modelgeneration.LOAD_MODEL);
 		
 		modelgen = modelgen_demonstrator.apply(data);
 		
@@ -170,10 +177,6 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 	public int getSelectedRuleIndex() {
 		return ruleIndex;
 	}
-	
-	public State getModelgenThreadState() {
-		return thread.getState();
-	}
 
 	@Override
 	public String buttonTranslateTxt() {
@@ -187,8 +190,6 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 		//next step functionalities
 		
 		System.out.println("Button Next Rule is clicked...");
-		
-		
 		
 		wakeUpThread();	
 		
@@ -221,6 +222,7 @@ class ModelgenThread extends Thread{
 	
 	private Set<ITGGMatch> matches = new HashSet<> ();
 	private ITGGMatch selectedMatch;
+	private CallbackHandler callbackHandler;
 	
 	
 	private ModelLoader_MODELGEN modelLoader;
@@ -229,6 +231,8 @@ class ModelgenThread extends Thread{
 		this.modelgen = m;
 		this.modelLoader = modelLoader;
 		ruleIndex = -1;
+		
+		callbackHandler = CallbackHandler.getInstance();
 	}
 	
 	@Override
@@ -237,13 +241,7 @@ class ModelgenThread extends Thread{
 		initializeModelgenStart();
 		
 		runModelgeneration();
-		
-		/*
-		while (true) {
-			//do something
-			System.out.println("Thread is running!");
-		}
-		*/
+
 		
 		while (true) {}
 	}
@@ -274,27 +272,22 @@ class ModelgenThread extends Thread{
 					
 					matches = matchContainer.getMatches();
 					
+					callbackHandler.setMatches(matches);
+					
 					System.out.println("Thread " + getId() + " sleeps for a very long time!");
 					sleep(Long.MAX_VALUE);
 
 					
 				} catch (InterruptedException e) {
 					
-					if (ruleIndex >= 0 && matches.size() - 1 == ruleIndex) {
-						
-						//System.out.println(matchContainer.getMatches().size());
-						
-						Object[] t = matches.toArray();
-						match = (ITGGMatch)t[ruleIndex];
-			
-						
-					}else {
-						//if no rule is selected then just use the next one
+					
+					match = callbackHandler.getSelectedMatch();
+					
+					if(match == null) {
+						//if no match is selected then just use the next match
 						match = matchContainer.getNext();
 					}
 				}
-
-				//match = getSelectedMatch();
 				
 				System.out.println("the rule " + match.getRuleName() + " will be performed");
 				

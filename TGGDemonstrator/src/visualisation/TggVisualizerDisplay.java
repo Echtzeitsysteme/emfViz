@@ -1,6 +1,7 @@
 package visualisation;
 
 import java.awt.Frame;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,8 +28,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import graphVisualization.InstanceDiagrammLoader;
 import graphVisualization.Visualizer;
-import tggDemonstrator.ModelLoader_INITIAL_BWD;
-import tggDemonstrator.ModelLoader_INITIAL_FWD;
 import tggDemonstrator.ModelLoader_MODELGEN;
 import tggDemonstrator.TGGDemonstrator;
 
@@ -57,6 +56,8 @@ public class TggVisualizerDisplay {
 	private Visualizer visSrc;
 	private Visualizer visTrg;
 	
+	private CallbackHandler callbackHandler;
+	
 	
 	
 	public TggVisualizerDisplay(DisplayHandler handler, TGGDemonstrator modelLoader, Display display, Shell shell) {
@@ -66,6 +67,8 @@ public class TggVisualizerDisplay {
 		this.modelLoader = modelLoader;
 		this.display = display;
 		this.shell = shell;
+		
+		callbackHandler = CallbackHandler.getInstance();
 		
 		createTggVisualizerDisplay();
 	}
@@ -137,6 +140,13 @@ public class TggVisualizerDisplay {
 			}
 			
 		});
+		
+		/*compSrc.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseUp(final MouseEvent e) {
+				System.out.println(e);
+			}
+		});*/
 
 		Composite compTrg = new Composite(shell, SWT.BOTTOM |  SWT.EMBEDDED);
 		compTrg.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_GRAY));
@@ -147,7 +157,7 @@ public class TggVisualizerDisplay {
 		
 		compTrg.setLayoutData(gridDataTrg);
 		
-		compTrg.addListener(SWT.MouseDown, new Listener() {
+		/*compTrg.addListener(SWT.MouseDown, new Listener() {
 
 			@Override
 			public void handleEvent(Event event) {
@@ -155,7 +165,7 @@ public class TggVisualizerDisplay {
 				System.out.println(event);
 			}
 			
-		});
+		});*/
 		
 		
 		
@@ -163,13 +173,9 @@ public class TggVisualizerDisplay {
 		
 		frameSrc = SWT_AWT.new_Frame(compSrc);
 		
-		//frameSrc.addMouseListener(new MListener());
-		
 		
 		frameTrg = SWT_AWT.new_Frame(compTrg);
-		
-		//frameTrg.addMouseListener(new MListener());
-		
+
 		
 		
 		
@@ -331,7 +337,15 @@ public class TggVisualizerDisplay {
 			
 			combo.setLayoutData(comboGridData);
 			
+			callbackHandler.registerComboBox(combo);
+			
 			combo.select(0);
+			
+			combo.addListener(SWT.Selection, new Listener() {
+				public void handleEvent(Event e) {
+					System.out.println(" - Default Selection" + e.widget);
+				}
+			});
 		}
 		
 		translateButton.addSelectionListener(new SelectionAdapter() {
@@ -340,15 +354,10 @@ public class TggVisualizerDisplay {
 				System.out.println("translate button is pressed!");
 				
 				if (modelLoader instanceof ModelLoader_MODELGEN && combo != null) {
-					((ModelLoader_MODELGEN)modelLoader).setSelectedRuleIndex(combo.getSelectionIndex());
+					callbackHandler.setSelectedMatch(combo.getSelectionIndex());
 				}
 				
 				modelLoader.buttonTranslateFunction();
-				
-				if (modelLoader instanceof ModelLoader_MODELGEN && combo != null) {
-					combo.setItems(((ModelLoader_MODELGEN)modelLoader).getRuleNames());
-					combo.select(0);
-				}
 			}
 		});
 		
@@ -356,6 +365,7 @@ public class TggVisualizerDisplay {
 		if (modelLoader instanceof ModelLoader_MODELGEN) {
 			popupButton.setEnabled(false);
 			deleteButton.setEnabled(false);
+			attrButton.setEnabled(false);
 		}
 	}
 	
