@@ -2,7 +2,6 @@ package tggDemonstrator;
 
 
 import java.io.IOException;
-import java.lang.Thread.State;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
@@ -84,6 +83,17 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 		
 		loadingOption = LoadingOption.Default;
 		
+		// set basic stop criterion
+		MODELGENStopCriterion stop = new MODELGENStopCriterion(modelgen.getTGG());
+		modelgen.setStopCriterion(stop);
+		
+		// Start new thread
+		thread = new ModelgenThread(modelgen, this);
+		thread.setName("Modelgen Thread");
+		thread.start();
+		
+		System.out.println("Model generation process is running on thread " + thread.getId());
+		
 	}
 
 	@Override
@@ -111,8 +121,6 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 		
 		// set basic stop criterion
 		MODELGENStopCriterion stop = new MODELGENStopCriterion(modelgen.getTGG());
-    	//stop.setMaxRuleCount("HospitaltoAdministrationRule", 1);
-		//stop.setMaxElementCount(12);
 		modelgen.setStopCriterion(stop);
 		
 		// Start new thread
@@ -266,8 +274,7 @@ class ModelgenThread extends Thread{
 				
 				ITGGMatch match = null;
 				
-				// DIRTY - MAKE THIS NON-STATIC
-				DisplayHandler.updateGraph();
+				callbackHandler.updateGraph(CallbackHandler.UpdateGraphType.ALL);
 				try {
 					
 					matches = matchContainer.getMatches();

@@ -28,43 +28,48 @@ public class TggSelectResourceDisplay {
 	private Display display;
 	private Shell shell;
 	
-	private int shellSizeX;
-	private int shellSizeY;
+	private final int shellSizeX;
+	private final int shellSizeY;
 	
+	/*
+	 * Constructor class
+	 *  - initalize display handeler, modelloader, display and shell
+	 *  - set up shell size
+	 *  - create window
+	 */
 	public TggSelectResourceDisplay(DisplayHandler handler, TGGDemonstrator modelLoader, Display display, Shell shell) {
-		//super(modelLoader);
-		// TODO Auto-generated constructor stub
 		this.handler = handler;
 		this.modelLoader = modelLoader;
 		this.display = display;
 		this.shell = shell;
+		
+		shellSizeX = 450;
+		shellSizeY = 450;
 		
 		CreateDirectorySelectionWindow();
 	}
 	
 	/*
 	 * This window will open when option "Select Model" is chosen.
-	 * Window to determine location of source and target model
+	 * Window to select location of source, target, corr and protocol file or project directory
+	 * MODELGEN - source and target model must be selected
+	 * INITIAL_FWD - source model must be selected, a project folder can be selected to store the created files
+	 * INITIAL_BWD - target model must be selected, a project folder can be selected to store the created files
 	*/
 	private void CreateDirectorySelectionWindow() {
-		shellSizeX = 450;
-		shellSizeY = 300;
-		
-		
+			
 		shell.setLayout(new GridLayout());
 		shell.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY));
 		
+		//create composite
 		Composite composite = new Composite(shell, SWT.EMBEDDED);
 		composite.setVisible(true);
 		
-		GridData gridData1 = new GridData(GridData.FILL_BOTH);
-		//gridData1.horizontalSpan = 3;
-		
+		GridData gridData1 = new GridData(GridData.FILL_BOTH);	
 		composite.setLayoutData(gridData1);
 		composite.setLayout(new GridLayout());
 		
-		
-		
+		//create groups
 		Group srcGroup = new Group(composite, SWT.None);
 		srcGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		srcGroup.setLayout(new GridLayout(2, false));
@@ -73,13 +78,23 @@ public class TggSelectResourceDisplay {
 		trgGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));	
 		trgGroup.setLayout(new GridLayout(2, false));
 		
+		Group corrGroup = new Group(composite, SWT.None);
+		corrGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));	
+		corrGroup.setLayout(new GridLayout(2, false));
+		
+		Group protocolGroup = new Group(composite, SWT.None);
+		protocolGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));	
+		protocolGroup.setLayout(new GridLayout(2, false));
+		
+		
+		
 		//create widgets for source location
 		Label srcLabel = new Label(srcGroup, SWT.NONE);
 		srcLabel.setText("Select your source xmi:");
 		
-		Button srcBT = new Button(srcGroup, SWT.PUSH);
-		srcBT.setText("Source xmi");
-		srcBT.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+		Button srcButton = new Button(srcGroup, SWT.PUSH);
+		srcButton.setText("Source xmi");
+		srcButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		
 		Text srcTxt = new Text(srcGroup, SWT.NONE);
 		
@@ -92,9 +107,9 @@ public class TggSelectResourceDisplay {
 		Label trgLabel = new Label(trgGroup, SWT.NONE);
 		trgLabel.setText("Select your target xmi:");
 		
-		Button trgBT = new Button(trgGroup, SWT.PUSH);
-		trgBT.setText("Target xmi");
-		trgBT.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+		Button trgButton = new Button(trgGroup, SWT.PUSH);
+		trgButton.setText("Target xmi");
+		trgButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		
 		Text trgTxt = new Text(trgGroup, SWT.NONE);
 		
@@ -103,30 +118,59 @@ public class TggSelectResourceDisplay {
 		
 		trgTxt.setLayoutData(gridDataTrg);
 		
-		//control buttons / composite 
+		//create widgets for corr location
+		Label corrLabel = new Label(corrGroup, SWT.NONE);
+		corrLabel.setText("Select your corr xmi:");
+		
+		Button corrButton = new Button(corrGroup, SWT.PUSH);
+		corrButton.setText("Corr xmi");
+		corrButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+		
+		Text corrTxt = new Text(corrGroup, SWT.NONE);
+		
+		GridData gridDataCorr = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gridDataCorr.widthHint = 300;
+		
+		corrTxt.setLayoutData(gridDataCorr);
+		
+		// create widgets for protocol location
+		Label protocolLabel = new Label(protocolGroup, SWT.NONE);
+		protocolLabel.setText("Select your protocol xmi:");
+		
+		Button protocolButton = new Button(protocolGroup, SWT.PUSH);
+		protocolButton.setText("Protocol xmi");
+		protocolButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+		
+		Text protocolTxt = new Text(protocolGroup, SWT.NONE);
+		
+		GridData gridDataProtocol = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gridDataProtocol.widthHint = 300;
+		
+		protocolTxt.setLayoutData(gridDataProtocol);
+		
+		//control buttons / composite - back and forward(next)
 		Composite compositeCtrl = new Composite(shell, SWT.EMBEDDED);
 		compositeCtrl.setVisible(true);
 		compositeCtrl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		compositeCtrl.setLayout(new RowLayout());
 		
-		Button nextBT = new Button(compositeCtrl, SWT.PUSH);
-		nextBT.setText("Next");
-		nextBT.setAlignment(SWT.CENTER);
+		Button nextButton = new Button(compositeCtrl, SWT.PUSH);
+		nextButton.setText("Next");
+		nextButton.setAlignment(SWT.CENTER);
 		
-		nextBT.addSelectionListener(new SelectionAdapter() {
+		nextButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent pSelectionEvent) {
 				loadModelFromPath(srcTxt.getText(), trgTxt.getText());
 			}
 		});
 		
-		// button to go back to initial window
-		Button backBT = new Button(compositeCtrl, SWT.PUSH);
-		backBT.setText("Back");
-		backBT.setAlignment(SWT.CENTER);
+		// button to go back to previous window
+		Button backButton = new Button(compositeCtrl, SWT.PUSH);
+		backButton.setText("Back");
+		backButton.setAlignment(SWT.CENTER);
 		
-		//go back to previous window
-		backBT.addSelectionListener(new SelectionAdapter() {
+		backButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent pSelectionEvent) {
 				handler.openTggLoadModelDisplay();
@@ -134,30 +178,24 @@ public class TggSelectResourceDisplay {
 		});
 		
 		/*
-		 * if ModelLoader is initialized by Inital_BWD_App or Inital_FWD_App
+		 * if ModelLoader is initialized by INITIAL_FWD or INITIAL_BWD
 		 * source or target model are generated from tgg.
+		 * rename existing button and label and add selection listener to buttons
 		 */
 		if (modelLoader instanceof ModelLoader_INITIAL_FWD)
 		{
-			/*
-			trgBT.setEnabled(false);
-			trgLabel.setEnabled(false);
-			trgTxt.setEnabled(false);
-			*/
-			
+			//rename trgLabel and trgButton
 			trgLabel.setText("Porject location");
-			trgBT.setText("Select location");
+			trgButton.setText("Select location");
 			
-			// buttons directory selection listener
-			
-			srcBT.addSelectionListener(new SelectionAdapter() {
+			srcButton.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent pSelectionEvent) {
 					srcTxt.setText(openFileDialog());
 				}
 			});
 			
-			trgBT.addSelectionListener(new SelectionAdapter() {
+			trgButton.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent pSelectionEvent) {
 					trgTxt.setText(openDirectoryDialog());
@@ -165,23 +203,19 @@ public class TggSelectResourceDisplay {
 			});
 			
 		}else if(modelLoader instanceof ModelLoader_INITIAL_BWD){
-			/*srcBT.setEnabled(false);
-			srcLabel.setEnabled(false);
-			srcTxt.setEnabled(false);
-			*/
+
+			//rename srcLabel and srcButton
 			srcLabel.setText("Porject location");
-			srcBT.setText("Select location");
+			srcButton.setText("Select location");
 			
-			// buttons directory selection listener
-			
-			srcBT.addSelectionListener(new SelectionAdapter() {
+			srcButton.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent pSelectionEvent) {
 					srcTxt.setText(openDirectoryDialog());
 				}
 			});
 			
-			trgBT.addSelectionListener(new SelectionAdapter() {
+			trgButton.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent pSelectionEvent) {
 					trgTxt.setText(openFileDialog());
@@ -232,7 +266,7 @@ public class TggSelectResourceDisplay {
         return selectedDir;
 	}
 	
-public String openDirectoryDialog() {
+	public String openDirectoryDialog() {
 		
 		String selectedDir = "";
 		

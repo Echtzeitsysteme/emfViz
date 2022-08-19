@@ -11,12 +11,14 @@ import org.emoflon.ibex.tgg.operational.strategies.sync.INITIAL_BWD;
 
 import tggDemonstrator.DataObject.Modelgeneration;
 import tggDemonstrator.TGGDemonstrator.LoadingOption;
+import visualisation.CallbackHandler;
 
 
 public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 	
 	private Function<DataObject, INITIAL_BWD> bwd_Demonstrator;
 	private INITIAL_BWD bwd;
+	private CallbackHandler callbackHandler;
 	
 	
 	
@@ -25,6 +27,8 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 		
 		System.out.println("Initialize ModelLoader_INITIAL_BWD");
 		bwd_Demonstrator = bwd;
+		
+		callbackHandler = CallbackHandler.getInstance();
 		
 		
 		startVisualisation(this);
@@ -104,7 +108,7 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 		source = resourceHandler.getSourceResource();
 		target = resourceHandler.getTargetResource();
 		
-		loadingOption = LoadingOption.Default;
+		loadingOption = LoadingOption.NewModel;
 	}
 	
 
@@ -124,8 +128,10 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 			bwd.backward();
 			
 			source = resourceHandler.getSourceResource();
+			
+			callbackHandler.updateGraph(CallbackHandler.UpdateGraphType.SRC);
+			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

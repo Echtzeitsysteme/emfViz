@@ -12,6 +12,7 @@ import org.emoflon.ibex.tgg.operational.strategies.sync.INITIAL_FWD;
 
 import tggDemonstrator.DataObject.Modelgeneration;
 import tggDemonstrator.TGGDemonstrator.LoadingOption;
+import visualisation.CallbackHandler;
 
 public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 
@@ -21,6 +22,7 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 	private INITIAL_FWD fwd;
 	//private IbexOptions options;
 	private TGGResourceHandler resourceHandler;
+	private CallbackHandler callbackHandler;
 	
 	public ModelLoader_INITIAL_FWD(Function<DataObject, INITIAL_FWD> fwd, String pP, String wP) {
 		// TODO Auto-generated constructor stub
@@ -28,6 +30,8 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 		
 		System.out.println("Initialize ModelLoader_INITIAL_FWD");
 		fwd_demonstrator = fwd;
+		
+		callbackHandler = CallbackHandler.getInstance();
 		
 		startVisualisation(this);
 	}
@@ -106,7 +110,7 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 		source = resourceHandler.getSourceResource();
 		target = resourceHandler.getTargetResource();
 		
-		loadingOption = LoadingOption.Default;
+		loadingOption = LoadingOption.NewModel;
 	}
 	
 
@@ -127,6 +131,7 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 			
 			target = resourceHandler.getTargetResource();
 			
+			callbackHandler.updateGraph(CallbackHandler.UpdateGraphType.TRG);
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

@@ -47,6 +47,8 @@ public class DisplayHandler {
 	private TggVisualizerDisplay tggVisualizerDisplay;
 	private TggSelectResourceDisplay tggSelectResourceDisplay;
 	
+	private CallbackHandler callbackHandler;
+	
 	public static VisContentAdapter srcContentAdapter;
 	public static VisContentAdapter trgContentAdapter;
 
@@ -56,6 +58,8 @@ public class DisplayHandler {
 	 */
 	public DisplayHandler (TGGDemonstrator modelLoader) {
 		this.modelLoader = modelLoader;
+		
+		callbackHandler = CallbackHandler.getInstance();
 		
 		//init display and shell
 		if (display == null || shell == null)
@@ -174,10 +178,10 @@ public class DisplayHandler {
 		
 		visSrc = new TggVisualizer(dataSrc, frameSrc, rectangleSrc);
 		visTrg = new TggVisualizer(dataTrg, frameTrg, rectangleTrg);
-
-		// connect resource with visualisation to keep both in sync
-		srcContentAdapter = new VisContentAdapter(srcRs, visSrc);
-		trgContentAdapter = new VisContentAdapter(trgRs, visTrg);
+		
+		// connect resource with visualization to keep both in sync
+		callbackHandler.registerSourceContentAdapter(srcRs, visSrc);
+		callbackHandler.registerTargetContentAdapter(trgRs, visTrg);
 		
 		visSrc.init();
 		visTrg.init();
@@ -185,14 +189,14 @@ public class DisplayHandler {
 		manipSrc = new GraphManipulator(visSrc, dataSrc.getInstanceModel(), dataSrc);
 		manipTrg = new GraphManipulator(visTrg, dataTrg.getInstanceModel(), dataTrg);
 	}
-	
+	/*
 	public static void updateGraph() {
 		System.out.println("UPDATE GRAPH");
 		if(srcContentAdapter != null)
 			srcContentAdapter.processNotifications();
 		if(trgContentAdapter != null)
 			trgContentAdapter.processNotifications();
-	}
+	}*/
 }
 
 

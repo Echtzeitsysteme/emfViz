@@ -36,7 +36,7 @@ public class DataObject {
 		return protocolPath;
 	}
 	
-	public Modelgeneration getModelgeneration() {
+	public Modelgeneration getModelgenerationType() {
 		return modelgenOption;
 	}
 }
