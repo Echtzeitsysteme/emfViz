@@ -176,7 +176,7 @@ public class TggVisualizerDisplay {
 				handler.openTggLoadModelDisplay();
 			}
 		});
-		
+		/*///////DEPRECATED///////////////////////////////////////////////////////
 		// buttons for manipulating the model
 		Group buttonGroupManip = new Group(comp, SWT.None);
 
@@ -208,8 +208,8 @@ public class TggVisualizerDisplay {
 			@Override
 			public void widgetSelected(SelectionEvent evt) {
 				System.out.println("testing edge features");
-				manipSrc.addEdge(display);
-				manipTrg.addEdge(display);
+				manipSrc.addEdge();
+				manipTrg.addEdge();
 				// modelLocationSelection("Default");
 				// update graph by loading modified resource
 				// updateVisualizer();
@@ -223,8 +223,8 @@ public class TggVisualizerDisplay {
 		attrButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent evt) {
-				manipSrc.setAttributes(display);
-				manipTrg.setAttributes(display);
+				manipSrc.setAttributes();
+				manipTrg.setAttributes();
 			}
 		});
 
@@ -295,6 +295,7 @@ public class TggVisualizerDisplay {
 		}
 
 		popupButton.setMenu(popupMenu);
+		/////////////////////////////////////////////////////////////////////////////////////*/
 		
 		/*sync, initial_fwd and initial_bwd functionalities*/
 		Group buttonGroupSync = new Group(comp, SWT.None);

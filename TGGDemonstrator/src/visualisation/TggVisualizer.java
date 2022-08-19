@@ -49,4 +49,8 @@ public class TggVisualizer extends Visualizer{
 	public Frame getFrame() {
 		return frame;
 	}
+	public mxGraphComponent getGraphComponent() {
+		return graphComponent;
+	}
+
 }
