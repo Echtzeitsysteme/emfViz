@@ -1,20 +1,29 @@
 package visualisation;
 
+import java.awt.*;
+import java.awt.event.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.common.util.Enumerator;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.impl.EClassImpl;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
@@ -22,48 +31,98 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+//import org.eclipse.swt.widgets.Menu;
+//import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.emoflon.ibex.common.emf.EMFManipulationUtils;
+import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
 
 import com.mxgraph.model.mxCell;
+import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.view.mxGraph;
+import com.mxgraph.util.mxEvent;
 
 import graphVisualization.InstanceDiagrammLoader;
 import graphVisualization.Node;
 import graphVisualization.Visualizer;
+import tggDemonstrator.TGGDemonstrator;
 
 public class GraphManipulator {
 
-	private Visualizer vis;
+	private TggVisualizer vis;
 	private Resource resource;
 	private InstanceDiagrammLoader loader;
+	private Display display;
+	private TGGDemonstrator modelLoader;
+	private boolean isSource;
 	private EObject nodeInModel;
 	private Object nodeInGraph;
+	private Object edgeInGraph;
 	private mxGraph graph;
-	private Map<EAttribute, Text> txtMap = new HashMap<EAttribute, Text>();
-	private Map<EAttribute, Combo> enumMap = new HashMap<EAttribute, Combo>();
+	private Map<EAttribute,Text> txtMap = new HashMap<EAttribute, Text>();
+	private Map<EAttribute,Combo> enumMap = new HashMap<EAttribute, Combo>();
 	private EObject newObj;
 	private EAttribute errorAttr;
+	private EReference eRefSelected;
+	private mxGraphComponent graphComponent;
 
-	public GraphManipulator(Visualizer vis, Resource resource, InstanceDiagrammLoader loader) {
+	public GraphManipulator(TggVisualizer vis, Display display, InstanceDiagrammLoader loader, TGGDemonstrator modelLoader, boolean isSource) {
 
 		this.vis = vis;
-		this.resource = resource;
+		this.display = display;
+		this.resource = loader.getInstanceModel();
 		this.loader = loader;
+		this.modelLoader = modelLoader;
+		this.isSource = isSource;
 		graph = vis.getGraph();
-		// PopupFrame popup = new PopupFrame(vis);
+		graphComponent = vis.getGraphComponent();
+		
+		graphComponent.getGraphControl().addMouseListener(new MouseAdapter()
+		{
+		
+			public void mouseReleased(MouseEvent e)
+			{
+				mxCell cell = (mxCell) graphComponent.getCellAt(e.getX(), e.getY());
+				
+				if(e.getButton() == MouseEvent.BUTTON3) {
+					if (cell != null)
+					{
+						if(cell.isVertex()) {
+							System.out.println("cell="+graph.getLabel(cell));
+							actionOnNode(e.getX(), e.getY());
+						}
+						else {
+							addEdge();
+						}
+					}
+					else {
+						actionOnFrame(e.getX(), e.getY());
+					}
+				}
+				
+				
+			}
+			//löst nicht aus
+			public void mouseDragged(MouseEvent e) 
+			{
+				System.out.println("Mouse dragged");
+				addEdge();
+			}
+
+		});
 
 	}
 
 	private void iterateModel() {
 		EList<EObject> objects = resource.getContents();
 		Object[] selectedCells = graph.getSelectionCells();
-
 		if (selectedCells.length > 0) {
 			System.out.println("selected");
 			for (Object selected : selectedCells) {
-				nodeInGraph = selected;
+				//nodeInGraph = selected;
 				for (EObject eObject : objects) {
 
 					/*
@@ -77,16 +136,16 @@ public class GraphManipulator {
 					 * 
 					 * } }
 					 */
-					iterateModelHierarchical(eObject, selected, loader);
+					iterateModelHierarchical(eObject, selected);
 				}
 			}
 		}
 
 	}
 
-	private void iterateModelHierarchical(EObject obj, Object comp, InstanceDiagrammLoader loader) {
+	private void iterateModelHierarchical(EObject obj, Object comp) {
 		for (EObject eobj : obj.eContents()) {
-			iterateModelHierarchical(eobj, comp, loader);
+			iterateModelHierarchical(eobj, comp);
 		}
 
 		mxCell c = (mxCell) comp;
@@ -94,47 +153,114 @@ public class GraphManipulator {
 			System.out.println("equal found");
 			nodeInModel = obj;
 		}
-		// System.out.println(obj.toString());
-		// System.out.println(c.getId());
+		if(c.isEdge()) {
+			edgeInGraph = c;
+			
+		}
 	}
-
+	
 	public void deleteSelected() {
 		iterateModel();
 		removeNode();
 	}
 
-	private void actionOnNode() {
+	private void actionOnNode(int x, int y) {
 		// open menu on node or on background
-		/*
-		 * final PopupMenu popupmenu = new PopupMenu("Edit");
-		 * 
-		 * MenuItem delete = new MenuItem("Delete"); MenuItem newEdge = new
-		 * MenuItem("New edge"); delete.setActionCommand("Delete");
-		 * newEdge.setActionCommand("New edge"); delete.setActionCommand("D");
-		 * newEdge.setActionCommand("NE"); popupmenu.add(delete);
-		 * popupmenu.add(newEdge); //statt frame auf knoten? Frame f = vis.getFrame();
-		 * f.addMouseListener(new MouseAdapter() { public void mouseClicked(MouseEvent
-		 * e) { popupmenu.show(f , e.getX(), e.getY()); } });
-		 * 
-		 * 
-		 * 
-		 * f.add(popupmenu); f.setSize(400,400); f.setLayout(null); f.setVisible(true);
-		 */
-
+		final PopupMenu popupmenu = new PopupMenu("On Node");   
+        
+		MenuItem delete = new MenuItem("Delete");  
+		MenuItem attr = new MenuItem("Show Attributes");
+        delete.setActionCommand("DEL");
+        attr.setActionCommand("ATTR");
+        popupmenu.add(delete);  
+        popupmenu.add(attr);
+       
+        graphComponent.add(popupmenu);
+        popupmenu.show(graphComponent , x, y);
+        
+        delete.addActionListener(new ActionListener() {
+        	@Override
+		    public void actionPerformed(ActionEvent e) {
+				deleteSelected(); //löscht den Knoten nicht?
+        		System.out.println("Delete clicked");
+        	}
+        });
+        
+        attr.addActionListener(new ActionListener() {
+        	@Override
+		    public void actionPerformed(ActionEvent e) {
+				setAttributes(); //Fehlermeldung
+        		System.out.println("Attributes clicked");
+        	}
+        });
+        
 	}
+	
+	private void actionOnFrame(int x, int y) {
+		PopupMenu popupMenu = new PopupMenu("On Frame");
 
+		List<EClassImpl> classes = new ArrayList<EClassImpl>();
+		// modelLoader.getOptions().tgg.tgg().getSrc().get(0).eContents();
+		// ibxopt.tgg.tgg().getSrc().get(0).eContents(); //sind die Klassen da drin?
+		if(isSource) {
+			for (EObject obj : modelLoader.getOptions().tgg.tgg().getSrc().get(0).eContents()) {
+				if (obj instanceof EClassImpl) {
+					EClassImpl node = (EClassImpl) obj;
+					if (!((EClass)node).isAbstract()) {
+						classes.add(node);
+					}
+				}
+			}
+		}
+		else {
+			for (EObject obj : modelLoader.getOptions().tgg.tgg().getTrg().get(0).eContents()) {
+				if (obj instanceof EClassImpl) {
+					EClassImpl node = (EClassImpl) obj;
+					if (!((EClass)node).isAbstract()) {
+						classes.add(node);
+					}
+				}
+			}
+		}
+		
+		for (EClassImpl cl : classes) {
+
+			MenuItem classItem = new MenuItem(cl.getName());
+			popupMenu.add(classItem);
+			classItem.addActionListener(new ActionListener() {
+	        	@Override
+			    public void actionPerformed(ActionEvent e) {
+	        		System.out.println("ClassItem clicked");
+	        	}
+	        });
+
+		}
+        graphComponent.add(popupMenu);
+        popupMenu.show(graphComponent , x, y);
+        
+	}
+	
+	/*private void actionOnNodeSWT(int x, int y) {
+		// open menu on node or on background
+		Menu menu = new Menu(vis.getShell());
+		
+		MenuItem delete = new MenuItem(menu, SWT.PUSH); 
+		delete.setText("Delete");
+		MenuItem attr = new MenuItem(menu, SWT.PUSH);
+		attr.setText("Show Attributes");
+		menu.setLocation(x, y);
+	}*/
+	
 	private void removeNode() {
-		if (nodeInModel != null) {
-			vis.getGraph().getModel().remove(nodeInGraph);
-			// ((mxCell) nodeInGraph).removeFromParent();
-			EcoreUtil.remove(nodeInModel); // delete wirft Nullpointerexception, aber so wird Kante nicht gelöscht
-			// EmfUtil -> kein delete gefunden
-			// EmoflonUtil -> komplett nicht gefunden
-			// emf listener weiß, welche änderungen vorgenommen wurden
+		if(nodeInModel != null) {
+			graph.getModel().remove(nodeInGraph);
+			EMFManipulationUtils.delete(nodeInModel);
+			//((mxCell) nodeInGraph).removeFromParent();
+			//EcoreUtil.remove(nodeInModel); // delete wirft Nullpointerexception, aber so wird Kante nicht gelöscht
 			System.out.println("removed from model");
-
-			// vis.getGraph().repaint();
-
+			
+			//vis.getGraph().repaint();
+			
 			Node deleteNode = null;
 			for (Node nodeElement : loader.nodes) {
 				if (nodeElement.id.equals(nodeInModel.toString())) {
@@ -145,162 +271,261 @@ public class GraphManipulator {
 				loader.nodes.remove(deleteNode);
 				System.out.println("removed from list");
 			}
-			vis.getGraph().refresh();
+			graph.refresh();
 		}
-
+		
 	}
+	
+	public void addEdge() {
+		iterateModel();
+		if(edgeInGraph != null) {
+			Object source = graph.getModel().getTerminal(edgeInGraph, true);
+			Object target = graph.getModel().getTerminal(edgeInGraph, false);
+			
+			EList<EObject> objects = resource.getContents();
+			for(EObject obj : objects) {
+				iterateModelHierarchical(obj, source);
+			}
+			EObject src = nodeInModel;
+			
+			for(EObject obj : objects) {
+				iterateModelHierarchical(obj, target);
+			}
+			EObject trg = nodeInModel;
 
-	private void addEdge() {
+			EList<EReference> edges = src.eClass().getEAllReferences();
+			
+			int count = 0;
+			for (EReference eRef : edges) {
+				if(eRef.getEType().getName().equals(trg.eClass().getName())) {
+					System.out.println("edge type: " + eRef.getName());	
+					eRefSelected = eRef;
+					count++;
+				}
+				
+			}
+			String[] literals = new String[count];
 
+			int i = 0;
+			for (EReference eRef : edges) {
+				if(eRef.getEType().getName().equals(trg.eClass().getName())) {
+					literals[i] = eRef.getName();
+					i++;
+					
+				}
+			}
+			if(literals.length > 1) {
+				createEReferenceSelectionWindow(literals, src);
+				EMFManipulationUtils.createEdge(src, trg, eRefSelected);
+			}
+			else if(literals.length == 1) {
+				EMFManipulationUtils.createEdge(src, trg, eRefSelected); //schon im Modell oder noch hinzufügen?
+			}
+			//else no edge should be created
+		}
+		
 	}
+	
+	/*not needed if only one edge type available*/
+	private void createEReferenceSelectionWindow(String[] literals, EObject src) {
+		Shell shellEdges = new Shell(display);
+		
+		shellEdges.setText("Select Edge Type");
+		
+		shellEdges.setLayout(new GridLayout());
+		shellEdges.setBackground(shellEdges.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY));
+		
+		Composite composite = new Composite(shellEdges, SWT.EMBEDDED);
+		composite.setVisible(true);
+		
+		GridData gridData1 = new GridData(SWT.FILL, SWT.FILL, true, true);
+		//gridData1.horizontalSpan = 3;
+		
+		composite.setLayoutData(gridData1);
+		composite.setLayout(new GridLayout(2, true));
+		
+		Label labelName = new Label(composite, SWT.None);
+		labelName.setText("Select Edge Type:");
 
+		Combo combo = new Combo(composite, SWT.DROP_DOWN | SWT.READ_ONLY);
+		combo.setLayoutData(new GridData(SWT.FILL, SWT.None, true, false));
+	    combo.setItems(literals);
+
+		
+		//control buttons / composite 
+		Composite compositeCtrl = new Composite(shellEdges, SWT.EMBEDDED);
+		compositeCtrl.setVisible(true);
+		compositeCtrl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		compositeCtrl.setLayout(new RowLayout());
+		
+		Button nextBT = new Button(compositeCtrl, SWT.PUSH |SWT.RIGHT);
+		nextBT.setText("Done");
+		nextBT.setAlignment(SWT.CENTER);
+		
+		nextBT.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent pSelectionEvent) {
+				
+				System.out.println(combo.getText());
+				EList<EReference> edges = src.eClass().getEAllReferences();
+				for (EReference eRef : edges) {
+					if(eRef.getName().equals(combo.getText())) {
+						eRefSelected = eRef;
+					}
+					
+				}
+				shellEdges.close();
+			}
+		});
+		
+		
+		//set size of shell
+		shellEdges.setSize(600,200);	
+		shellEdges.open();
+	}
+	
 	public void addNode(EClass cl) {
 		newObj = EcoreUtil.create(cl);
 		resource.getContents().add(newObj);
 		System.out.println("new obj created in model");
-//		Node newNode = new Node(newObj.toString(), newObj.eClass().getName(), "defaultNode");
-//		loader.nodes.add(newNode);
+		Node newNode = new Node(newObj.toString(),newObj.eClass().getName(), "defaultNode");
+		loader.nodes.add(newNode);
 		System.out.println("added to list");
-//		graph.insertVertex(graph.getDefaultParent(), newNode.id, newNode.name, 100, 100, 80, 40);
+		graph.insertVertex(graph.getDefaultParent(),newNode.id, newNode.name,100,100,80,40);
 		System.out.println("added in graph");
-
-		// cl.getEAllStructuralFeatures(); //alle Attribute + Kanten?
-		// EReference Kanten! eindeutig oder null bis n (Liste), isMany
-		// Tutorial vogella
-		// mxGraph repaint?
+		
 	}
-
-	public void setAttributes(Display display) {
-
+	
+	
+	
+	public void setAttributes() {
+		
 		iterateModel();
-		if (nodeInModel != null) {
+		if(nodeInModel != null) {
 			Shell shellAttr = new Shell(display);
-
+			
 			shellAttr.setText("Set Attributes");
-
-			/*
-			 * shellAttr.addListener(SWT.Close, new Listener() { public void
-			 * handleEvent(Event event) { System.out.println("close"); } });
-			 */
-
+					
 			shellAttr.setLayout(new GridLayout());
 			shellAttr.setBackground(shellAttr.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY));
-
+			
 			Composite composite = new Composite(shellAttr, SWT.EMBEDDED);
 			composite.setVisible(true);
-
+			
 			GridData gridData1 = new GridData(SWT.FILL, SWT.FILL, true, true);
-			// gridData1.horizontalSpan = 3;
-
+			//gridData1.horizontalSpan = 3;
+			
 			composite.setLayoutData(gridData1);
 			composite.setLayout(new GridLayout(3, true));
+			
+			EList<EAttribute> attributes = nodeInModel.eClass().getEAllAttributes();
 
-			EList<EAttribute> attributes = nodeInModel.eClass().getEAttributes();
-			///// LÖSCHEN////
-			for (EAttribute attr : attributes) {
-				System.out.println(attr.getName() + " , " + attr.getEAttributeType().getInstanceTypeName());
-				// cl.eSet(attr, (Integer) 3);
-			}
-			for (EAttribute attr : attributes) {
-				// Group group = new Group(composite, SWT.None);
-				// group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-				// group.setLayout(new GridLayout(3, true));
+			for(EAttribute attr: attributes) {
 				Label labelName = new Label(composite, SWT.None);
 				labelName.setText(attr.getName());
 				Label labelValue = new Label(composite, SWT.None);
 				labelValue.setText(attr.getEAttributeType().getInstanceTypeName());
-
-				if (attr.getEType() instanceof EEnum) {
+				
+				if(attr.getEType() instanceof EEnum) {
 					EEnum eenum = (EEnum) attr.getEType();
 					int len = eenum.getELiterals().size();
 					String[] literals = new String[len];
 					int i = 0;
-					for (EEnumLiteral literal : eenum.getELiterals()) {
-						// System.out.println(" " + literal);
+					for(EEnumLiteral literal : eenum.getELiterals()) {
+						//System.out.println("	" + literal);
 						literals[i] = literal.getName();
 						i++;
 					}
-
+					
 					Combo combo = new Combo(composite, SWT.DROP_DOWN | SWT.READ_ONLY);
 					combo.setLayoutData(new GridData(SWT.FILL, SWT.None, true, false));
-					combo.setItems(literals);
-					combo.setText(nodeInModel.eGet(attr).toString());
-					enumMap.put(attr, combo);
-				} else {
+				    combo.setItems(literals);
+				    combo.setText(nodeInModel.eGet(attr).toString());
+				    enumMap.put(attr,combo);
+				}
+				else {
 					Text txt = new Text(composite, SWT.BORDER | SWT.TRAIL);
 					txt.setLayoutData(new GridData(SWT.FILL, SWT.None, true, false));
-					if (attr.getDefaultValueLiteral() != null)
-						txt.setText(nodeInModel.eGet(attr).toString());
+					if(attr.getDefaultValueLiteral() != null) txt.setText(nodeInModel.eGet(attr).toString());
 					txtMap.put(attr, txt);
 				}
-				// verify that input is of correct type for the attribute
-				// passiert das schon? was passiert im Fehlerfall?
-				/*
-				 * txt.addVerifyListener(new VerifyListener(){ public void
-				 * verifyText(VerifyEvent arg0) { System.out.println("verifying");
-				 * 
-				 * }});
-				 */
-
+				//verify that input is of correct type for the attribute
+				//passiert das schon? was passiert im Fehlerfall?
+				/*txt.addVerifyListener(new VerifyListener(){
+				      public void verifyText(VerifyEvent arg0) {
+				          System.out.println("verifying");
+				          
+				        }});*/
+				
 			}
-
-			// control buttons / composite
+			
+			//control buttons / composite 
 			Composite compositeCtrl = new Composite(shellAttr, SWT.EMBEDDED);
 			compositeCtrl.setVisible(true);
 			compositeCtrl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			compositeCtrl.setLayout(new RowLayout());
-
-			Button nextBT = new Button(compositeCtrl, SWT.PUSH | SWT.RIGHT);
+			
+			Button nextBT = new Button(compositeCtrl, SWT.PUSH |SWT.RIGHT);
 			nextBT.setText("Done");
 			nextBT.setAlignment(SWT.CENTER);
-
+			
 			nextBT.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent pSelectionEvent) {
-
+					
 					try {
 						setAttributesInModel();
 						shellAttr.close();
-					} catch (Exception e) {
+					}
+					catch(Exception e) {
 						for (EAttribute attr : txtMap.keySet()) {
 							if (attr.equals(errorAttr)) {
 								txtMap.get(attr).setBackground(display.getSystemColor(SWT.COLOR_RED));
-							} else {
+							}
+							else {
 								txtMap.get(attr).setBackground(display.getSystemColor(SWT.COLOR_WHITE));
 							}
 						}
-
+						
+						
 					}
-
+					
 				}
 			});
-
-			// set size of shell
-			shellAttr.setSize(800, 400);
+			
+			
+			//set size of shell
+			shellAttr.setSize(800,400);	
 			shellAttr.open();
 		}
-
+		
+		
 	}
-
+	
 	private void setAttributesInModel() throws Exception {
 		for (EAttribute attr : txtMap.keySet()) {
-			System.out.println(txtMap.get(attr).getText());
+			System.out.println(attr.getName() + " (" + attr.getEAttributeType().getInstanceTypeName() 
+					+ ") = "+ txtMap.get(attr).getText());
 			errorAttr = attr;
 			EDataType type = attr.getEAttributeType();
 			String input = txtMap.get(attr).getText();
-			// Wird nicht gesetzt??
-			nodeInModel.eSet(attr, createFromString(type, input));
+			//Wird nicht gesetzt??
+			nodeInModel.eSet(attr, createFromString(type,input));
 		}
 		for (EAttribute attr : enumMap.keySet()) {
-			System.out.println(enumMap.get(attr).getText());
+			System.out.println(attr.getName() + " (" + attr.getEAttributeType().getInstanceTypeName() 
+					+ ") = " + enumMap.get(attr).getText());
 			EDataType type = attr.getEAttributeType();
 			String input = enumMap.get(attr).getText();
-			// Wird nicht gesetzt?? //get instance?
-			nodeInModel.eSet(attr, createFromString(type, input));
+			//Wird nicht gesetzt?? //get instance?
+			nodeInModel.eSet(attr, createFromString(type,input));
 		}
 	}
-
-	private Object createFromString(EDataType eDataType, String literal) throws Exception {
-		return eDataType.getEPackage().getEFactoryInstance().createFromString(eDataType, literal);
+	
+	
+	private Object createFromString(EDataType eDataType, String literal) throws Exception
+	{
+	 return eDataType.getEPackage().getEFactoryInstance().createFromString(eDataType, literal);
 	}
 }
+

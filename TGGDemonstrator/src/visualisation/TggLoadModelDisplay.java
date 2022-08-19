@@ -48,7 +48,7 @@ public class TggLoadModelDisplay {
 	private void createLoadModelDisplay () {
 		
 		shellSizeX = 600;
-		shellSizeY = 180;
+		shellSizeY = 240;
 		
 		shell.setLayout(new GridLayout());
 		shell.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY));

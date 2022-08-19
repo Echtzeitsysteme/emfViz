@@ -40,8 +40,8 @@ public class DisplayHandler {
 	private InstanceDiagrammLoader dataSrc;
 	private InstanceDiagrammLoader dataTrg;
 	
-	private Visualizer visSrc;
-	private Visualizer visTrg;
+	private TggVisualizer visSrc;
+	private TggVisualizer visTrg;
 	
 	private TggLoadModelDisplay loadModelDisplay;
 	private TggVisualizerDisplay tggVisualizerDisplay;
@@ -186,8 +186,8 @@ public class DisplayHandler {
 		visSrc.init();
 		visTrg.init();
 		
-		manipSrc = new GraphManipulator(visSrc, dataSrc.getInstanceModel(), dataSrc);
-		manipTrg = new GraphManipulator(visTrg, dataTrg.getInstanceModel(), dataTrg);
+		manipSrc = new GraphManipulator(visSrc, display, dataSrc, modelLoader, true);
+		manipTrg = new GraphManipulator(visTrg, display, dataTrg, modelLoader, false);
 	}
 	/*
 	public static void updateGraph() {

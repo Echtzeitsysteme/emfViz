@@ -197,7 +197,7 @@ public class TggVisualizerDisplay {
 		
 		Group buttonGroupStandard = new Group(comp, SWT.None);
 		
-		buttonGroupStandard.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,true));
+		buttonGroupStandard.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,false));
 		buttonGroupStandard.setText("Standard Functionalities");
 		buttonGroupStandard.setLayout(new GridLayout(3, true));
 		
@@ -219,8 +219,8 @@ public class TggVisualizerDisplay {
 
 		Group buttonGroupManip = new Group(comp, SWT.None);
 
-		buttonGroupManip.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		buttonGroupManip.setText("Model Manipulation");
+		buttonGroupManip.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		buttonGroupManip.setText("Manipulate Model");
 		buttonGroupManip.setLayout(new GridLayout(4, false));
 
 		Button deleteButton = new Button(buttonGroupManip, SWT.PUSH);
@@ -239,6 +239,22 @@ public class TggVisualizerDisplay {
 			}
 		});
 		
+		Button edgeButton = new Button(buttonGroupManip, SWT.PUSH);
+		edgeButton.setText("Test Edge");
+		edgeButton.setLayoutData(new GridData());
+
+		edgeButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent evt) {
+				System.out.println("testing edge features");
+				manipSrc.addEdge();
+				manipTrg.addEdge();
+				// modelLocationSelection("Default");
+				// update graph by loading modified resource
+				// updateVisualizer();
+			}
+		});
+		
 		Button attrButton = new Button(buttonGroupManip, SWT.PUSH);
 		attrButton.setText("Attributes");
 		attrButton.setLayoutData(new GridData());
@@ -246,8 +262,8 @@ public class TggVisualizerDisplay {
 		attrButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent evt) {
-				manipSrc.setAttributes(display);
-				manipTrg.setAttributes(display);
+				manipSrc.setAttributes();
+				manipTrg.setAttributes();
 			}
 		});
 
@@ -270,6 +286,7 @@ public class TggVisualizerDisplay {
 				if (!((EClass)node).isAbstract()) { // isabstract führt nicht zu Ausschluss von Staff??
 					srcClasses.add(node);
 				}
+				
 
 			}
 		}
@@ -317,6 +334,7 @@ public class TggVisualizerDisplay {
 		}
 
 		popupButton.setMenu(popupMenu);
+		/////////////////////////////////////////////////////////////////////////////////////*/
 		
 		/*model generation functionalities (depending on strategy)*/
 		Group buttonGroupModelGeneration = new Group(comp, SWT.None);
