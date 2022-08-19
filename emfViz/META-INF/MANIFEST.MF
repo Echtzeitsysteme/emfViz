@@ -7,7 +7,10 @@ Bundle-ClassPath: external jars/jgraphx-1.4.0.2-sources.jar,
  external jars/jgraphx-4.2.2.jar
 Automatic-Module-Name: emfViz
 Bundle-RequiredExecutionEnvironment: JavaSE-17
-Export-Package: graphVisualization
+Export-Package: com.mxgraph.model,
+ com.mxgraph.swing,
+ com.mxgraph.view,
+ graphVisualization
 Require-Bundle: org.eclipse.emf.common;bundle-version="2.23.0",
  org.eclipse.emf.ecore;bundle-version="2.25.0",
  org.eclipse.jface;bundle-version="3.24.0",

@@ -181,7 +181,7 @@ public class GraphManipulator {
         delete.addActionListener(new ActionListener() {
         	@Override
 		    public void actionPerformed(ActionEvent e) {
-				deleteSelected(); //löscht den Knoten nicht?
+				//deleteSelected(); //löscht den Knoten nicht?
         		System.out.println("Delete clicked");
         	}
         });
@@ -189,7 +189,7 @@ public class GraphManipulator {
         attr.addActionListener(new ActionListener() {
         	@Override
 		    public void actionPerformed(ActionEvent e) {
-				setAttributes(); //Fehlermeldung
+				//setAttributes(); //Fehlermeldung
         		System.out.println("Attributes clicked");
         	}
         });
@@ -279,6 +279,7 @@ public class GraphManipulator {
 	public void addEdge() {
 		iterateModel();
 		if(edgeInGraph != null) {
+			//add export com.mxgraph.view to emfViz? was heißt das?
 			Object source = graph.getModel().getTerminal(edgeInGraph, true);
 			Object target = graph.getModel().getTerminal(edgeInGraph, false);
 			
@@ -388,11 +389,11 @@ public class GraphManipulator {
 		newObj = EcoreUtil.create(cl);
 		resource.getContents().add(newObj);
 		System.out.println("new obj created in model");
-		Node newNode = new Node(newObj.toString(),newObj.eClass().getName(), "defaultNode");
+		/*Node newNode = new Node(newObj.toString(),newObj.eClass().getName(), "defaultNode");
 		loader.nodes.add(newNode);
 		System.out.println("added to list");
 		graph.insertVertex(graph.getDefaultParent(),newNode.id, newNode.name,100,100,80,40);
-		System.out.println("added in graph");
+		System.out.println("added in graph");*/
 		
 	}
 	
@@ -413,7 +414,6 @@ public class GraphManipulator {
 			composite.setVisible(true);
 			
 			GridData gridData1 = new GridData(SWT.FILL, SWT.FILL, true, true);
-			//gridData1.horizontalSpan = 3;
 			
 			composite.setLayoutData(gridData1);
 			composite.setLayout(new GridLayout(3, true));

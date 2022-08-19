@@ -216,7 +216,8 @@ public class TggVisualizerDisplay {
 		
 		/* buttons to create a complete new model or modify an existing model*/
 		/* buttons are only activated for fwd, bwd or sync strategy*/
-
+		
+		//DEPRECATED///////////////////////////////////////////////////////////
 		Group buttonGroupManip = new Group(comp, SWT.None);
 
 		buttonGroupManip.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
