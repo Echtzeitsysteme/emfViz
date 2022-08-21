@@ -80,6 +80,11 @@ public class GraphManipulator {
 		graph = vis.getGraph();
 		graphComponent = vis.getGraphComponent();
 		
+
+
+	}
+	
+	public void initialize() {
 		graphComponent.getGraphControl().addMouseListener(new MouseAdapter()
 		{
 		
@@ -113,7 +118,6 @@ public class GraphManipulator {
 			}
 
 		});
-
 	}
 
 	private void iterateModel() {
@@ -147,12 +151,14 @@ public class GraphManipulator {
 		for (EObject eobj : obj.eContents()) {
 			iterateModelHierarchical(eobj, comp);
 		}
-
+		
 		mxCell c = (mxCell) comp;
-		if (obj.toString().equals(c.getId())) {
+
+		if (obj.eClass().getName().equals(c.getValue().toString())) {
 			System.out.println("equal found");
 			nodeInModel = obj;
 		}
+		
 		if(c.isEdge()) {
 			edgeInGraph = c;
 			
@@ -181,7 +187,8 @@ public class GraphManipulator {
         delete.addActionListener(new ActionListener() {
         	@Override
 		    public void actionPerformed(ActionEvent e) {
-				//deleteSelected(); //löscht den Knoten nicht?
+				deleteSelected();
+				//x und y weitergeben an automatische Visualisierung
         		System.out.println("Delete clicked");
         	}
         });
@@ -189,7 +196,7 @@ public class GraphManipulator {
         attr.addActionListener(new ActionListener() {
         	@Override
 		    public void actionPerformed(ActionEvent e) {
-				//setAttributes(); //Fehlermeldung
+				setAttributesExec();
         		System.out.println("Attributes clicked");
         	}
         });
@@ -260,7 +267,7 @@ public class GraphManipulator {
 			System.out.println("removed from model");
 			
 			//vis.getGraph().repaint();
-			
+			/*
 			Node deleteNode = null;
 			for (Node nodeElement : loader.nodes) {
 				if (nodeElement.id.equals(nodeInModel.toString())) {
@@ -271,7 +278,7 @@ public class GraphManipulator {
 				loader.nodes.remove(deleteNode);
 				System.out.println("removed from list");
 			}
-			graph.refresh();
+			graph.refresh();*/
 		}
 		
 	}
@@ -397,12 +404,20 @@ public class GraphManipulator {
 		
 	}
 	
+	public void setAttributesExec() {
+		Display.getDefault().syncExec(new Runnable(){
+			public void run() {
+				System.out.println("syncexec");
+			    setAttributes();
+			}
+			});
+	}
 	
-	
-	public void setAttributes() {
+	private void setAttributes() {
 		
 		iterateModel();
 		if(nodeInModel != null) {
+			
 			Shell shellAttr = new Shell(display);
 			
 			shellAttr.setText("Set Attributes");

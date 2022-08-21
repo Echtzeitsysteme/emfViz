@@ -188,6 +188,9 @@ public class DisplayHandler {
 		
 		manipSrc = new GraphManipulator(visSrc, display, dataSrc, modelLoader, true);
 		manipTrg = new GraphManipulator(visTrg, display, dataTrg, modelLoader, false);
+		
+		manipSrc.initialize();
+		manipTrg.initialize();
 	}
 	/*
 	public static void updateGraph() {

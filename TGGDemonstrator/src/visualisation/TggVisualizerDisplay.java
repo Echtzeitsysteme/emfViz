@@ -217,7 +217,7 @@ public class TggVisualizerDisplay {
 		/* buttons to create a complete new model or modify an existing model*/
 		/* buttons are only activated for fwd, bwd or sync strategy*/
 		
-		//DEPRECATED///////////////////////////////////////////////////////////
+		/*//DEPRECATED///////////////////////////////////////////////////////////
 		Group buttonGroupManip = new Group(comp, SWT.None);
 
 		buttonGroupManip.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -381,11 +381,11 @@ public class TggVisualizerDisplay {
 		});
 		
 		//disable button they are not needed for this strategy
-		if (modelLoader instanceof ModelLoader_MODELGEN) {
+		/*if (modelLoader instanceof ModelLoader_MODELGEN) {
 			popupButton.setEnabled(false);
 			deleteButton.setEnabled(false);
 			attrButton.setEnabled(false);
-		}
+		}*/
 	}
 	
 	
