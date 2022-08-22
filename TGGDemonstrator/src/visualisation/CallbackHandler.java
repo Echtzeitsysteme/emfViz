@@ -136,6 +136,7 @@ public class CallbackHandler {
 	 */
 	public void updateGraph(UpdateGraphType type) {
 		System.out.println("UPDATE GRAPH");
+		
 		switch (type) {
 		case ALL:
 			if(srcContentAdapter != null)
@@ -154,6 +155,11 @@ public class CallbackHandler {
 		default:
 			break;
 		}
+	}
+	
+	public void setPositionForNewNode(int x, int y) {
+		srcContentAdapter.setPosition(x,y);
+		trgContentAdapter.setPosition(x,y);
 	}
 	
 }

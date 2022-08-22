@@ -23,6 +23,9 @@ public class VisContentAdapter extends EContentAdapter {
 	private Collection<Notification> notifications = new LinkedList<>();
 	private Set<Object> removedObjects = new HashSet<>();
 	private Set<Object> addedObjects = new HashSet<>();
+	
+	private int xPos;
+	private int yPos;
 
 	public VisContentAdapter(Resource r, Visualizer vis) {
 		this.vis = vis;
@@ -175,7 +178,9 @@ public class VisContentAdapter extends EContentAdapter {
 			// the node was added directly into the resource, which means that there is no
 			// new edge
 			if(isNew(notification.getNewValue()))
-				vis.insertNodeIntoGraph(new Node((EObject) notification.getNewValue()));
+				vis.insertNewNodeIntoGraph(new Node((EObject) notification.getNewValue()), xPos, yPos);
+				xPos = 0;
+				yPos = 0;
 			return;
 		}
 
@@ -233,5 +238,11 @@ public class VisContentAdapter extends EContentAdapter {
 
 		throw new UnsupportedOperationException(
 				notification.getFeature() + " is not yet supported by VisContentAdapter");
+	}
+	
+	/* set position of where the last mouse click appeared */
+	public void setPosition(int x, int y) {
+		xPos = x;
+		yPos = y;
 	}
 }

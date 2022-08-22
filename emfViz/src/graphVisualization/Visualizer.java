@@ -146,6 +146,13 @@ public class Visualizer {
 		insertNodeIntoGraph(node, defaultNodePosition.x - centerX, defaultNodePosition.y - centerY);
 		dataLoader.nodes.add(node);
 	}
+	
+	protected void insertNewNodeIntoGraph(Node node, double x, double y) {
+		System.out.println("NEW NODE IN GRAPH");
+		dataLoader.nodes.add(node);
+		graph.insertVertex(graph.getDefaultParent(), String.valueOf(node.hashCode()), node, x, y, defaultNodeWidth,
+				defaultNodeHeight, node.styleCategory);
+	}
 
 	protected void insertEdgeIntoGraph(Edge edge) {
 		graph.insertEdge(graph.getDefaultParent(), String.valueOf(edge.hashCode()), edge,

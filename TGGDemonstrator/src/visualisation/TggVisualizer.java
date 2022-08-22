@@ -50,7 +50,7 @@ public class TggVisualizer extends Visualizer{
 		
 		graphComponent = new mxGraphComponent(graph);
 		frame.add(graphComponent);
-		
+		/*
 		graphComponent.getGraphControl().addMouseListener(new MouseAdapter()
 		{
 		
@@ -66,6 +66,7 @@ public class TggVisualizer extends Visualizer{
 				System.out.println(e);
 			}
 		});
+		*/
 	}
 
 	public Frame getFrame() {

@@ -49,6 +49,7 @@ import graphVisualization.InstanceDiagrammLoader;
 import graphVisualization.Node;
 import graphVisualization.Visualizer;
 import tggDemonstrator.TGGDemonstrator;
+import visualisation.CallbackHandler.UpdateGraphType;
 
 public class GraphManipulator {
 
@@ -58,6 +59,7 @@ public class GraphManipulator {
 	private Display display;
 	private TGGDemonstrator modelLoader;
 	private boolean isSource;
+	private CallbackHandler callback;
 	private EObject nodeInModel;
 	private Object nodeInGraph;
 	private Object edgeInGraph;
@@ -68,6 +70,7 @@ public class GraphManipulator {
 	private EAttribute errorAttr;
 	private EReference eRefSelected;
 	private mxGraphComponent graphComponent;
+	private mxCell cellAtPos;
 
 	public GraphManipulator(TggVisualizer vis, Display display, InstanceDiagrammLoader loader, TGGDemonstrator modelLoader, boolean isSource) {
 
@@ -79,7 +82,7 @@ public class GraphManipulator {
 		this.isSource = isSource;
 		graph = vis.getGraph();
 		graphComponent = vis.getGraphComponent();
-		
+		callback = CallbackHandler.getInstance();
 
 
 	}
@@ -90,14 +93,15 @@ public class GraphManipulator {
 		
 			public void mouseReleased(MouseEvent e)
 			{
-				mxCell cell = (mxCell) graphComponent.getCellAt(e.getX(), e.getY());
+				cellAtPos = (mxCell) graphComponent.getCellAt(e.getX(), e.getY());
 				
 				if(e.getButton() == MouseEvent.BUTTON3) {
-					if (cell != null)
+					if (cellAtPos != null)
 					{
-						if(cell.isVertex()) {
-							System.out.println("cell="+graph.getLabel(cell));
+						if(cellAtPos.isVertex()) {
+							System.out.println("cell="+graph.getLabel(cellAtPos));
 							actionOnNode(e.getX(), e.getY());
+							
 						}
 						else {
 							addEdge();
@@ -105,7 +109,10 @@ public class GraphManipulator {
 					}
 					else {
 						actionOnFrame(e.getX(), e.getY());
+						callback.setPositionForNewNode(e.getX(), e.getY());
 					}
+					
+					callback.updateGraph(UpdateGraphType.ALL);
 				}
 				
 				
@@ -119,7 +126,7 @@ public class GraphManipulator {
 
 		});
 	}
-
+/*
 	private void iterateModel() {
 		EList<EObject> objects = resource.getContents();
 		Object[] selectedCells = graph.getSelectionCells();
@@ -139,11 +146,21 @@ public class GraphManipulator {
 					 * if(true) { Integer i = 0; eObject.eSet(esf, i);
 					 * 
 					 * } }
-					 */
+					 
 					iterateModelHierarchical(eObject, selected);
 				}
 			}
 		}
+
+	}
+*/	
+	private void iterateModelMousePosition() {
+		EList<EObject> objects = resource.getContents();
+		
+			for (EObject eObject : objects) {
+
+				iterateModelHierarchical(eObject, cellAtPos);
+			}
 
 	}
 
@@ -151,23 +168,22 @@ public class GraphManipulator {
 		for (EObject eobj : obj.eContents()) {
 			iterateModelHierarchical(eobj, comp);
 		}
-		
-		mxCell c = (mxCell) comp;
 
-		if (obj.eClass().getName().equals(c.getValue().toString())) {
+		if (obj.eClass().getName().equals(((mxCell)comp).getValue().toString())) {
 			System.out.println("equal found");
 			nodeInModel = obj;
 		}
 		
-		if(c.isEdge()) {
-			edgeInGraph = c;
+		if(((mxCell)comp).isEdge()) {
+			edgeInGraph = comp;
 			
 		}
 	}
 	
 	public void deleteSelected() {
-		iterateModel();
+		iterateModelMousePosition();
 		removeNode();
+		
 	}
 
 	private void actionOnNode(int x, int y) {
@@ -237,7 +253,7 @@ public class GraphManipulator {
 			classItem.addActionListener(new ActionListener() {
 	        	@Override
 			    public void actionPerformed(ActionEvent e) {
-	        		System.out.println("ClassItem clicked");
+	        		addNode(cl);
 	        	}
 	        });
 
@@ -284,7 +300,7 @@ public class GraphManipulator {
 	}
 	
 	public void addEdge() {
-		iterateModel();
+		iterateModelMousePosition();
 		if(edgeInGraph != null) {
 			//add export com.mxgraph.view to emfViz? was heißt das?
 			Object source = graph.getModel().getTerminal(edgeInGraph, true);
@@ -415,7 +431,7 @@ public class GraphManipulator {
 	
 	private void setAttributes() {
 		
-		iterateModel();
+		iterateModelMousePosition();
 		if(nodeInModel != null) {
 			
 			Shell shellAttr = new Shell(display);
