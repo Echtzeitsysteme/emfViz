@@ -70,7 +70,6 @@ public class Visualizer {
 	public Visualizer(Shell shell, DataLoader dataLoader) {
 		this.dataLoader = dataLoader;
 		this.shell = shell;
-
 	}
 
 	/*

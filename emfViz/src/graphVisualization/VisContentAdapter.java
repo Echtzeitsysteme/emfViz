@@ -43,7 +43,7 @@ public class VisContentAdapter extends EContentAdapter {
 		System.out.println(notification);
 
 		preProcessNotification(notification);
-		vis.runIncrementalLayout();
+		vis.runLayout();
 	}
 
 	// here we search for newly added elements that already exist in our graph
