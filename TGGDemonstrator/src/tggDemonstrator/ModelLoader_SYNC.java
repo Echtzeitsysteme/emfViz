@@ -8,10 +8,10 @@ import org.emoflon.ibex.tgg.operational.strategies.sync.SYNC;
 
 public class ModelLoader_SYNC extends TGGDemonstrator{
 	
-	private Function<String, SYNC> sync_demonstrator;
+	private Function<DataObject, SYNC> sync_demonstrator;
 	private SYNC sync;
 	
-	public ModelLoader_SYNC(Function<String, SYNC> sync, String pP, String wP) {
+	public ModelLoader_SYNC(Function<DataObject, SYNC> sync, String pP, String wP) {
 		super(pP, wP);
 		
 		
@@ -24,7 +24,7 @@ public class ModelLoader_SYNC extends TGGDemonstrator{
 	
 	
 	@Override
-	public void createResourcesFromPath(String pathSrc, String pathTrg) {
+	public void createResourcesFromPath(String pathSrc, String pathTrg, String pathCorr, String pathProtocol, String pathProject) {
 		// TODO Auto-generated method stub
 		
 	}

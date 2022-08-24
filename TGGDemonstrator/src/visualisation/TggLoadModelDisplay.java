@@ -27,8 +27,8 @@ public class TggLoadModelDisplay {
 	private Display display;
 	private Shell shell;
 	
-	private int shellSizeX;
-	private int shellSizeY;
+	private final int shellSizeX;
+	private final int shellSizeY;
 	
 	public TggLoadModelDisplay(DisplayHandler handler, TGGDemonstrator modelLoader, Display display, Shell shell) {
 		//super(modelLoader);
@@ -38,47 +38,45 @@ public class TggLoadModelDisplay {
 		this.display = display;
 		this.shell = shell;
 		
+		shellSizeX = 600;
+		shellSizeY = 200;
+		
 		createLoadModelDisplay();
 	}
 	
 	/*
 	 * Window to select between different model loading options.
-	 * It is the initial window (start window)
+	 * This is the start window
 	 */
 	private void createLoadModelDisplay () {
-		
-		shellSizeX = 600;
-		shellSizeY = 240;
 		
 		shell.setLayout(new GridLayout());
 		shell.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY));
 		
-		
 		Composite composite = new Composite(shell, SWT.EMBEDDED);
 		composite.setVisible(true);
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,true));
-		composite.setLayout(new GridLayout());
-		
+		composite.setLayout(new GridLayout());	
 		
 		Group modelGroup = new Group(composite, SWT.None);
 		modelGroup.setText("Select your model location:");
 		modelGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		modelGroup.setLayout(new GridLayout());
 		
-		Button defaultBT = new Button(modelGroup, SWT.RADIO);
-		defaultBT.setText("Default");
+		Button defaultButton = new Button(modelGroup, SWT.RADIO);
+		defaultButton.setText("Default");
 		
-		Button newModeltBT = new Button(modelGroup, SWT.RADIO);
-		newModeltBT.setText("New Model");
+		Button newModeltButton = new Button(modelGroup, SWT.RADIO);
+		newModeltButton.setText("New Model");
 		
-		Button modelLocationBT = new Button(modelGroup, SWT.RADIO);
-		modelLocationBT.setText("Select Model");
+		Button modelLocationButton = new Button(modelGroup, SWT.RADIO);
+		modelLocationButton.setText("Select Model");
 		
-		Button nextBT = new Button(composite, SWT.PUSH);
-		nextBT.setText("Next");
-		nextBT.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+		Button nextButton = new Button(composite, SWT.PUSH);
+		nextButton.setText("Next");
+		nextButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 
-		nextBT.addSelectionListener(new SelectionAdapter() {
+		nextButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent pSelectionEvent) {
 				for (Control bt : modelGroup.getChildren()) {

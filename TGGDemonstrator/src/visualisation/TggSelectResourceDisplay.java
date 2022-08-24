@@ -43,7 +43,7 @@ public class TggSelectResourceDisplay {
 		this.display = display;
 		this.shell = shell;
 		
-		shellSizeX = 450;
+		shellSizeX = 460;
 		shellSizeY = 450;
 		
 		CreateDirectorySelectionWindow();
@@ -86,7 +86,9 @@ public class TggSelectResourceDisplay {
 		protocolGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));	
 		protocolGroup.setLayout(new GridLayout(2, false));
 		
-		
+		Group projectGroup = new Group(composite, SWT.None);
+		projectGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));	
+		projectGroup.setLayout(new GridLayout(2, false));
 		
 		//create widgets for source location
 		Label srcLabel = new Label(srcGroup, SWT.NONE);
@@ -103,6 +105,13 @@ public class TggSelectResourceDisplay {
 				
 		srcTxt.setLayoutData(gridDataSrc);
 		
+		srcButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent pSelectionEvent) {
+				srcTxt.setText(openFileDialog());
+			}
+		});
+		
 		//create widgets for target location		
 		Label trgLabel = new Label(trgGroup, SWT.NONE);
 		trgLabel.setText("Select your target xmi:");
@@ -118,9 +127,16 @@ public class TggSelectResourceDisplay {
 		
 		trgTxt.setLayoutData(gridDataTrg);
 		
+		trgButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent pSelectionEvent) {
+				trgTxt.setText(openFileDialog());
+			}
+		});
+		
 		//create widgets for corr location
 		Label corrLabel = new Label(corrGroup, SWT.NONE);
-		corrLabel.setText("Select your corr xmi:");
+		corrLabel.setText("Select your corr xmi (optional):");
 		
 		Button corrButton = new Button(corrGroup, SWT.PUSH);
 		corrButton.setText("Corr xmi");
@@ -133,9 +149,16 @@ public class TggSelectResourceDisplay {
 		
 		corrTxt.setLayoutData(gridDataCorr);
 		
+		corrButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent pSelectionEvent) {
+				corrTxt.setText(openFileDialog());
+			}
+		});
+		
 		// create widgets for protocol location
 		Label protocolLabel = new Label(protocolGroup, SWT.NONE);
-		protocolLabel.setText("Select your protocol xmi:");
+		protocolLabel.setText("Select your protocol xmi (optional):");
 		
 		Button protocolButton = new Button(protocolGroup, SWT.PUSH);
 		protocolButton.setText("Protocol xmi");
@@ -147,6 +170,35 @@ public class TggSelectResourceDisplay {
 		gridDataProtocol.widthHint = 300;
 		
 		protocolTxt.setLayoutData(gridDataProtocol);
+		
+		protocolButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent pSelectionEvent) {
+				protocolTxt.setText(openFileDialog());
+			}
+		});
+		
+		// create widgets for project location
+		Label projectLabel = new Label(projectGroup, SWT.NONE);
+		projectLabel.setText("Select project location (optional):");
+		
+		Button projectButton = new Button(protocolGroup, SWT.PUSH);
+		projectButton.setText("Location");
+		projectButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+		
+		Text projectTxt = new Text(protocolGroup, SWT.NONE);
+		
+		GridData gridDataProject = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gridDataProject.widthHint = 300;
+		
+		projectTxt.setLayoutData(gridDataProtocol);
+		
+		projectButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent pSelectionEvent) {
+				projectTxt.setText(openDirectoryDialog());
+			}
+		});
 		
 		//control buttons / composite - back and forward(next)
 		Composite compositeCtrl = new Composite(shell, SWT.EMBEDDED);
@@ -161,7 +213,7 @@ public class TggSelectResourceDisplay {
 		nextButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent pSelectionEvent) {
-				loadModelFromPath(srcTxt.getText(), trgTxt.getText());
+				loadModelFromPath(srcTxt.getText(), trgTxt.getText(), corrTxt.getText(), protocolTxt.getText(), projectTxt.getText());
 			}
 		});
 		
@@ -177,52 +229,6 @@ public class TggSelectResourceDisplay {
 			}
 		});
 		
-		/*
-		 * if ModelLoader is initialized by INITIAL_FWD or INITIAL_BWD
-		 * source or target model are generated from tgg.
-		 * rename existing button and label and add selection listener to buttons
-		 */
-		if (modelLoader instanceof ModelLoader_INITIAL_FWD)
-		{
-			//rename trgLabel and trgButton
-			trgLabel.setText("Porject location");
-			trgButton.setText("Select location");
-			
-			srcButton.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent pSelectionEvent) {
-					srcTxt.setText(openFileDialog());
-				}
-			});
-			
-			trgButton.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent pSelectionEvent) {
-					trgTxt.setText(openDirectoryDialog());
-				}
-			});
-			
-		}else if(modelLoader instanceof ModelLoader_INITIAL_BWD){
-
-			//rename srcLabel and srcButton
-			srcLabel.setText("Porject location");
-			srcButton.setText("Select location");
-			
-			srcButton.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent pSelectionEvent) {
-					srcTxt.setText(openDirectoryDialog());
-				}
-			});
-			
-			trgButton.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent pSelectionEvent) {
-					trgTxt.setText(openFileDialog());
-				}
-			});
-		}
-		
 		//set size of shell
 		shell.setSize(shellSizeX, shellSizeY);	
 	}
@@ -232,9 +238,9 @@ public class TggSelectResourceDisplay {
 	/*
 	 * start loading source and target model from selected path
 	 */
-	private void loadModelFromPath (String src, String trg) {
+	private void loadModelFromPath (String srcPath, String trgPath, String corrPath, String protocolPath, String projectPath) {
 		
-		modelLoader.createResourcesFromPath(src, trg);
+		modelLoader.createResourcesFromPath(srcPath, trgPath, corrPath, protocolPath, projectPath);
 		
 		handler.openTggVisualizerDisplay();
 	}

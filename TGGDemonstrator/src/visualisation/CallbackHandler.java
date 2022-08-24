@@ -33,7 +33,12 @@ public class CallbackHandler {
         return instance;
     }
  
-	//-----------------------------------------------------------------
+	//-------------------------Model Generation ----------------------------------------
+	/*
+	 * This section of the CallbackHandler provides functions 
+	 * to keep the visualization (select next step) and the model generation (execute selected step) in sync 
+	 */
+	
 	
 	public void setMatches(Set<ITGGMatch> matches) {
 		this.matches = matches;
@@ -99,7 +104,12 @@ public class CallbackHandler {
 		return selectedMatch;
 	}
 	
-	//-----------------------------------------------------------------
+	//-------------------------- VisContentAdapter -------------------------------	
+	/*
+	 * This section of the CallbackHandler provides functions 
+	 * to connect source and target resource with visualization to keep both in sync 
+	 */
+	
 	
 	/*
 	 * connect source resource with visualization to keep both in sync

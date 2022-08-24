@@ -35,21 +35,33 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 	}
 
 	@Override
-	public void createResourcesFromPath(String pathLoc, String pathTrg) {
+	public void createResourcesFromPath(String pathSrc, String pathTrg, String pathCorr, String pathProtocol, String pathProject) {
 		// TODO Auto-generated method stub
 		
-		String pathLocTemp = pathLoc;
+		String pathProjectTemp = pathProject;
 		
 		if (!pathTrg.equals(" ") && !pathTrg.equals("")) {
 			
-			if (pathLocTemp.equals(" ") && pathLocTemp.equals("")) {
-				pathLocTemp = projectPath + "/instances/";
+			if (pathProjectTemp.equals(" ") || pathProjectTemp.equals("")) {
+				pathProjectTemp = projectPath + "/instances/";
 			}
 			
-			DataObject data = new DataObject(pathLocTemp + "src.xmi", 
+			if (pathSrc.equals(" ") || pathSrc.equals("")) {
+				pathSrc = pathProjectTemp + "src.xmi";
+			}
+			
+			if (pathCorr.equals(" ") || pathCorr.equals("")) {
+				pathCorr = pathProjectTemp + "corr.xmi";
+			}
+			
+			if (pathProtocol.equals(" ") || pathProtocol.equals("")) {
+				pathProtocol = pathProjectTemp + "protocol.xmi";
+			}
+			
+			DataObject data = new DataObject(pathSrc, 
 					pathTrg, 
-					pathLocTemp + "corr.xmi",
-					pathLocTemp + "protocol.xmi", 
+					pathCorr,
+					pathProtocol, 
 					Modelgeneration.LOAD_MODEL);
 			
 			bwd = bwd_Demonstrator.apply(data);

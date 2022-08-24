@@ -37,20 +37,32 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 	}
 
 	@Override
-	public void createResourcesFromPath(String pathSrc, String pathLoc) {
+	public void createResourcesFromPath(String pathSrc, String pathTrg, String pathCorr, String pathProtocol, String pathProject) {
 		
-		String pathLocTemp = pathLoc;
+		String pathProjectTemp = pathProject;
 		
 		if (!pathSrc.equals(" ") && !pathSrc.equals("")) {
 			
-			if (pathLocTemp.equals(" ") && pathLocTemp.equals("")) {
-				pathLocTemp = projectPath + "/instances/";
+			if (pathProjectTemp.equals(" ") || pathProjectTemp.equals("")) {
+				pathProjectTemp = projectPath + "/instances/";
+			}
+			
+			if (pathTrg.equals("") || pathTrg.equals("")) {
+				pathTrg = pathProjectTemp + "trg.xmi";
+			}
+			
+			if (pathCorr.equals(" ") || pathCorr.equals("")) {
+				pathCorr = pathProjectTemp + "corr.xmi";
+			}
+			
+			if (pathProtocol.equals(" ") || pathProtocol.equals("")) {
+				pathProtocol = pathProjectTemp + "protocol.xmi";
 			}
 			
 			DataObject data = new DataObject(pathSrc, 
-					pathLocTemp + "trg.xmi", 
-					pathLocTemp + "corr.xmi",
-					pathLocTemp + "protocol.xmi",
+					pathTrg, 
+					pathCorr,
+					pathProtocol,
 					Modelgeneration.LOAD_MODEL);
 			
 			fwd = fwd_demonstrator.apply(data);
