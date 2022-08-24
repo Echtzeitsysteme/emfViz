@@ -44,7 +44,7 @@ public class TggSelectResourceDisplay {
 		this.shell = shell;
 		
 		shellSizeX = 460;
-		shellSizeY = 450;
+		shellSizeY = 500;
 		
 		CreateDirectorySelectionWindow();
 	}
@@ -182,16 +182,16 @@ public class TggSelectResourceDisplay {
 		Label projectLabel = new Label(projectGroup, SWT.NONE);
 		projectLabel.setText("Select project location (optional):");
 		
-		Button projectButton = new Button(protocolGroup, SWT.PUSH);
+		Button projectButton = new Button(projectGroup, SWT.PUSH);
 		projectButton.setText("Location");
 		projectButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		
-		Text projectTxt = new Text(protocolGroup, SWT.NONE);
+		Text projectTxt = new Text(projectGroup, SWT.NONE);
 		
 		GridData gridDataProject = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gridDataProject.widthHint = 300;
 		
-		projectTxt.setLayoutData(gridDataProtocol);
+		projectTxt.setLayoutData(gridDataProject);
 		
 		projectButton.addSelectionListener(new SelectionAdapter() {
 			@Override
