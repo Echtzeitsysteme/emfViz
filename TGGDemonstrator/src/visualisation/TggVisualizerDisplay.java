@@ -154,7 +154,9 @@ public class TggVisualizerDisplay {
 		
 		frameSrc = SWT_AWT.new_Frame(compSrc);
 		frameTrg = SWT_AWT.new_Frame(compTrg);
-
+		
+		frameSrc.setEnabled(modelLoader.isFrameSourceActive());
+		frameTrg.setEnabled(modelLoader.isFrameTargetActive());
 		
 		//initializeButtons(comp);
 		initButtons(comp);
