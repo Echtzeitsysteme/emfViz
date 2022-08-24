@@ -112,7 +112,7 @@ public class GraphManipulator {
 						callback.setPositionForNewNode(e.getX(), e.getY());
 					}
 					
-					callback.updateGraph(UpdateGraphType.ALL);
+					
 				}
 				
 				
@@ -183,7 +183,7 @@ public class GraphManipulator {
 	public void deleteSelected() {
 		iterateModelMousePosition();
 		removeNode();
-		
+		callback.updateGraph(UpdateGraphType.ALL);
 	}
 
 	private void actionOnNode(int x, int y) {
@@ -346,6 +346,7 @@ public class GraphManipulator {
 				EMFManipulationUtils.createEdge(src, trg, eRefSelected); //schon im Modell oder noch hinzufügen?
 			}
 			//else no edge should be created
+			callback.updateGraph(UpdateGraphType.ALL);
 		}
 		
 	}
@@ -417,7 +418,7 @@ public class GraphManipulator {
 		System.out.println("added to list");
 		graph.insertVertex(graph.getDefaultParent(),newNode.id, newNode.name,100,100,80,40);
 		System.out.println("added in graph");*/
-		
+		callback.updateGraph(UpdateGraphType.ALL);
 	}
 	
 	public void setAttributesExec() {
@@ -425,8 +426,10 @@ public class GraphManipulator {
 			public void run() {
 				System.out.println("syncexec");
 			    setAttributes();
+			    callback.updateGraph(UpdateGraphType.ALL);
 			}
 			});
+		
 	}
 	
 	private void setAttributes() {
