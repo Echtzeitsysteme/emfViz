@@ -3,12 +3,12 @@ Bundle-ManifestVersion: 2
 Bundle-Name: emfViz
 Bundle-SymbolicName: emfViz
 Bundle-Version: 1.0.0.qualifier
-Bundle-ClassPath: external jars/jgraphx-1.4.0.2-sources.jar,
- external jars/jgraphx-4.2.2.jar
+Bundle-ClassPath: external jars/jgraphx-4.2.3.jar
 Automatic-Module-Name: emfViz
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: com.mxgraph.model,
  com.mxgraph.swing,
+ com.mxgraph.util,
  com.mxgraph.view,
  graphVisualization
 Require-Bundle: org.eclipse.emf.common;bundle-version="2.23.0",

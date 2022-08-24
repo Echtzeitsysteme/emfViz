@@ -224,11 +224,11 @@ public class Visualizer {
 
 		System.out.println("Build graph");
 		//System.out.println("Placing nodes");
-		placeNodes();
-		//System.out.println("Routing edges");
-		placeEdges();
-		//System.out.println("Placing edge labels");
-		placeLabels();
+//		placeNodes();
+//		//System.out.println("Routing edges");
+//		placeEdges();
+//		//System.out.println("Placing edge labels");
+//		placeLabels();
 		System.out.println("Ready");
 
 		setIgnoreStatus(true);
@@ -255,8 +255,10 @@ public class Visualizer {
 			mxCell c = (mxCell) cell;
 
 			if (c.isEdge()) {
-				((Edge) c.getValue()).ignored = ignored;
-				continue;
+				if(c.getValue() instanceof Edge edge) {
+						edge.ignored = ignored;
+					continue;
+				}
 			}
 
 			if (c.isVertex()) {

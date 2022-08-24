@@ -43,7 +43,7 @@ public class VisContentAdapter extends EContentAdapter {
 		System.out.println(notification);
 
 		preProcessNotification(notification);
-		vis.runLayout();
+//		vis.runLayout();
 	}
 
 	// here we search for newly added elements that already exist in our graph
@@ -179,8 +179,10 @@ public class VisContentAdapter extends EContentAdapter {
 			// new edge
 			if(isNew(notification.getNewValue()))
 				vis.insertNewNodeIntoGraph(new Node((EObject) notification.getNewValue()), xPos, yPos);
-				xPos = 0;
-				yPos = 0;
+			vis.graph.refresh();
+			vis.graphComponent.refresh();
+				xPos = 20;
+				yPos = 20;
 			return;
 		}
 

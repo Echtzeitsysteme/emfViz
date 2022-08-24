@@ -322,8 +322,6 @@ class ModelgenThread extends Thread{
 					
 					
 					match = callbackHandler.getSelectedMatch();
-					
-					
 					if(match == null) {
 						//if no match is selected then just use the next match
 						match = matchContainer.getNext();
