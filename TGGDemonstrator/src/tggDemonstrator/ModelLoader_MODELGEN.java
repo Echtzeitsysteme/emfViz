@@ -2,19 +2,25 @@ package tggDemonstrator;
 
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Group;
+import org.emoflon.ibex.common.emf.EMFEdge;
 import org.emoflon.ibex.tgg.operational.matches.ITGGMatch;
 import org.emoflon.ibex.tgg.operational.matches.ImmutableMatchContainer;
 import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGEN;
 import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGENStopCriterion;
 import org.emoflon.ibex.tgg.operational.updatepolicy.IUpdatePolicy;
 
+import runtime.TGGRuleApplication;
 import tggDemonstrator.DataObject.Modelgeneration;
 import visualisation.CallbackHandler;
 import visualisation.DisplayHandler;
@@ -43,13 +49,29 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 	}
 	
 	@Override
-	public void createResourcesFromPath(String pathSrc, String pathTrg) {
+	public void createResourcesFromPath(String pathSrc, String pathTrg, String pathCorr, String pathProtocol, String pathProject) {
 		// TODO Auto-generated method stub
+		String pathProjectTemp = pathProject;
+		
+		if (pathSrc.equals("") || pathTrg.equals(" "))
+			return;		
+			
+		if (pathProjectTemp.equals("") || pathProjectTemp.equals(" "))
+			pathProjectTemp = projectPath + "/instances/";
 
 		
-		DataObject data = new DataObject(pathSrc, pathTrg, 
-				projectPath + "/instances/corr.xmi", 
-				projectPath + "/instances/protocol.xmi", 
+		if (pathCorr.equals("") || pathCorr.equals(" "))
+			pathCorr = pathProjectTemp + "corr.xmi";
+	
+		
+		if (pathProtocol.equals("") || pathProtocol.equals(" "))
+			pathProtocol = pathProjectTemp + "protocol.xmi";
+	
+		
+		DataObject data = new DataObject(pathSrc, 
+				pathTrg, 
+				pathCorr, 
+				pathProtocol, 
 				Modelgeneration.LOAD_MODEL);
 		
 		modelgen = modelgen_demonstrator.apply(data);
@@ -61,6 +83,17 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 		target = resourceHandler.getTargetResource();
 		
 		loadingOption = LoadingOption.SelectedResource;
+		
+		// set basic stop criterion
+		MODELGENStopCriterion stop = new MODELGENStopCriterion(modelgen.getTGG());
+		modelgen.setStopCriterion(stop);
+		
+		// Start new thread
+		thread = new ModelgenThread(modelgen, this);
+		thread.setName("Modelgen Thread");
+		thread.start();
+		
+		System.out.println("Model generation process is running on thread " + thread.getId());
 		
 	}
 
@@ -153,7 +186,7 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 	/*
 	 * Return rule names from possible matches
 	 */
-	public String[] getRuleNames() {
+	/*public String[] getRuleNames() {
 		
 		matches = thread.getMatches();
 		
@@ -168,17 +201,17 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 		}
 		
 		return ruleNames;	
-	}
+	}*/
 	
 	/*
 	 * Set rule index
 	 */
-	public void setSelectedRuleIndex(int i) {
+	/*public void setSelectedRuleIndex(int i) {
 		ruleIndex = i;
 		
 		thread.setRuleIndex(i);
 	}
-	
+	*/
 	/*
 	 * Get rule index
 	 */
@@ -290,10 +323,33 @@ class ModelgenThread extends Thread{
 					
 					match = callbackHandler.getSelectedMatch();
 					
+					
 					if(match == null) {
 						//if no match is selected then just use the next match
 						match = matchContainer.getNext();
 					}
+					
+					Collection <Object> o = match.getObjects();
+					if (o.iterator().hasNext()) {
+						Object oo = o.iterator().next();
+						((InternalEObject)oo).eAllContents();
+						System.out.println("InternalEObject - " + ((InternalEObject)oo));
+					}
+					try {
+						Collection<EMFEdge> g = match.getCreatedEdges();
+						
+						if (g.iterator().hasNext()) {
+							
+						
+							EMFEdge edge = g.iterator().next();
+							
+							EObject objSource = g.iterator().next().getSource();
+							EObject objTarget = g.iterator().next().getTarget();
+						}
+					}catch(Exception eeee) {
+						
+					}
+					
 				}
 				
 				System.out.println("the rule " + match.getRuleName() + " will be performed");
@@ -314,7 +370,7 @@ class ModelgenThread extends Thread{
 			e.printStackTrace();
 		}
 	}
-	
+	/*
 	public  void setRuleIndex(int i) {
 		ruleIndex = i;
 	}
@@ -334,7 +390,7 @@ class ModelgenThread extends Thread{
 		matches =  modelgen.getMatchContainer().getMatches();
 		
 		return matches;
-	}
+	}*/
 }
 
 

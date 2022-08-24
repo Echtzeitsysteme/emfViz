@@ -140,13 +140,7 @@ public class TggVisualizerDisplay {
 			}
 			
 		});
-		
-		/*compSrc.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseUp(final MouseEvent e) {
-				System.out.println(e);
-			}
-		});*/
+
 
 		Composite compTrg = new Composite(shell, SWT.BOTTOM |  SWT.EMBEDDED);
 		compTrg.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_GRAY));
@@ -156,28 +150,13 @@ public class TggVisualizerDisplay {
 		gridDataTrg.verticalAlignment = SWT.FILL;
 		
 		compTrg.setLayoutData(gridDataTrg);
-		
-		/*compTrg.addListener(SWT.MouseDown, new Listener() {
 
-			@Override
-			public void handleEvent(Event event) {
-				// TODO Auto-generated method stub
-				System.out.println(event);
-			}
-			
-		});*/
-		
-		
-		
-		
 		
 		frameSrc = SWT_AWT.new_Frame(compSrc);
-		
-		
 		frameTrg = SWT_AWT.new_Frame(compTrg);
-
 		
-		
+		frameSrc.setEnabled(modelLoader.isFrameSourceActive());
+		frameTrg.setEnabled(modelLoader.isFrameTargetActive());
 		
 		//initializeButtons(comp);
 		initButtons(comp);
@@ -377,6 +356,10 @@ public class TggVisualizerDisplay {
 				}
 				
 				modelLoader.buttonTranslateFunction();
+				
+				if (modelLoader instanceof ModelLoader_MODELGEN) {
+					translateButton.setText("Next Step");
+				}
 			}
 		});
 		

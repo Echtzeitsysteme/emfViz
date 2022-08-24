@@ -62,7 +62,7 @@ public abstract class TGGDemonstrator implements UserControlArea{
 	/*
 	 * Load source and target model from a given path
 	 */
-	public abstract void createResourcesFromPath(String pathSrc, String pathTrg);
+	public abstract void createResourcesFromPath(String pathSrc, String pathTrg,  String pathCorr, String pathProtocol, String pathProject);
 		
 	
 	//--------------------- Setter & Getter Methods --------------------- 

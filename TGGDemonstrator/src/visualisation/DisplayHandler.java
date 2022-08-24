@@ -15,6 +15,10 @@ import org.eclipse.swt.widgets.Shell;
 import graphVisualization.InstanceDiagrammLoader;
 import graphVisualization.VisContentAdapter;
 import graphVisualization.Visualizer;
+import tggDemonstrator.ModelLoader_INITIAL_BWD;
+import tggDemonstrator.ModelLoader_INITIAL_FWD;
+import tggDemonstrator.ModelLoader_MODELGEN;
+import tggDemonstrator.ModelLoader_SYNC;
 import tggDemonstrator.TGGDemonstrator;
 
 
@@ -49,8 +53,7 @@ public class DisplayHandler {
 	
 	private CallbackHandler callbackHandler;
 	
-	public static VisContentAdapter srcContentAdapter;
-	public static VisContentAdapter trgContentAdapter;
+	private String windowNameExtension = "";
 
 	
 	/*
@@ -78,7 +81,16 @@ public class DisplayHandler {
 		display = new Display();
 		shell = new Shell(display);
 		
-		shell.setText("TGG Demonstrator");
+		if(modelLoader instanceof ModelLoader_MODELGEN)
+			windowNameExtension = "MODELGEN";
+		else if(modelLoader instanceof ModelLoader_INITIAL_BWD)
+			windowNameExtension = "INITIAL_BWD";
+		else if(modelLoader instanceof ModelLoader_INITIAL_FWD)
+			windowNameExtension = "INITIAL_FWD";
+		else if(modelLoader instanceof ModelLoader_SYNC)
+			windowNameExtension = "SYNC";
+		
+		shell.setText("TGG Demonstrator - " + windowNameExtension);
 		
 		shell.addListener(SWT.Close, new Listener() {
 			public void handleEvent(Event event) {
@@ -192,14 +204,6 @@ public class DisplayHandler {
 		manipSrc.initialize();
 		manipTrg.initialize();
 	}
-	/*
-	public static void updateGraph() {
-		System.out.println("UPDATE GRAPH");
-		if(srcContentAdapter != null)
-			srcContentAdapter.processNotifications();
-		if(trgContentAdapter != null)
-			trgContentAdapter.processNotifications();
-	}*/
 }
 
 
