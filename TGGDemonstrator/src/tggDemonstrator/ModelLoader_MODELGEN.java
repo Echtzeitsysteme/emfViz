@@ -8,18 +8,24 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Group;
 import org.emoflon.ibex.common.emf.EMFEdge;
+import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
 import org.emoflon.ibex.tgg.operational.matches.ITGGMatch;
 import org.emoflon.ibex.tgg.operational.matches.ImmutableMatchContainer;
 import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGEN;
 import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGENStopCriterion;
 import org.emoflon.ibex.tgg.operational.updatepolicy.IUpdatePolicy;
 
+import language.TGG;
+import language.TGGRule;
+import language.TGGRuleEdge;
+import language.TGGRuleNode;
 import runtime.TGGRuleApplication;
 import tggDemonstrator.DataObject.Modelgeneration;
 import visualisation.CallbackHandler;
@@ -328,28 +334,28 @@ class ModelgenThread extends Thread{
 						//if no match is selected then just use the next match
 						match = matchContainer.getNext();
 					}
+					/*
+					Collection<String> s = match.getParameterNames();
 					
-					Collection <Object> o = match.getObjects();
-					if (o.iterator().hasNext()) {
-						Object oo = o.iterator().next();
-						((InternalEObject)oo).eAllContents();
-						System.out.println("InternalEObject - " + ((InternalEObject)oo));
+					for (String so : s) {
+						Object o = match.get(so);
+						
 					}
-					try {
-						Collection<EMFEdge> g = match.getCreatedEdges();
+					System.out.println(s);
+					*/
+					
+					TGGRule myRule = null;
+					TGG tgg = modelLoader.options.tgg.flattenedTGG();
+					for (TGGRule rule : tgg.getRules()) {
 						
-						if (g.iterator().hasNext()) {
-							
-						
-							EMFEdge edge = g.iterator().next();
-							
-							EObject objSource = g.iterator().next().getSource();
-							EObject objTarget = g.iterator().next().getTarget();
-						}
-					}catch(Exception eeee) {
+							myRule = rule;
 						
 					}
 					
+					if (myRule != null) {
+						EList<TGGRuleNode> nodes = myRule.getNodes();
+						EList<TGGRuleEdge> edges = myRule.getEdges();
+					}
 				}
 				
 				System.out.println("the rule " + match.getRuleName() + " will be performed");
