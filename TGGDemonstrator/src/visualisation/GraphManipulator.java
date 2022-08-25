@@ -2,10 +2,15 @@ package visualisation;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.Enumerator;
@@ -124,7 +129,18 @@ public class GraphManipulator {
 				addEdge();
 			}
 
+			
 		});
+		graph.addListener("", (sender, evt) -> System.out.println(sender + " ---- " + evt));
+		graph.addPropertyChangeListener(new PropertyChangeListener() {
+			
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				System.out.println(evt);				
+			}
+		});
+		
+		graph.getView().addListener("", (sender, evt) -> System.out.println(sender + " ---- " + evt));
 	}
 /*
 	private void iterateModel() {

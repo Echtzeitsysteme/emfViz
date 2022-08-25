@@ -132,8 +132,6 @@ public class Grid {
 	
 	//estimate corresponding point in grid to absolute position
 	Point primeGridSearch(Point2D.Double p) {
-			
-		
 			int yIdx = (int) Math.min(Math.max(0,(Math.round((p.y - visYOffset)/(double)verticalGridDist))), maxYindx);
 			int xIdx = (int) Math.min(Math.max(0,(Math.round((p.x - visXOffset)/(double)horizontalGridDist))), maxXindx);
 			
@@ -155,7 +153,6 @@ public class Grid {
 			
 			for(int y = Math.max(origin.y - d, 0);  y <= Math.min(origin.y +  d, maxYindx); y += Math.max(1,2*d)) {
 				
-				
 				for(int x = Math.max(origin.x - d, 0);  x <= Math.min(origin.x +  d, maxXindx); x += Math.max(1,2*d)) {
 			
 					if(getCostForArea(includedArea, x, y, true) == 0) {
@@ -164,7 +161,6 @@ public class Grid {
 						includedArea.setLocation((int)absolutePosition.getX(),(int) absolutePosition.getY());	
 						return absolutePosition;
 					}
-					
 					
 				}
 				
