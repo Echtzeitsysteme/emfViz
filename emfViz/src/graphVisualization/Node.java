@@ -1,10 +1,17 @@
 package graphVisualization;
 
+import java.io.Serializable;
+
 import org.eclipse.emf.ecore.EObject;
 
-public class Node {
+public class Node implements Serializable{
 	
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public static final String DEFAULT_NODE_STYLE = "defaultNode";
 	
 	public String id;

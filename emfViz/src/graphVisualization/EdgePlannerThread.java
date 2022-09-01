@@ -63,9 +63,11 @@ public class EdgePlannerThread extends Thread {
 				continue;
 			}
 
-			if (((Edge) mxedgeInGraph.getValue()).ignored)
-				continue;
-
+			if(mxedgeInGraph instanceof Edge edge) {
+				if(edge.ignored)
+					continue;
+			}
+			
 			mxGeometry geometry = mxedgeInGraph.getGeometry();
 			if (geometry == null) {
 				geometry = new mxGeometry();
