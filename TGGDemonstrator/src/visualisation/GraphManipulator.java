@@ -53,6 +53,10 @@ import com.mxgraph.util.mxEvent;
 import graphVisualization.InstanceDiagrammLoader;
 import graphVisualization.Node;
 import graphVisualization.Visualizer;
+import tggDemonstrator.ModelLoader_INITIAL_BWD;
+import tggDemonstrator.ModelLoader_INITIAL_FWD;
+import tggDemonstrator.ModelLoader_MODELGEN;
+import tggDemonstrator.ModelLoader_SYNC;
 import tggDemonstrator.TGGDemonstrator;
 import visualisation.CallbackHandler.UpdateGraphType;
 
@@ -80,10 +84,10 @@ public class GraphManipulator {
 	public GraphManipulator(TggVisualizer vis, Display display, InstanceDiagrammLoader loader, TGGDemonstrator modelLoader, boolean isSource) {
 
 		this.vis = vis;
-		this.display = display;
+		this.display = display; //aus vis?
 		this.resource = loader.getInstanceModel();
 		this.loader = loader;
-		this.modelLoader = modelLoader;
+		this.modelLoader = modelLoader; //aus vis?
 		this.isSource = isSource;
 		graph = vis.getGraph();
 		graphComponent = vis.getGraphComponent();
@@ -109,24 +113,29 @@ public class GraphManipulator {
 							
 						}
 						else {
-							addEdge();
+							if(modelLoader instanceof ModelLoader_INITIAL_FWD && isSource ||
+									modelLoader instanceof ModelLoader_INITIAL_BWD && !isSource ||
+									modelLoader instanceof ModelLoader_SYNC) {
+								
+								addEdge();
+							}
+							
 						}
 					}
 					else {
-						actionOnFrame(e.getX(), e.getY());
-						callback.setPositionForNewNode(e.getX(), e.getY());
+						if(modelLoader instanceof ModelLoader_INITIAL_FWD && isSource ||
+								modelLoader instanceof ModelLoader_INITIAL_BWD && !isSource ||
+								modelLoader instanceof ModelLoader_SYNC) {
+							
+							actionOnFrame(e.getX(), e.getY());
+							callback.setPositionForNewNode(e.getX(), e.getY());
+						}
 					}
 					
 					
 				}
 				
 				
-			}
-			//löst nicht aus
-			public void mouseDragged(MouseEvent e) 
-			{
-				System.out.println("Mouse dragged");
-				addEdge();
 			}
 
 			
@@ -206,30 +215,41 @@ public class GraphManipulator {
 		// open menu on node or on background
 		final PopupMenu popupmenu = new PopupMenu("On Node");   
         
-		MenuItem delete = new MenuItem("Delete");  
+		  
 		MenuItem attr = new MenuItem("Show Attributes");
-        delete.setActionCommand("DEL");
+        
         attr.setActionCommand("ATTR");
-        popupmenu.add(delete);  
+          
         popupmenu.add(attr);
+        
+        if(modelLoader instanceof ModelLoader_MODELGEN) {
+        	//no delete function
+        }
+        if(modelLoader instanceof ModelLoader_INITIAL_FWD && isSource ||
+        		modelLoader instanceof ModelLoader_INITIAL_BWD && !isSource ||
+        		modelLoader instanceof ModelLoader_SYNC) {
+        	
+        	MenuItem delete = new MenuItem("Delete");
+        	delete.setActionCommand("DEL");
+        	popupmenu.add(delete);
+        	delete.addActionListener(new ActionListener() {
+            	@Override
+    		    public void actionPerformed(ActionEvent e) {
+    				deleteSelected();
+    				//x und y weitergeben an automatische Visualisierung
+            		//System.out.println("Delete clicked");
+            	}
+            });
+        }
        
         graphComponent.add(popupmenu);
         popupmenu.show(graphComponent , x, y);
-        
-        delete.addActionListener(new ActionListener() {
-        	@Override
-		    public void actionPerformed(ActionEvent e) {
-				deleteSelected();
-				//x und y weitergeben an automatische Visualisierung
-        		System.out.println("Delete clicked");
-        	}
-        });
-        
+ 
         attr.addActionListener(new ActionListener() {
         	@Override
 		    public void actionPerformed(ActionEvent e) {
 				setAttributesExec();
-        		System.out.println("Attributes clicked");
+        		//System.out.println("Attributes clicked");
         	}
         });
         
