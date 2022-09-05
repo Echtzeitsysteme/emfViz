@@ -4,6 +4,7 @@ package tggDemonstrator;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -22,14 +23,20 @@ import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGEN;
 import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGENStopCriterion;
 import org.emoflon.ibex.tgg.operational.updatepolicy.IUpdatePolicy;
 
+import com.mxgraph.model.mxCell;
+import com.mxgraph.model.mxICell;
+import com.mxgraph.model.mxIGraphModel;
+import com.mxgraph.view.mxGraph;
+
+import graphVisualization.Node;
 import language.TGG;
 import language.TGGRule;
-import language.TGGRuleEdge;
 import language.TGGRuleNode;
 import runtime.TGGRuleApplication;
 import tggDemonstrator.DataObject.Modelgeneration;
 import visualisation.CallbackHandler;
 import visualisation.DisplayHandler;
+import visualisation.TggVisualizer;
 
 
 public class ModelLoader_MODELGEN extends TGGDemonstrator {
@@ -37,10 +44,9 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 	
 	private Function<DataObject, MODELGEN> modelgen_demonstrator;
 	private MODELGEN modelgen;
-	
 	private ModelgenThread thread;
-	private int ruleIndex;
-	private Set<ITGGMatch> matches;
+	private CallbackHandler callbackHandler;
+	
 	
 	
 	public ModelLoader_MODELGEN (Function<DataObject, MODELGEN> modelgen, String pP, String wP) {	
@@ -50,8 +56,19 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 		System.out.println("Initialize ModelLoader_MODELGEN");
 		modelgen_demonstrator = modelgen;
 		
+		callbackHandler = CallbackHandler.getInstance();
+		
 		
 		startVisualisation(this);
+	}
+	
+	@Override
+	protected void initThread() {
+		thread = new ModelgenThread(modelgen, this);
+		thread.setName("Modelgen Thread");
+		thread.start();
+		
+		System.out.println("Model generation process is running on thread " + thread.getId());
 	}
 	
 	@Override
@@ -95,11 +112,7 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 		modelgen.setStopCriterion(stop);
 		
 		// Start new thread
-		thread = new ModelgenThread(modelgen, this);
-		thread.setName("Modelgen Thread");
-		thread.start();
-		
-		System.out.println("Model generation process is running on thread " + thread.getId());
+		initThread();
 		
 	}
 
@@ -127,11 +140,7 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 		modelgen.setStopCriterion(stop);
 		
 		// Start new thread
-		thread = new ModelgenThread(modelgen, this);
-		thread.setName("Modelgen Thread");
-		thread.start();
-		
-		System.out.println("Model generation process is running on thread " + thread.getId());
+		initThread();
 		
 	}
 
@@ -163,85 +172,37 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 		modelgen.setStopCriterion(stop);
 		
 		// Start new thread
-		thread = new ModelgenThread(modelgen, this);
-		thread.setName("Modelgen Thread");
-		thread.start();
-		
-		System.out.println("Model generation process is running on thread " + thread.getId());
+		initThread();
 		
 	}
 	
-	/*
-	 * Interrupt sleep
-	 */
-	public boolean wakeUpThread() {
-		
-		try {
-			thread.wakeUp();
-		
-			return true;
-			
-		}catch(Exception e) {
-			System.out.println(e);
-		}
-		
-		return false;
-		
+	@Override
+	public void highlightGraph(TggVisualizer visSrc, TggVisualizer visTrg) {
+		highlightingGraphAlgorithm(visSrc, visTrg, "CreateNode","ContextNode");
 	}
 	
-	/*
-	 * Return rule names from possible matches
-	 */
-	/*public String[] getRuleNames() {
-		
-		matches = thread.getMatches();
-		
-		String[] ruleNames = new String[matches.size()];
-		int i = 0;
-		
-		
-		for (ITGGMatch m : matches) {
-			ruleNames[i] = m.getRuleName();
-			
-			i++;
-		}
-		
-		return ruleNames;	
-	}*/
-	
-	/*
-	 * Set rule index
-	 */
-	/*public void setSelectedRuleIndex(int i) {
-		ruleIndex = i;
-		
-		thread.setRuleIndex(i);
-	}
-	*/
-	/*
-	 * Get rule index
-	 */
-	public int getSelectedRuleIndex() {
-		return ruleIndex;
-	}
-
 	@Override
 	public String buttonTranslateTxt() {
-		// TODO Auto-generated method stub
-		return "New Model";
+		if (loadingOption == loadingOption.NewModel)
+			return "New Model";
+		else
+			return "Next Step";
 	}
 
 	@Override
 	public void buttonTranslateFunction() {
-		// TODO Auto-generated method stub
 		//next step functionalities
 		
 		System.out.println("Button Next Rule is clicked...");
 		
-		wakeUpThread();	
-		
-		
+		try {
+			thread.wakeUp();
+			
+		}catch(Exception e) {
+			System.out.println(e);
+		}	
 	}
+	
 	@Override
 	public Combo createComboBox(Group g) {
 		return new Combo(g, SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -265,19 +226,15 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 class ModelgenThread extends Thread{
 	
 	private MODELGEN modelgen;
-	private int ruleIndex;
-	
-	private Set<ITGGMatch> matches = new HashSet<> ();
-	private ITGGMatch selectedMatch;
+	private ModelLoader_MODELGEN modelLoader;
 	private CallbackHandler callbackHandler;
 	
+	private Set<ITGGMatch> matches = new HashSet<> ();
 	
-	private ModelLoader_MODELGEN modelLoader;
 	
 	public ModelgenThread(MODELGEN m, ModelLoader_MODELGEN modelLoader) {
 		this.modelgen = m;
 		this.modelLoader = modelLoader;
-		ruleIndex = -1;
 		
 		callbackHandler = CallbackHandler.getInstance();
 	}
@@ -306,7 +263,7 @@ class ModelgenThread extends Thread{
 		return true;
 	}
 	
-	public void initializeModelgenStart() {
+	private void initializeModelgenStart() {
 		modelgen.setUpdatePolicy((IUpdatePolicy) new IUpdatePolicy(){
 			@Override
 			public ITGGMatch chooseOneMatch(ImmutableMatchContainer matchContainer) {
@@ -332,69 +289,24 @@ class ModelgenThread extends Thread{
 						//if no match is selected then just use the next match
 						match = matchContainer.getNext();
 					}
-					/*
-					Collection<String> s = match.getParameterNames();
-					
-					for (String so : s) {
-						Object o = match.get(so);
-						
-					}
-					System.out.println(s);
-					*/
-					
-					TGGRule myRule = null;
-					TGG tgg = modelLoader.options.tgg.flattenedTGG();
-					for (TGGRule rule : tgg.getRules()) {
-						
-							myRule = rule;
-						
-					}
-					
-					if (myRule != null) {
-						EList<TGGRuleNode> nodes = myRule.getNodes();
-						EList<TGGRuleEdge> edges = myRule.getEdges();
-					}
 				}
 				
-				System.out.println("the rule " + match.getRuleName() + " will be performed");
+				System.out.println("MODELGEN_Match: " + match.getRuleName());
 				
-				return match;
-						
+				return match;			
 			}
 		});
 	}
 	
-	private void runModelgeneration() {
-		// start model generation		
+	/*
+	 * Start the new model generation process.
+	 */
+	private void runModelgeneration() {		
 		try {
-			System.out.println("------- run()------");
+			System.out.println("------- run ------");
 			modelgen.run();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	/*
-	public  void setRuleIndex(int i) {
-		ruleIndex = i;
-	}
-	
-	public ITGGMatch getSelectedMatch() {
-		ITGGMatch match = null;
-		
-		if (ruleIndex >= 0 && matches != null) {
-		
-			Object[] t = matches.toArray();
-			match = (ITGGMatch)t[ruleIndex];
-		}
-		return match;
-	}
-	
-	public Set<ITGGMatch> getMatches(){
-		matches =  modelgen.getMatchContainer().getMatches();
-		
-		return matches;
-	}*/
 }
-
-

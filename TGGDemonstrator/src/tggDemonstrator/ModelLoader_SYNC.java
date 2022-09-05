@@ -6,6 +6,8 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Group;
 import org.emoflon.ibex.tgg.operational.strategies.sync.SYNC;
 
+import visualisation.TggVisualizer;
+
 public class ModelLoader_SYNC extends TGGDemonstrator{
 	
 	private Function<DataObject, SYNC> sync_demonstrator;
@@ -20,8 +22,13 @@ public class ModelLoader_SYNC extends TGGDemonstrator{
 		
 		
 		startVisualisation(this);
+		
 	}
 	
+	@Override
+	protected void initThread() {
+		return;
+	}
 	
 	@Override
 	public void createResourcesFromPath(String pathSrc, String pathTrg, String pathCorr, String pathProtocol, String pathProject) {
@@ -42,11 +49,18 @@ public class ModelLoader_SYNC extends TGGDemonstrator{
 	}
 	
 	public void syncForward() {
-		
+		// TODO Auto-generated method stub
+		return;
 	}
 	
 	public void syncBackward() {
-		
+		// TODO Auto-generated method stub
+		return;
+	}
+	
+	@Override
+	public void highlightGraph(TggVisualizer visSrc, TggVisualizer visTrg) {
+		//highlightingGraphAlgorithm(visSrc, visTrg, "","");
 	}
 
 
@@ -83,5 +97,4 @@ public class ModelLoader_SYNC extends TGGDemonstrator{
 		// TODO Auto-generated method stub
 		return false;
 	}
-
 }

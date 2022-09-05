@@ -104,7 +104,7 @@ public class GraphManipulator {
 					if (cellAtPos != null)
 					{
 						if(cellAtPos.isVertex()) {
-							System.out.println("cell="+graph.getLabel(cellAtPos));
+							//System.out.println("cell="+graph.getLabel(cellAtPos));
 							actionOnNode(e.getX(), e.getY());
 							
 						}
@@ -117,6 +117,7 @@ public class GraphManipulator {
 						callback.setPositionForNewNode(e.getX(), e.getY());
 					}
 					
+					// EDIT - JL: only update graph when changes have actually been made
 					callback.updateGraph(UpdateGraphType.ALL);
 				}
 				
@@ -131,16 +132,16 @@ public class GraphManipulator {
 
 			
 		});
-		graph.addListener("", (sender, evt) -> System.out.println(sender + " ---- " + evt));
+		//graph.addListener("", (sender, evt) -> System.out.println(sender + " ---- " + evt));
 		graph.addPropertyChangeListener(new PropertyChangeListener() {
 			
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
-				System.out.println(evt);				
+				//System.out.println(evt);				
 			}
 		});
 		
-		graph.getView().addListener("", (sender, evt) -> System.out.println(sender + " ---- " + evt));
+		//graph.getView().addListener("", (sender, evt) -> System.out.println(sender + " ---- " + evt));
 	}
 /*
 	private void iterateModel() {
@@ -186,7 +187,7 @@ public class GraphManipulator {
 		}
 
 		if (obj.eClass().getName().equals(((mxCell)comp).getValue().toString())) {
-			System.out.println("equal found");
+			//System.out.println("equal found");
 			nodeInModel = obj;
 		}
 		
@@ -296,7 +297,8 @@ public class GraphManipulator {
 			EMFManipulationUtils.delete(nodeInModel);
 			//((mxCell) nodeInGraph).removeFromParent();
 			//EcoreUtil.remove(nodeInModel); // delete wirft Nullpointerexception, aber so wird Kante nicht gelöscht
-			System.out.println("removed from model");
+			
+			//System.out.println("removed from model");
 			
 			//vis.getGraph().repaint();
 			/*
@@ -338,7 +340,7 @@ public class GraphManipulator {
 			int count = 0;
 			for (EReference eRef : edges) {
 				if(eRef.getEType().getName().equals(trg.eClass().getName())) {
-					System.out.println("edge type: " + eRef.getName());	
+					//System.out.println("edge type: " + eRef.getName());	
 					eRefSelected = eRef;
 					count++;
 				}
@@ -406,7 +408,7 @@ public class GraphManipulator {
 			@Override
 			public void widgetSelected(SelectionEvent pSelectionEvent) {
 				
-				System.out.println(combo.getText());
+				//System.out.println(combo.getText());
 				EList<EReference> edges = src.eClass().getEAllReferences();
 				for (EReference eRef : edges) {
 					if(eRef.getName().equals(combo.getText())) {
@@ -427,7 +429,7 @@ public class GraphManipulator {
 	public void addNode(EClass cl) {
 		newObj = EcoreUtil.create(cl);
 		resource.getContents().add(newObj);
-		System.out.println("new obj created in model");
+		//System.out.println("new obj created in model");
 		/*Node newNode = new Node(newObj.toString(),newObj.eClass().getName(), "defaultNode");
 		loader.nodes.add(newNode);
 		System.out.println("added to list");
@@ -439,7 +441,7 @@ public class GraphManipulator {
 	public void setAttributesExec() {
 		Display.getDefault().syncExec(new Runnable(){
 			public void run() {
-				System.out.println("syncexec");
+				//System.out.println("syncexec");
 			    setAttributes();
 			}
 			});
@@ -572,7 +574,7 @@ public class GraphManipulator {
 	
 	private Object createFromString(EDataType eDataType, String literal) throws Exception
 	{
-	 return eDataType.getEPackage().getEFactoryInstance().createFromString(eDataType, literal);
+		return eDataType.getEPackage().getEFactoryInstance().createFromString(eDataType, literal);
 	}
 }
 

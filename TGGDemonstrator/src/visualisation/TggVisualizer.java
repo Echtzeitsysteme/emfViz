@@ -73,23 +73,6 @@ public class TggVisualizer extends Visualizer{
 			}
 		});
 		frame.add(graphComponent);
-		/*
-		graphComponent.getGraphControl().addMouseListener(new MouseAdapter()
-		{
-		
-			public void mouseReleased(MouseEvent e)
-			{
-				Object cell = graphComponent.getCellAt(e.getX(), e.getY());
-				
-				if (cell != null)
-				{
-					System.out.println("cell="+graph.getLabel(cell));
-				}
-				
-				System.out.println(e);
-			}
-		});
-		*/
 	}
 
 	public Frame getFrame() {
