@@ -32,7 +32,6 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 	
 	private Function<DataObject, INITIAL_BWD> bwd_Demonstrator;
 	private INITIAL_BWD bwd;
-	private CallbackHandler callbackHandler;
 	private BWDThread thread;
 	
 	
@@ -42,16 +41,13 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 		System.out.println("Initialize ModelLoader_INITIAL_BWD");
 		bwd_Demonstrator = bwd;
 		
-		callbackHandler = CallbackHandler.getInstance();
-		
-		
 		startVisualisation(this);
 	}
 
 	
 	@Override
 	protected void initThread() {
-		thread = new BWDThread(bwd, this);
+		thread = new BWDThread(bwd);
 		thread.setName("INITIAL_BWD Thread");
 		thread.start();
 		
@@ -61,49 +57,45 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 	
 	@Override
 	public void createResourcesFromPath(String pathSrc, String pathTrg, String pathCorr, String pathProtocol, String pathProject) {
-		// TODO Auto-generated method stub
 		
 		String pathProjectTemp = pathProject;
 		
-		if (!pathTrg.equals(" ") && !pathTrg.equals("")) {
+		//ERROR check
+		if (!pathTrg.equals(" ") || !pathTrg.equals(""))
 			
-			if (pathProjectTemp.equals(" ") || pathProjectTemp.equals("")) {
-				pathProjectTemp = projectPath + "/instances/";
-			}
-			
-			if (pathSrc.equals(" ") || pathSrc.equals("")) {
-				pathSrc = pathProjectTemp + "src.xmi";
-			}
-			
-			if (pathCorr.equals(" ") || pathCorr.equals("")) {
-				pathCorr = pathProjectTemp + "corr.xmi";
-			}
-			
-			if (pathProtocol.equals(" ") || pathProtocol.equals("")) {
-				pathProtocol = pathProjectTemp + "protocol.xmi";
-			}
-			
-			DataObject data = new DataObject(pathSrc, 
-					pathTrg, 
-					pathCorr,
-					pathProtocol, 
-					Modelgeneration.LOAD_MODEL);
-			
-			bwd = bwd_Demonstrator.apply(data);
-			
-			options = bwd.getOptions();
-			resourceHandler = bwd.getResourceHandler();
-			
-			source = resourceHandler.getSourceResource();
-			target = resourceHandler.getTargetResource();
-			
-			loadingOption = LoadingOption.SelectedResource;
-			
-			initThread();
-		}else {
-			System.out.println("Path is empty...");
+		if (pathProjectTemp.equals(" ") || pathProjectTemp.equals("")) {
+			pathProjectTemp = projectPath + "/instances/";
 		}
 		
+		if (pathSrc.equals(" ") || pathSrc.equals("")) {
+			pathSrc = pathProjectTemp + "src.xmi";
+		}
+		
+		if (pathCorr.equals(" ") || pathCorr.equals("")) {
+			pathCorr = pathProjectTemp + "corr.xmi";
+		}
+		
+		if (pathProtocol.equals(" ") || pathProtocol.equals("")) {
+			pathProtocol = pathProjectTemp + "protocol.xmi";
+		}
+		
+		DataObject data = new DataObject(pathSrc, 
+				pathTrg, 
+				pathCorr,
+				pathProtocol, 
+				Modelgeneration.LOAD_MODEL);
+		
+		bwd = bwd_Demonstrator.apply(data);
+		
+		options = bwd.getOptions();
+		resourceHandler = bwd.getResourceHandler();
+		
+		source = resourceHandler.getSourceResource();
+		target = resourceHandler.getTargetResource();
+		
+		loadingOption = LoadingOption.SelectedResource;
+		
+		initThread();
 	}
 
 	@Override
@@ -200,44 +192,19 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 
 }
 
-class BWDThread extends Thread{
+class BWDThread extends ModelLoaderThread{
 	
 	private INITIAL_BWD bwd;
-	private ModelLoader_INITIAL_BWD modelLoader;
-	private CallbackHandler callbackHandler;
 	
-	private Set<ITGGMatch> matches = new HashSet<> ();
 	
-	public BWDThread (INITIAL_BWD bwd, ModelLoader_INITIAL_BWD modelLoader) {
+	public BWDThread (INITIAL_BWD bwd) {
+		super();
+		
 		this.bwd = bwd;
-		this.modelLoader = modelLoader;
-		
-		callbackHandler = CallbackHandler.getInstance();
 	}
-	
-	@Override
-	public void run(){
-		
-		initializeModelgenStart();
-		
-		runBackwardTranslation();
 
-		while (true) {}
-	}
-	
-	/*
-	 * Wake up thread after sleep
-	 */
-	public boolean wakeUp() {
-		
-		System.out.println("Hey thread " + getId() + " wake up!");
-		
-		interrupt();
-		
-		return true;
-	}
-	
-	private void initializeModelgenStart() {
+	@Override
+	protected void initialize() {
 		bwd.setUpdatePolicy((IUpdatePolicy) new IUpdatePolicy(){
 			@Override
 			public ITGGMatch chooseOneMatch(ImmutableMatchContainer matchContainer) {
@@ -271,13 +238,15 @@ class BWDThread extends Thread{
 			}
 		});
 	}
-	
-	private void runBackwardTranslation() {
+
+	@Override
+	protected void startProcess() {
 		try {
 			System.out.println("------- Backward ------");
 			bwd.backward();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
 	}
 }

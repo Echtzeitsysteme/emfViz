@@ -2,36 +2,15 @@ package visualisation;
 
 
 import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
-import org.eclipse.emf.common.util.EList;
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Display;
 import org.emoflon.ibex.tgg.operational.matches.ITGGMatch;
 
-import com.mxgraph.model.mxCell;
-import com.mxgraph.model.mxGraphModel;
-import com.mxgraph.model.mxICell;
-import com.mxgraph.model.mxIGraphModel;
-import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.util.mxConstants;
-import com.mxgraph.view.mxGraph;
-import com.mxgraph.view.mxStylesheet;
-
-import graphVisualization.InstanceDiagrammLoader;
-import graphVisualization.Node;
 import graphVisualization.VisContentAdapter;
 import graphVisualization.Visualizer;
-import language.TGG;
-import language.TGGRule;
-import language.TGGRuleEdge;
-import language.TGGRuleNode;
-import tggDemonstrator.TGGDemonstrator;
 
 public class CallbackHandler {
 	
@@ -44,8 +23,6 @@ public class CallbackHandler {
 	private Combo combo = null;
 	private VisContentAdapter srcContentAdapter = null;
 	private VisContentAdapter trgContentAdapter = null;
-	
-	private mxGraph graph = null;
 	
 	private CallbackHandler() {
 	}

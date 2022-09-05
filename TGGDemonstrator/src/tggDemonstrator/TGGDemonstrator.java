@@ -167,8 +167,6 @@ public abstract class TGGDemonstrator implements UserControlArea{
 								updateCellsCreate.add(myCellSrc);
 							}else if(obj.getBindingType()== "CONTEXT") {
 								updateCellsContext.add(myCellSrc);
-							}else {
-								System.out.println("EROERRRRRRRRRRRRRRRRRRRRRRR__________________");
 							}
 						}
 					}
@@ -203,8 +201,6 @@ public abstract class TGGDemonstrator implements UserControlArea{
 								updateCellsCreate.add(myCellTrg);
 							}else if(obj.getBindingType() == "CONTEXT") {
 								updateCellsContext.add(myCellTrg);
-							}else {
-								System.out.println("EROERRRRRRRRRRRRRRRRRRRRRRR__________________");
 							}
 						}
 					}
@@ -272,9 +268,7 @@ public abstract class TGGDemonstrator implements UserControlArea{
 		cellStyleContex.put(mxConstants.STYLE_OVERFLOW, "hidden");
 		cellStyleContex.put(mxConstants.STYLE_STROKEWIDTH, "3");
 		cellStyleContex.put(mxConstants.STYLE_STROKECOLOR, "#000000");
-		stylesheetContex.putCellStyle("ContextNode", cellStyleContex);
-		
-		
+		stylesheetContex.putCellStyle("ContextNode", cellStyleContex);	
 	}
 	
 	

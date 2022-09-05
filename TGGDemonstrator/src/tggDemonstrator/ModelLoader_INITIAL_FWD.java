@@ -35,7 +35,6 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 	private Function<DataObject, INITIAL_FWD> fwd_demonstrator;
 	private INITIAL_FWD fwd;
 	private TGGResourceHandler resourceHandler;
-	private CallbackHandler callbackHandler;
 	private FWDThread thread;
 	
 	
@@ -48,14 +47,12 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 		System.out.println("Initialize ModelLoader_INITIAL_FWD");
 		fwd_demonstrator = fwd;
 		
-		callbackHandler = CallbackHandler.getInstance();
-		
 		startVisualisation(this);
 	}
 
 	@Override
 	protected void initThread() {
-		thread = new FWDThread(fwd, this);
+		thread = new FWDThread(fwd);
 		thread.setName("INITIAL_FWD Thread");
 		thread.start();
 		
@@ -68,45 +65,43 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 		
 		String pathProjectTemp = pathProject;
 		
-		if (!pathSrc.equals(" ") && !pathSrc.equals("")) {
+		//ERROR check
+		if (!pathSrc.equals(" ") || !pathSrc.equals(""))
+			return;
 			
-			if (pathProjectTemp.equals(" ") || pathProjectTemp.equals("")) {
-				pathProjectTemp = projectPath + "/instances/";
-			}
-			
-			if (pathTrg.equals("") || pathTrg.equals("")) {
-				pathTrg = pathProjectTemp + "trg.xmi";
-			}
-			
-			if (pathCorr.equals(" ") || pathCorr.equals("")) {
-				pathCorr = pathProjectTemp + "corr.xmi";
-			}
-			
-			if (pathProtocol.equals(" ") || pathProtocol.equals("")) {
-				pathProtocol = pathProjectTemp + "protocol.xmi";
-			}
-			
-			DataObject data = new DataObject(pathSrc, 
-					pathTrg, 
-					pathCorr,
-					pathProtocol,
-					Modelgeneration.LOAD_MODEL);
-			
-			fwd = fwd_demonstrator.apply(data);
-			
-			options = fwd.getOptions();
-			resourceHandler = fwd.getResourceHandler();
-			
-			source = resourceHandler.getSourceResource();
-			target = resourceHandler.getTargetResource();
-			
-			loadingOption = LoadingOption.SelectedResource;
-			
-			initThread();
-			
-		}else {
-			System.out.println("Path is empty...");
+		if (pathProjectTemp.equals(" ") || pathProjectTemp.equals("")) {
+			pathProjectTemp = projectPath + "/instances/";
 		}
+		
+		if (pathTrg.equals("") || pathTrg.equals("")) {
+			pathTrg = pathProjectTemp + "trg.xmi";
+		}
+		
+		if (pathCorr.equals(" ") || pathCorr.equals("")) {
+			pathCorr = pathProjectTemp + "corr.xmi";
+		}
+		
+		if (pathProtocol.equals(" ") || pathProtocol.equals("")) {
+			pathProtocol = pathProjectTemp + "protocol.xmi";
+		}
+		
+		DataObject data = new DataObject(pathSrc, 
+				pathTrg, 
+				pathCorr,
+				pathProtocol,
+				Modelgeneration.LOAD_MODEL);
+		
+		fwd = fwd_demonstrator.apply(data);
+		
+		options = fwd.getOptions();
+		resourceHandler = fwd.getResourceHandler();
+		
+		source = resourceHandler.getSourceResource();
+		target = resourceHandler.getTargetResource();
+		
+		loadingOption = LoadingOption.SelectedResource;
+		
+		initThread();
 	}
 	
 	@Override
@@ -131,11 +126,6 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 		initThread();
 	}
 	
-	
-	
-	/*
-	 * creates an empty model 
-	 */
 	@Override
 	public void generateNewModel() {
 	
@@ -164,7 +154,7 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 	}
 	
 	/*
-	 * forward translation of the source model
+	 * Forward translation of the source model
 	 */
 	@Override
 	public void buttonTranslateFunction() {
@@ -182,7 +172,6 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 
 	@Override
 	public String buttonTranslateTxt() {
-		// TODO Auto-generated method stub
 		return "Translate Forward";
 	}
 
@@ -207,45 +196,18 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 }
 
 
-class FWDThread extends Thread{
+class FWDThread extends ModelLoaderThread{
 	
 	private INITIAL_FWD fwd;
-	private ModelLoader_INITIAL_FWD modelLoader;
-	private CallbackHandler callbackHandler;
 	
-	private Set<ITGGMatch> matches = new HashSet<> ();
-	
-	public FWDThread (INITIAL_FWD fwd, ModelLoader_INITIAL_FWD modelLoader) {
+	public FWDThread (INITIAL_FWD fwd) {
+		super();
+		
 		this.fwd = fwd;
-		this.modelLoader = modelLoader;
-		
-		callbackHandler = CallbackHandler.getInstance();
 	}
-	
-	@Override
-	public void run(){
-		
-		initializeModelgenStart();
-		
-		runForwardTranslation();
 
-		
-		while (true) {}
-	}
-	
-	/*
-	 * Wake up thread after sleep
-	 */
-	public boolean wakeUp() {
-		
-		System.out.println("Hey thread " + getId() + " wake up!");
-		
-		interrupt();
-		
-		return true;
-	}
-	
-	private void initializeModelgenStart() {
+	@Override
+	protected void initialize() {
 		fwd.setUpdatePolicy((IUpdatePolicy) new IUpdatePolicy(){
 			@Override
 			public ITGGMatch chooseOneMatch(ImmutableMatchContainer matchContainer) {
@@ -279,13 +241,15 @@ class FWDThread extends Thread{
 			}
 		});
 	}
-	
-	private void runForwardTranslation() {
+
+
+	@Override
+	protected void startProcess() {
 		try {
 			System.out.println("------- Forward ------");
 			fwd.forward();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
+		}	
 	}
 }

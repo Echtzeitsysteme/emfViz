@@ -45,26 +45,21 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 	private Function<DataObject, MODELGEN> modelgen_demonstrator;
 	private MODELGEN modelgen;
 	private ModelgenThread thread;
-	private CallbackHandler callbackHandler;
 	
 	
 	
 	public ModelLoader_MODELGEN (Function<DataObject, MODELGEN> modelgen, String pP, String wP) {	
 		super(pP, wP);
 		
-		
 		System.out.println("Initialize ModelLoader_MODELGEN");
 		modelgen_demonstrator = modelgen;
-		
-		callbackHandler = CallbackHandler.getInstance();
-		
 		
 		startVisualisation(this);
 	}
 	
 	@Override
 	protected void initThread() {
-		thread = new ModelgenThread(modelgen, this);
+		thread = new ModelgenThread(modelgen);
 		thread.setName("Modelgen Thread");
 		thread.start();
 		
@@ -223,48 +218,21 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 
 
 
-class ModelgenThread extends Thread{
+class ModelgenThread extends ModelLoaderThread{
 	
 	private MODELGEN modelgen;
-	private ModelLoader_MODELGEN modelLoader;
-	private CallbackHandler callbackHandler;
 	
-	private Set<ITGGMatch> matches = new HashSet<> ();
-	
-	
-	public ModelgenThread(MODELGEN m, ModelLoader_MODELGEN modelLoader) {
+	public ModelgenThread(MODELGEN m) {
+		super();
+		
 		this.modelgen = m;
-		this.modelLoader = modelLoader;
-		
-		callbackHandler = CallbackHandler.getInstance();
-	}
-	
-	@Override
-	public void run(){
-		
-		initializeModelgenStart();
-		
-		runModelgeneration();
 
-		
-		while (true) {}
 	}
-	
-	
-	/*
-	 * Wake up thread after sleep
-	 */
-	public boolean wakeUp() {
-		
-		System.out.println("Hey thread " + getId() + " wake up!");
-		
-		interrupt();
-		
-		return true;
-	}
-	
-	private void initializeModelgenStart() {
+
+	@Override
+	protected void initialize() {
 		modelgen.setUpdatePolicy((IUpdatePolicy) new IUpdatePolicy(){
+			
 			@Override
 			public ITGGMatch chooseOneMatch(ImmutableMatchContainer matchContainer) {
 				
@@ -297,16 +265,14 @@ class ModelgenThread extends Thread{
 			}
 		});
 	}
-	
-	/*
-	 * Start the new model generation process.
-	 */
-	private void runModelgeneration() {		
+
+	@Override
+	protected void startProcess() {
 		try {
 			System.out.println("------- run ------");
 			modelgen.run();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
+		}	
 	}
 }
