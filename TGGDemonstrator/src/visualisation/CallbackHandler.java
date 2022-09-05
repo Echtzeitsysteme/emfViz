@@ -81,6 +81,7 @@ public class CallbackHandler {
 					
 					combo.setItems(matchesTemp);
 					combo.select(0);
+					
 				}
 		    }
 		});

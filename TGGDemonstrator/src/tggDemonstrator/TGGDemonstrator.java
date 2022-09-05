@@ -253,7 +253,7 @@ public abstract class TGGDemonstrator implements UserControlArea{
 		mxStylesheet stylesheetCreated = graph.getStylesheet();
 		Hashtable<String, Object> cellStyleCreated = new Hashtable<String, Object>();
 		cellStyleCreated.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_RECTANGLE);
-		cellStyleCreated.put(mxConstants.STYLE_OPACITY, 50);
+		cellStyleCreated.put(mxConstants.STYLE_OPACITY, 90);
 		cellStyleCreated.put(mxConstants.STYLE_FONTCOLOR, "#000000");
 		cellStyleCreated.put(mxConstants.STYLE_FONTSIZE, "13");
 		cellStyleCreated.put(mxConstants.STYLE_FILLCOLOR, "#76b32a");
@@ -264,13 +264,14 @@ public abstract class TGGDemonstrator implements UserControlArea{
 		mxStylesheet stylesheetContex = graph.getStylesheet();
 		Hashtable<String, Object> cellStyleContex = new Hashtable<String, Object>();
 		cellStyleContex.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_RECTANGLE);
-		cellStyleContex.put(mxConstants.STYLE_OPACITY, 50);
+		cellStyleContex.put(mxConstants.STYLE_OPACITY, 90);
 		cellStyleContex.put(mxConstants.STYLE_FONTCOLOR, "#000000");
 		cellStyleContex.put(mxConstants.STYLE_FONTSIZE, "13");
 		cellStyleContex.put(mxConstants.STYLE_FILLCOLOR, "#FFFFFF");
 		cellStyleContex.put(mxConstants.ALIGN_CENTER, "1");
 		cellStyleContex.put(mxConstants.STYLE_OVERFLOW, "hidden");
 		cellStyleContex.put(mxConstants.STYLE_STROKEWIDTH, "3");
+		cellStyleContex.put(mxConstants.STYLE_STROKECOLOR, "#000000");
 		stylesheetContex.putCellStyle("ContextNode", cellStyleContex);
 		
 		
