@@ -113,7 +113,7 @@ public class Visualizer {
 		Hashtable<String, Object> cellStyle = new Hashtable<String, Object>();
 		cellStyle.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_RECTANGLE);
 		cellStyle.put(mxConstants.STYLE_OPACITY, 50);
-		cellStyle.put(mxConstants.STYLE_FONTCOLOR, "#00000");
+		cellStyle.put(mxConstants.STYLE_FONTCOLOR, "#000000");
 		cellStyle.put(mxConstants.STYLE_FONTSIZE, "13");
 		cellStyle.put(mxConstants.STYLE_FILLCOLOR, "#FFFFFF");
 		cellStyle.put(mxConstants.ALIGN_CENTER, "1");
@@ -121,7 +121,7 @@ public class Visualizer {
 		stylesheet.putCellStyle("defaultNode", cellStyle);
 
 		Hashtable<String, Object> edgeStyle = new Hashtable<String, Object>();
-		edgeStyle.put(mxConstants.STYLE_FONTCOLOR, "#00000");
+		edgeStyle.put(mxConstants.STYLE_FONTCOLOR, "#000000");
 		edgeStyle.put(mxConstants.STYLE_FONTSIZE, "10");
 		edgeStyle.put(mxConstants.STYLE_FILLCOLOR, "#FFFFFF");
 		edgeStyle.put(mxConstants.ALIGN_LEFT, "1");

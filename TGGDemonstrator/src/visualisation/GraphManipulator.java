@@ -575,9 +575,8 @@ public class GraphManipulator {
 	}
 	
 	
-	private Object createFromString(EDataType eDataType, String literal) throws Exception
-	{
-	 return eDataType.getEPackage().getEFactoryInstance().createFromString(eDataType, literal);
+	private Object createFromString(EDataType eDataType, String literal) throws Exception {
+		return eDataType.getEPackage().getEFactoryInstance().createFromString(eDataType, literal);
 	}
 }
 

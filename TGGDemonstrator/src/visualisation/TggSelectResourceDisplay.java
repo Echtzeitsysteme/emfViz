@@ -229,6 +229,12 @@ public class TggSelectResourceDisplay {
 			}
 		});
 		
+		if (modelLoader instanceof ModelLoader_INITIAL_BWD)
+			srcLabel.setText("Select your source xmi (optional):");
+		else if (modelLoader instanceof ModelLoader_INITIAL_BWD)
+			trgLabel.setText("Select your target xmi (optional):");
+			
+		
 		//set size of shell
 		shell.setSize(shellSizeX, shellSizeY);	
 	}
