@@ -46,13 +46,20 @@ import org.emoflon.ibex.common.emf.EMFManipulationUtils;
 import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
 
 import com.mxgraph.model.mxCell;
+import com.mxgraph.model.mxGraphModel.mxChildChange;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.util.mxEvent;
+import com.mxgraph.util.mxPoint;
 
+import graphVisualization.Edge;
 import graphVisualization.InstanceDiagrammLoader;
 import graphVisualization.Node;
 import graphVisualization.Visualizer;
+import tggDemonstrator.ModelLoader_INITIAL_BWD;
+import tggDemonstrator.ModelLoader_INITIAL_FWD;
+import tggDemonstrator.ModelLoader_MODELGEN;
+import tggDemonstrator.ModelLoader_SYNC;
 import tggDemonstrator.TGGDemonstrator;
 import visualisation.CallbackHandler.UpdateGraphType;
 
@@ -66,24 +73,24 @@ public class GraphManipulator {
 	private boolean isSource;
 	private CallbackHandler callback;
 	private EObject nodeInModel;
-	private Object nodeInGraph;
-	private Object edgeInGraph;
+	private EReference edgeInModel;
+	private EObject srcNode;
+	private EObject trgNode;
 	private mxGraph graph;
 	private Map<EAttribute,Text> txtMap = new HashMap<EAttribute, Text>();
 	private Map<EAttribute,Combo> enumMap = new HashMap<EAttribute, Combo>();
 	private EObject newObj;
 	private EAttribute errorAttr;
-	private EReference eRefSelected;
 	private mxGraphComponent graphComponent;
 	private mxCell cellAtPos;
 
 	public GraphManipulator(TggVisualizer vis, Display display, InstanceDiagrammLoader loader, TGGDemonstrator modelLoader, boolean isSource) {
 
 		this.vis = vis;
-		this.display = display;
+		this.display = display; //aus vis?
 		this.resource = loader.getInstanceModel();
 		this.loader = loader;
-		this.modelLoader = modelLoader;
+		this.modelLoader = modelLoader; //aus vis?
 		this.isSource = isSource;
 		graph = vis.getGraph();
 		graphComponent = vis.getGraphComponent();
@@ -109,12 +116,23 @@ public class GraphManipulator {
 							
 						}
 						else {
-							addEdge();
+							if(modelLoader instanceof ModelLoader_INITIAL_FWD && isSource ||
+									modelLoader instanceof ModelLoader_INITIAL_BWD && !isSource ||
+									modelLoader instanceof ModelLoader_SYNC) {
+								
+								actionOnEdge(e.getX(), e.getY());
+							}
+							
 						}
 					}
 					else {
-						actionOnFrame(e.getX(), e.getY());
-						callback.setPositionForNewNode(e.getX(), e.getY());
+						if(modelLoader instanceof ModelLoader_INITIAL_FWD && isSource ||
+								modelLoader instanceof ModelLoader_INITIAL_BWD && !isSource ||
+								modelLoader instanceof ModelLoader_SYNC) {
+							
+							actionOnFrame(e.getX(), e.getY());
+							callback.setPositionForNewNode(e.getX(), e.getY());
+						}
 					}
 					
 					
@@ -122,16 +140,10 @@ public class GraphManipulator {
 				
 				
 			}
-			//löst nicht aus
-			public void mouseDragged(MouseEvent e) 
-			{
-				System.out.println("Mouse dragged");
-				addEdge();
-			}
 
 			
 		});
-		graph.addListener("", (sender, evt) -> System.out.println(sender + " ---- " + evt));
+		/*graph.addListener("", (sender, evt) -> System.out.println(sender + " ---- " + evt));
 		graph.addPropertyChangeListener(new PropertyChangeListener() {
 			
 			@Override
@@ -140,98 +152,113 @@ public class GraphManipulator {
 			}
 		});
 		
-		graph.getView().addListener("", (sender, evt) -> System.out.println(sender + " ---- " + evt));
+		graph.getView().addListener("", (sender, evt) -> System.out.println(sender + " ---- " + evt));*/
+		
+		graph.getModel().addListener(mxEvent.CHANGE, (sender, evt) -> {
+			System.out.println(evt.getName() + " ---- " + evt);
+			var changes = evt.getProperty("changes");
+			if(changes instanceof Iterable<?> it) {
+				for(var change : it) {
+					if(change instanceof mxChildChange childChange) {
+						var child = childChange.getChild();
+						if(child instanceof mxCell cell) {
+							if(cell.isEdge()) {
+								if(!(cell.getValue() instanceof Edge)) {
+									System.out.println("Detected new edge without value: " + cell);
+									cellAtPos = cell;
+									addEdge();
+									
+								}
+								else {
+									System.out.println("Detected new edge: " + cell);
+								}
+							}
+						}
+					}
+				}				
+			}
+		});
 	}
-/*
-	private void iterateModel() {
-		EList<EObject> objects = resource.getContents();
-		Object[] selectedCells = graph.getSelectionCells();
-		if (selectedCells.length > 0) {
-			System.out.println("selected");
-			for (Object selected : selectedCells) {
-				//nodeInGraph = selected;
-				for (EObject eObject : objects) {
 
-					/*
-					 * EList<EStructuralFeature> allEStructFeats =
-					 * eObject.eClass().getEAllStructuralFeatures();
-					 * 
-					 * for(EStructuralFeature esf : allEStructFeats) { System.out.println("blub");
-					 * Object o = eObject.eGet(esf);
-					 * 
-					 * if(true) { Integer i = 0; eObject.eSet(esf, i);
-					 * 
-					 * } }
-					 
-					iterateModelHierarchical(eObject, selected);
+	private void findMatchInModel(mxCell comp) {
+		if(comp.isVertex()) {
+			for (Node node : loader.nodes) {
+				if(String.valueOf(node.hashCode()).equals(comp.getId())) {
+					System.out.println("**node in map found");
+					nodeInModel = node.eobj;
 				}
 			}
 		}
-
-	}
-*/	
-	private void iterateModelMousePosition() {
-		EList<EObject> objects = resource.getContents();
-		
-			for (EObject eObject : objects) {
-
-				iterateModelHierarchical(eObject, cellAtPos);
-			}
-
-	}
-
-	private void iterateModelHierarchical(EObject obj, Object comp) {
-		for (EObject eobj : obj.eContents()) {
-			iterateModelHierarchical(eobj, comp);
-		}
-
-		if (obj.eClass().getName().equals(((mxCell)comp).getValue().toString())) {
-			System.out.println("equal found");
-			nodeInModel = obj;
+		if(comp.isEdge()) {
+			edgeInModel = loader.edges.get(Integer.parseInt(comp.getId())).ref;
+			srcNode = loader.edges.get(Integer.parseInt(comp.getId())).source;
+			trgNode = loader.edges.get(Integer.parseInt(comp.getId())).target;
+			System.out.println("**edge in model found");
 		}
 		
-		if(((mxCell)comp).isEdge()) {
-			edgeInGraph = comp;
-			
-		}
 	}
 	
-	public void deleteSelected() {
-		iterateModelMousePosition();
-		removeNode();
-		callback.updateGraph(UpdateGraphType.ALL);
-	}
 
 	private void actionOnNode(int x, int y) {
 		// open menu on node or on background
-		final PopupMenu popupmenu = new PopupMenu("On Node");   
-        
-		MenuItem delete = new MenuItem("Delete");  
-		MenuItem attr = new MenuItem("Show Attributes");
-        delete.setActionCommand("DEL");
+		final PopupMenu popupmenu = new PopupMenu("On Node");    
+		MenuItem attr = new MenuItem("Show Attributes"); 
         attr.setActionCommand("ATTR");
-        popupmenu.add(delete);  
+          
         popupmenu.add(attr);
+        
+        if(modelLoader instanceof ModelLoader_INITIAL_FWD && isSource ||
+        		modelLoader instanceof ModelLoader_INITIAL_BWD && !isSource ||
+        		modelLoader instanceof ModelLoader_SYNC) {
+        	
+        	MenuItem delete = new MenuItem("Delete");
+        	delete.setActionCommand("DEL");
+        	popupmenu.add(delete);
+        	delete.addActionListener(new ActionListener() {
+            	@Override
+    		    public void actionPerformed(ActionEvent e) {
+    				removeNode();
+    				//x und y weitergeben an automatische Visualisierung
+            		//System.out.println("Delete clicked");
+            	}
+            });
+        }
        
         graphComponent.add(popupmenu);
         popupmenu.show(graphComponent , x, y);
-        
-        delete.addActionListener(new ActionListener() {
-        	@Override
-		    public void actionPerformed(ActionEvent e) {
-				deleteSelected();
-				//x und y weitergeben an automatische Visualisierung
-        		System.out.println("Delete clicked");
-        	}
-        });
-        
+ 
         attr.addActionListener(new ActionListener() {
         	@Override
 		    public void actionPerformed(ActionEvent e) {
 				setAttributesExec();
-        		System.out.println("Attributes clicked");
+        		//System.out.println("Attributes clicked");
         	}
         });
+        
+	}
+	private void actionOnEdge(int x, int y) {
+		// open menu on node or on background
+		final PopupMenu popupmenu = new PopupMenu("On Edge");   
+        
+        if(modelLoader instanceof ModelLoader_INITIAL_FWD && isSource ||
+        		modelLoader instanceof ModelLoader_INITIAL_BWD && !isSource ||
+        		modelLoader instanceof ModelLoader_SYNC) {
+        	
+        	MenuItem delete = new MenuItem("Delete");
+        	delete.setActionCommand("DEL");
+        	popupmenu.add(delete);
+        	delete.addActionListener(new ActionListener() {
+            	@Override
+    		    public void actionPerformed(ActionEvent e) {
+    				removeEdge();
+    				//x und y weitergeben an automatische Visualisierung
+            		System.out.println("Delete clicked");
+            	}
+            });
+        }
+       
+        graphComponent.add(popupmenu);
+        popupmenu.show(graphComponent , x, y);
         
 	}
 	
@@ -279,96 +306,71 @@ public class GraphManipulator {
         
 	}
 	
-	/*private void actionOnNodeSWT(int x, int y) {
-		// open menu on node or on background
-		Menu menu = new Menu(vis.getShell());
-		
-		MenuItem delete = new MenuItem(menu, SWT.PUSH); 
-		delete.setText("Delete");
-		MenuItem attr = new MenuItem(menu, SWT.PUSH);
-		attr.setText("Show Attributes");
-		menu.setLocation(x, y);
-	}*/
 	
 	private void removeNode() {
+		findMatchInModel(cellAtPos);
 		if(nodeInModel != null) {
-			graph.getModel().remove(nodeInGraph);
+			//graph.getModel().remove(nodeInGraph);
 			EMFManipulationUtils.delete(nodeInModel);
 			//((mxCell) nodeInGraph).removeFromParent();
-			//EcoreUtil.remove(nodeInModel); // delete wirft Nullpointerexception, aber so wird Kante nicht gelöscht
 			System.out.println("removed from model");
-			
-			//vis.getGraph().repaint();
-			/*
-			Node deleteNode = null;
-			for (Node nodeElement : loader.nodes) {
-				if (nodeElement.id.equals(nodeInModel.toString())) {
-					deleteNode = nodeElement;
-				}
-			}
-			if (deleteNode != null) {
-				loader.nodes.remove(deleteNode);
-				System.out.println("removed from list");
-			}
-			graph.refresh();*/
+
+			callback.updateGraph(UpdateGraphType.ALL);
+		}
+		
+		
+	}
+	
+	private void removeEdge() {
+		findMatchInModel(cellAtPos);
+		if(edgeInModel != null) {
+			EMFManipulationUtils.deleteEdge(srcNode, trgNode, edgeInModel);
+			callback.updateGraph(UpdateGraphType.ALL);
 		}
 		
 	}
 	
-	public void addEdge() {
-		iterateModelMousePosition();
-		if(edgeInGraph != null) {
+	private void addEdge() {
+		
+		if(cellAtPos != null) {
 			//add export com.mxgraph.view to emfViz? was heißt das?
-			Object source = graph.getModel().getTerminal(edgeInGraph, true);
-			Object target = graph.getModel().getTerminal(edgeInGraph, false);
+			mxCell source = (mxCell) graph.getModel().getTerminal(cellAtPos, true);
+			mxCell target = (mxCell) graph.getModel().getTerminal(cellAtPos, false);
 			
-			EList<EObject> objects = resource.getContents();
-			for(EObject obj : objects) {
-				iterateModelHierarchical(obj, source);
-			}
+			findMatchInModel(source);
 			EObject src = nodeInModel;
 			
-			for(EObject obj : objects) {
-				iterateModelHierarchical(obj, target);
-			}
+			findMatchInModel(target);
 			EObject trg = nodeInModel;
 
 			EList<EReference> edges = src.eClass().getEAllReferences();
 			
-			int count = 0;
+			PopupMenu popupMenu = new PopupMenu("Edge type");
+			
 			for (EReference eRef : edges) {
-				if(eRef.getEType().getName().equals(trg.eClass().getName())) {
-					System.out.println("edge type: " + eRef.getName());	
-					eRefSelected = eRef;
-					count++;
-				}
-				
-			}
-			String[] literals = new String[count];
 
-			int i = 0;
-			for (EReference eRef : edges) {
-				if(eRef.getEType().getName().equals(trg.eClass().getName())) {
-					literals[i] = eRef.getName();
-					i++;
-					
-				}
+				MenuItem edgeItem = new MenuItem(eRef.getEType().getName());
+				popupMenu.add(edgeItem);
+				edgeItem.addActionListener(new ActionListener() {
+		        	@Override
+				    public void actionPerformed(ActionEvent e) {
+		        		EMFManipulationUtils.createEdge(src, trg, eRef);
+		        	}
+		        });
+
 			}
-			if(literals.length > 1) {
-				createEReferenceSelectionWindow(literals, src);
-				EMFManipulationUtils.createEdge(src, trg, eRefSelected);
-			}
-			else if(literals.length == 1) {
-				EMFManipulationUtils.createEdge(src, trg, eRefSelected); //schon im Modell oder noch hinzufügen?
-			}
-			//else no edge should be created
+	        graphComponent.add(popupMenu);
+	        mxPoint pos = graph.getView().getPoint(graph.getView().getState(cellAtPos));
+	        popupMenu.show(graphComponent , (int)pos.getX(), (int)pos.getY());
+	        
+	        graph.getModel().remove(cellAtPos);
 			callback.updateGraph(UpdateGraphType.ALL);
 		}
 		
 	}
 	
 	/*not needed if only one edge type available*/
-	private void createEReferenceSelectionWindow(String[] literals, EObject src) {
+	/*private void createEReferenceSelectionWindow(String[] literals, EObject src) {
 		Shell shellEdges = new Shell(display);
 		
 		shellEdges.setText("Select Edge Type");
@@ -423,9 +425,9 @@ public class GraphManipulator {
 		//set size of shell
 		shellEdges.setSize(600,200);	
 		shellEdges.open();
-	}
+	}*/
 	
-	public void addNode(EClass cl) {
+	private void addNode(EClass cl) {
 		newObj = EcoreUtil.create(cl);
 		resource.getContents().add(newObj);
 		System.out.println("new obj created in model");
@@ -437,7 +439,7 @@ public class GraphManipulator {
 		callback.updateGraph(UpdateGraphType.ALL);
 	}
 	
-	public void setAttributesExec() {
+	private void setAttributesExec() {
 		Display.getDefault().syncExec(new Runnable(){
 			public void run() {
 				System.out.println("syncexec");
@@ -450,7 +452,7 @@ public class GraphManipulator {
 	
 	private void setAttributes() {
 		
-		iterateModelMousePosition();
+		findMatchInModel(cellAtPos);
 		if(nodeInModel != null) {
 			
 			Shell shellAttr = new Shell(display);

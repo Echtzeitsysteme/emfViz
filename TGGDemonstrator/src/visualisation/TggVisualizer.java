@@ -52,7 +52,7 @@ public class TggVisualizer extends Visualizer{
 		
 		graphComponent = new mxGraphComponent(graph);
 		graph.setAllowDanglingEdges(false);
-		graph.getModel().addListener(mxEvent.CHANGE, (sender, evt) -> {
+		/*graph.getModel().addListener(mxEvent.CHANGE, (sender, evt) -> {
 			System.out.println(evt.getName() + " ---- " + evt);
 			var changes = evt.getProperty("changes");
 			if(changes instanceof Iterable<?> it) {
@@ -71,7 +71,7 @@ public class TggVisualizer extends Visualizer{
 					}
 				}				
 			}
-		});
+		});*/
 		frame.add(graphComponent);
 	}
 
