@@ -154,7 +154,7 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 	}
 	
 	/*
-	 * Forward translation of the source model
+	 * Continues forward translation of the source model
 	 */
 	@Override
 	public void buttonTranslateFunction() {
@@ -163,7 +163,9 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 		System.out.println("Button Next Rule is clicked...");
 		
 		try {
+			
 			thread.wakeUp();
+			
 		}catch(Exception e) {
 			System.out.println(e);
 		}
@@ -214,7 +216,7 @@ class FWDThread extends ModelLoaderThread{
 				
 				ITGGMatch match = null;
 				
-				callbackHandler.updateGraph(CallbackHandler.UpdateGraphType.TRG);
+				callbackHandler.updateGraph();
 				try {
 					
 					matches = matchContainer.getMatches();

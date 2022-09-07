@@ -152,16 +152,17 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 	}
 	
 	/*
-	 * backward translation of the target model
+	 * Continues backward translation of the target model
 	 */
 	@Override
 	public void buttonTranslateFunction() {
 		//next step functionalities
-		
 		System.out.println("Button Next Rule is clicked...");
 		
 		try {
+			
 			thread.wakeUp();
+			
 		}catch(Exception e) {
 			System.out.println(e);
 		}
@@ -211,7 +212,7 @@ class BWDThread extends ModelLoaderThread{
 				
 				ITGGMatch match = null;
 				
-				callbackHandler.updateGraph(CallbackHandler.UpdateGraphType.SRC);
+				callbackHandler.updateGraph();
 				try {
 					
 					matches = matchContainer.getMatches();

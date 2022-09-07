@@ -5,6 +5,10 @@ import org.eclipse.swt.widgets.Group;
 
 public interface UserControlArea {
 	
+	/*
+	 * Interface to define basic button titles and button functionalities at visualizer display
+	 */
+	
 	public String buttonTranslateTxt();
 	
 	public void buttonTranslateFunction();

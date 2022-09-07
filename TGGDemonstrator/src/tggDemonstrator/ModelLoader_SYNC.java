@@ -133,16 +133,6 @@ public class ModelLoader_SYNC extends TGGDemonstrator{
 		
 	}
 	
-	public void syncForward() {
-		// TODO Auto-generated method stub
-		return;
-	}
-	
-	public void syncBackward() {
-		// TODO Auto-generated method stub
-		return;
-	}
-	
 	@Override
 	public void highlightGraph(TggVisualizer visSrc, TggVisualizer visTrg) {
 		highlightingGraphAlgorithm(visSrc, visTrg, "CreateNode","ContextNode");
@@ -154,15 +144,18 @@ public class ModelLoader_SYNC extends TGGDemonstrator{
 		return "Translate";
 	}
 
-
+	/*
+	 * Continues graph sync function 
+	 */
 	@Override
 	public void buttonTranslateFunction() {
 		//next step functionalities
-		
 		System.out.println("Button Next Rule is clicked...");
 		
 		try {
+			
 			thread.wakeUp();
+			
 		}catch(Exception e) {
 			System.out.println(e);
 		}
@@ -207,7 +200,7 @@ class SYNCThread extends ModelLoaderThread{
 				
 				ITGGMatch match = null;
 				
-				callbackHandler.updateGraph(CallbackHandler.UpdateGraphType.ALL);
+				callbackHandler.updateGraph();
 				
 				try {
 					matches = matchContainer.getMatches();
@@ -235,8 +228,16 @@ class SYNCThread extends ModelLoaderThread{
 	@Override
 	protected void startProcess() {
 		try {
+			if (callbackHandler.getLastProcessedGraph() == null)
+				return;
+			
 			System.out.println("------- sync ------");
-			sync.run();
+			
+			if (callbackHandler.getLastProcessedGraph().equals("SRC"))
+				sync.forward();
+			else if(callbackHandler.getLastProcessedGraph().equals("TRG"))
+				sync.backward();
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}	

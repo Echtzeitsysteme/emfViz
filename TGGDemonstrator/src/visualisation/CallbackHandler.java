@@ -17,12 +17,12 @@ public class CallbackHandler {
 	
 	private static CallbackHandler instance;
 	
-	public enum UpdateGraphType { ALL, SRC, TRG}
 	private Set<ITGGMatch> matches = new HashSet<> ();
 	private ITGGMatch selectedMatch;
 	private Combo combo = null;
 	private VisContentAdapter srcContentAdapter = null;
 	private VisContentAdapter trgContentAdapter = null;
+	private String lastProcessedGraph = "SRC";
 	
 	private CallbackHandler() {
 	}
@@ -58,7 +58,15 @@ public class CallbackHandler {
 					
 					combo.setItems(matchesTemp);
 					combo.select(0);
+					combo.setEnabled(true);
 					
+				}else if(combo != null && matches.isEmpty()) {
+					String[] matchesTemp = new String[1];
+					matchesTemp[0] = "";
+					
+					combo.setItems(matchesTemp);
+					combo.select(0);
+					combo.setEnabled(false);
 				}
 		    }
 		});
@@ -156,32 +164,26 @@ public class CallbackHandler {
 	/*
 	 * Update graph visualization
 	 */
-	public void updateGraph(UpdateGraphType type) {
+	public void updateGraph() {
 		System.out.println("----- UPDATE GRAPH -----");
 		
-		switch (type) {
-		case ALL:
-			if(srcContentAdapter != null)
-				srcContentAdapter.processNotifications();
-			if(trgContentAdapter != null)
-				trgContentAdapter.processNotifications();
-			break;
-		case SRC:
-			if(srcContentAdapter != null)
-				srcContentAdapter.processNotifications();
-			break;
-		case TRG:
-			if(trgContentAdapter != null)
-				trgContentAdapter.processNotifications();
-			break;
-		default:
-			break;
-		}
+		if(srcContentAdapter != null)
+			srcContentAdapter.processNotifications();
+		if(trgContentAdapter != null)
+			trgContentAdapter.processNotifications();
 	}
 	
 	public void setPositionForNewNode(int x, int y) {
 		srcContentAdapter.setPosition(x,y);
 		trgContentAdapter.setPosition(x,y);
+	}
+	
+	public void setLastProcessedGraph(String change) {
+		lastProcessedGraph = change;
+	}
+	
+	public String getLastProcessedGraph() {
+		return lastProcessedGraph;
 	}
 	
 }

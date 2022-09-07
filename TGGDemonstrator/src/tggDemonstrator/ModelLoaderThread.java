@@ -8,8 +8,10 @@ import org.emoflon.ibex.tgg.operational.matches.ITGGMatch;
 import visualisation.CallbackHandler;
 
 public abstract class ModelLoaderThread extends Thread {
+	
 	protected CallbackHandler callbackHandler;
 	protected Set<ITGGMatch> matches = new HashSet<> ();
+	protected boolean restart = false;
 	
 	public ModelLoaderThread() {
 		callbackHandler = CallbackHandler.getInstance();
@@ -17,10 +19,21 @@ public abstract class ModelLoaderThread extends Thread {
 	
 	@Override
 	public void run() {
-		initialize();	
-		startProcess();
-
-		while (true) {}
+		while (true) {
+			initialize();	
+			startProcess();
+			
+			matches = new HashSet<> ();
+			callbackHandler.setMatches(matches);
+			
+			try {
+				sleep(Integer.MAX_VALUE);
+			} catch (InterruptedException e) {
+				System.out.println("Thread " + getId() + " restarts");
+			}
+		}
+		
+		//System.out.println("Thread " + getId() + " is not alive anymore!");
 	}
 	
 	/*

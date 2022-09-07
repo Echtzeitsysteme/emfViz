@@ -2,13 +2,6 @@ package visualisation;
 
 import java.awt.Frame;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.impl.EClassImpl;
-
 import org.eclipse.swt.events.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
@@ -22,15 +15,12 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 
 import graphVisualization.InstanceDiagrammLoader;
 import graphVisualization.Visualizer;
 import tggDemonstrator.ModelLoader_MODELGEN;
 import tggDemonstrator.TGGDemonstrator;
-import visualisation.CallbackHandler.UpdateGraphType;
 
 public class TggVisualizerDisplay {
 
@@ -180,14 +170,16 @@ public class TggVisualizerDisplay {
 			}
 		});
 		
-		//highlight Graph button - TEST
-		Button highlighButton = new Button(buttonGroupStandard, SWT.PUSH);
-		highlighButton.setText("TEST Highlight");
+
+		Button resetHighlighButton = new Button(buttonGroupStandard, SWT.PUSH);
+		resetHighlighButton.setText("Reset Highlighting");
 		
-		highlighButton.addSelectionListener(new SelectionAdapter() {
+		resetHighlighButton.addSelectionListener(new SelectionAdapter() {
 			@Override
             public void widgetSelected(SelectionEvent evt) {
-				modelLoader.highlightGraph((TggVisualizer)visSrc, (TggVisualizer)visTrg);
+				//modelLoader.highlightGraph((TggVisualizer)visSrc, (TggVisualizer)visTrg);
+				modelLoader.removeGraphHighlighting((TggVisualizer)visSrc);
+				modelLoader.removeGraphHighlighting((TggVisualizer)visTrg);
 			}
 		});
 		
@@ -246,6 +238,8 @@ public class TggVisualizerDisplay {
 					callbackHandler.setSelectedMatch(combo.getSelectionIndex());
 					
 					modelLoader.buttonTranslateFunction();
+					
+					modelLoader.highlightGraph((TggVisualizer)visSrc, (TggVisualizer)visTrg);
 					
 					if (modelLoader instanceof ModelLoader_MODELGEN) {
 						translateButton.setText("Next Step");

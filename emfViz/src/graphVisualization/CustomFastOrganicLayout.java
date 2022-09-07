@@ -14,8 +14,10 @@ public class CustomFastOrganicLayout extends mxFastOrganicLayout{
 	@Override
 	public boolean isVertexIgnored(Object vertex) {
 		var ignored = super.isVertexIgnored(vertex);
+		
 		if(vertex instanceof mxCell cell) {
 			var value = cell.getValue();
+			
 			if(value instanceof Node node)
 				ignored = ignored || node.ignored;
 		}

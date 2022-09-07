@@ -91,15 +91,24 @@ public abstract class TGGDemonstrator implements UserControlArea{
 	protected abstract void initThread();
 	
 	/*
-	 * Highlights the graph:
+	 * Method called from external to highlight the graph
+	 * Implement it in that way that the highlightGraph method is called
 	 * 		- Created: Green
 	 * 		- Context: Black
 	 */
 	public abstract void highlightGraph(TggVisualizer visSrc, TggVisualizer visTrg);
 	
-	
-	
+	/*
+	 * Highlights the graph:
+	 * 		- Created: Green
+	 * 		- Context: Black
+	 */
 	protected void highlightingGraphAlgorithm (TggVisualizer visSrc, TggVisualizer visTrg, String layoutCreateCells, String layoutContextCells) {
+		//check whether a match for highlighting exists or not
+		ITGGMatch match = callbackHandler.getSelectedMatch();
+		if (match == null)
+			return;
+		
 		//initialize source and target graph
 		mxGraph graphSrc = visSrc.getGraph();	
 		mxCell rootSrc = (mxCell)graphSrc.getModel().getRoot();
@@ -109,8 +118,6 @@ public abstract class TGGDemonstrator implements UserControlArea{
 		
 		addStyles(graphSrc);
 		addStyles(graphTrg);
-		
-		ITGGMatch match = callbackHandler.getSelectedMatch();
 		
 		List<HilightObject> temp = new LinkedList<HilightObject>();
 		List<mxICell> updateCellsCreate = new LinkedList<mxICell>();
@@ -235,6 +242,9 @@ public abstract class TGGDemonstrator implements UserControlArea{
 			if (myCell.isEdge())
 				continue;
 			
+			if (myCell.getStyle().equals("defaultNode"))
+				continue;
+			
 			resetTemp.add(myCell);
 		}
 		
@@ -331,10 +341,13 @@ public abstract class TGGDemonstrator implements UserControlArea{
 
 }
 
+/*
+ * Class for storing all relevant parameters required by the higlightGraph method
+ */
 class HilightObject {
 	
 	private Object o;
-	private String bindingType;
+	private String bindingType;  //CREATE; CONTEXT
 	
 	public HilightObject(Object o, String s) {
 		this.o = o;

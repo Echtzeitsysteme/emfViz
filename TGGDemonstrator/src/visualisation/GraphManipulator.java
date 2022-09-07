@@ -2,18 +2,12 @@ package visualisation;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.event.AncestorEvent;
-import javax.swing.event.AncestorListener;
-
 import org.eclipse.emf.common.util.EList;
-import org.eclipse.emf.common.util.Enumerator;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EDataType;
@@ -27,8 +21,6 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
@@ -36,14 +28,12 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 //import org.eclipse.swt.widgets.Menu;
 //import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.emoflon.ibex.common.emf.EMFManipulationUtils;
-import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
 
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGraphModel.mxChildChange;
@@ -55,36 +45,39 @@ import com.mxgraph.util.mxPoint;
 import graphVisualization.Edge;
 import graphVisualization.InstanceDiagrammLoader;
 import graphVisualization.Node;
-import graphVisualization.Visualizer;
 import tggDemonstrator.ModelLoader_INITIAL_BWD;
 import tggDemonstrator.ModelLoader_INITIAL_FWD;
-import tggDemonstrator.ModelLoader_MODELGEN;
 import tggDemonstrator.ModelLoader_SYNC;
 import tggDemonstrator.TGGDemonstrator;
-import visualisation.CallbackHandler.UpdateGraphType;
 
 public class GraphManipulator {
 
+	public enum GraphType {SRC,TRG}
+	private final GraphType type;
+	
+	private CallbackHandler callback;
+	private TGGDemonstrator modelLoader;
 	private TggVisualizer vis;
-	private Resource resource;
 	private InstanceDiagrammLoader loader;
 	private Display display;
-	private TGGDemonstrator modelLoader;
-	private boolean isSource;
-	private CallbackHandler callback;
+
+	private Resource resource;
 	private EObject nodeInModel;
 	private EReference edgeInModel;
 	private EObject srcNode;
 	private EObject trgNode;
-	private mxGraph graph;
+	private EObject newObj;
 	private Map<EAttribute,Text> txtMap = new HashMap<EAttribute, Text>();
 	private Map<EAttribute,Combo> enumMap = new HashMap<EAttribute, Combo>();
-	private EObject newObj;
 	private EAttribute errorAttr;
 	private mxGraphComponent graphComponent;
 	private mxCell cellAtPos;
+	private mxGraph graph;
+	
+	private boolean isSource;
+	
 
-	public GraphManipulator(TggVisualizer vis, Display display, InstanceDiagrammLoader loader, TGGDemonstrator modelLoader, boolean isSource) {
+	public GraphManipulator(TggVisualizer vis, Display display, InstanceDiagrammLoader loader, TGGDemonstrator modelLoader, boolean isSource, GraphType type) {
 
 		this.vis = vis;
 		this.display = display; //aus vis?
@@ -92,6 +85,8 @@ public class GraphManipulator {
 		this.loader = loader;
 		this.modelLoader = modelLoader; //aus vis?
 		this.isSource = isSource;
+		this.type = type;
+		
 		graph = vis.getGraph();
 		graphComponent = vis.getGraphComponent();
 		callback = CallbackHandler.getInstance();
@@ -315,7 +310,8 @@ public class GraphManipulator {
 			//((mxCell) nodeInGraph).removeFromParent();
 			System.out.println("removed from model");
 
-			callback.updateGraph(UpdateGraphType.ALL);
+			callback.updateGraph();
+			callback.setLastProcessedGraph(getGraphTypeName());
 		}
 		
 		
@@ -325,7 +321,8 @@ public class GraphManipulator {
 		findMatchInModel(cellAtPos);
 		if(edgeInModel != null) {
 			EMFManipulationUtils.deleteEdge(srcNode, trgNode, edgeInModel);
-			callback.updateGraph(UpdateGraphType.ALL);
+			callback.updateGraph();
+			callback.setLastProcessedGraph(getGraphTypeName());
 		}
 		
 	}
@@ -364,7 +361,8 @@ public class GraphManipulator {
 	        popupMenu.show(graphComponent , (int)pos.getX(), (int)pos.getY());
 	        
 	        graph.getModel().remove(cellAtPos);
-			callback.updateGraph(UpdateGraphType.ALL);
+			callback.updateGraph();
+			callback.setLastProcessedGraph(getGraphTypeName());
 		}
 		
 	}
@@ -436,7 +434,8 @@ public class GraphManipulator {
 		System.out.println("added to list");
 		graph.insertVertex(graph.getDefaultParent(),newNode.id, newNode.name,100,100,80,40);
 		System.out.println("added in graph");*/
-		callback.updateGraph(UpdateGraphType.ALL);
+		callback.updateGraph();
+		callback.setLastProcessedGraph(getGraphTypeName());
 	}
 	
 	private void setAttributesExec() {
@@ -444,7 +443,8 @@ public class GraphManipulator {
 			public void run() {
 				System.out.println("syncexec");
 			    setAttributes();
-			    callback.updateGraph(UpdateGraphType.ALL);
+			    callback.updateGraph();
+			    callback.setLastProcessedGraph(getGraphTypeName());
 			}
 			});
 		
@@ -577,6 +577,14 @@ public class GraphManipulator {
 	
 	private Object createFromString(EDataType eDataType, String literal) throws Exception {
 		return eDataType.getEPackage().getEFactoryInstance().createFromString(eDataType, literal);
+	}
+	
+	public GraphType getGraphType() {
+		return type;
+	}
+	
+	public String getGraphTypeName() {
+		return type.name();
 	}
 }
 

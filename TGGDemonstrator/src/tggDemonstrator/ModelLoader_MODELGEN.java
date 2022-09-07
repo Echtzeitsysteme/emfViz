@@ -238,7 +238,7 @@ class ModelgenThread extends ModelLoaderThread{
 				
 				ITGGMatch match = null;
 				
-				callbackHandler.updateGraph(CallbackHandler.UpdateGraphType.ALL);
+				callbackHandler.updateGraph();
 				try {
 					
 					matches = matchContainer.getMatches();
