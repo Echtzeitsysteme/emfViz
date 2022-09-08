@@ -395,7 +395,8 @@ public class GraphManipulator {
 			EMFManipulationUtils.createEdge(src, trg, eRef);
 		}
 		
-		callback.updateGraph(UpdateGraphType.ALL);
+		callback.updateGraph();
+	    callback.setLastProcessedGraph(getGraphTypeName());
 	}
 	
 	/*not needed if only one edge type available*/
