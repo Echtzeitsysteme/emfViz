@@ -221,8 +221,9 @@ public class VisContentAdapter extends EContentAdapter {
 	}
 
 	private void handleRemoveAdapterNotification(Notification notification) {
-		if (isDeleted(notification.getOldValue()))
-			vis.removeNodeInGraph(new Node((EObject) notification.getOldValue()));
+		/*if (isDeleted(notification.getOldValue()))
+			vis.removeNodeInGraph(new Node((EObject) notification.getNotifier()));*/
+		
 	}
 
 	private void handleSetNotification(Notification notification) {
