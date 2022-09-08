@@ -179,7 +179,7 @@ public class GraphManipulator {
 		if(comp.isVertex()) {
 			for (Node node : loader.nodes) {
 				if(String.valueOf(node.hashCode()).equals(comp.getId())) {
-					System.out.println("**node in map found");
+					//System.out.println("**node in map found");
 					nodeInModel = node.eobj;
 				}
 			}
@@ -188,7 +188,7 @@ public class GraphManipulator {
 			edgeInModel = loader.edges.get(Integer.parseInt(comp.getId())).ref;
 			srcNode = loader.edges.get(Integer.parseInt(comp.getId())).source;
 			trgNode = loader.edges.get(Integer.parseInt(comp.getId())).target;
-			System.out.println("**edge in model found");
+			//System.out.println("**edge in model found");
 		}
 		
 	}
@@ -247,7 +247,7 @@ public class GraphManipulator {
     		    public void actionPerformed(ActionEvent e) {
     				removeEdge();
     				//x und y weitergeben an automatische Visualisierung
-            		System.out.println("Delete clicked");
+            		//System.out.println("Delete clicked");
             	}
             });
         }
@@ -306,9 +306,9 @@ public class GraphManipulator {
 		findMatchInModel(cellAtPos);
 		if(nodeInModel != null) {
 			//graph.getModel().remove(nodeInGraph);
-			EMFManipulationUtils.delete(nodeInModel);
+			EMFManipulationUtils.delete(nodeInModel,true);
 			//((mxCell) nodeInGraph).removeFromParent();
-			System.out.println("removed from model");
+			//System.out.println("removed from model");
 
 			callback.updateGraph();
 			callback.setLastProcessedGraph(getGraphTypeName());
@@ -341,30 +341,61 @@ public class GraphManipulator {
 			EObject trg = nodeInModel;
 
 			EList<EReference> edges = src.eClass().getEAllReferences();
-			
+			EList<EClass> superclasses = trg.eClass().getEAllSuperTypes();
 			PopupMenu popupMenu = new PopupMenu("Edge type");
 			
 			for (EReference eRef : edges) {
-
-				MenuItem edgeItem = new MenuItem(eRef.getEType().getName());
-				popupMenu.add(edgeItem);
-				edgeItem.addActionListener(new ActionListener() {
-		        	@Override
-				    public void actionPerformed(ActionEvent e) {
-		        		EMFManipulationUtils.createEdge(src, trg, eRef);
-		        	}
-		        });
-
+				
+				//type of edge could be an abstract superclass
+				for (EClass eClass : superclasses) {
+					if(eClass.getName().equals(eRef.getEType().getName())) {
+						MenuItem edgeItem = new MenuItem(eRef.getName());
+						popupMenu.add(edgeItem);
+						edgeItem.addActionListener(new ActionListener() {
+				        	@Override
+						    public void actionPerformed(ActionEvent e) {
+				        		createSpecificEdge(src,trg,eRef);
+				        	}
+				        });
+					}
+				}
+				if(trg.eClass().getName().equals(eRef.getEType().getName())) {
+					MenuItem edgeItem = new MenuItem(eRef.getName());
+					popupMenu.add(edgeItem);
+					edgeItem.addActionListener(new ActionListener() {
+			        	@Override
+					    public void actionPerformed(ActionEvent e) {
+			        		createSpecificEdge(src,trg,eRef);
+			        	}
+			        });
+				}
 			}
 	        graphComponent.add(popupMenu);
-	        mxPoint pos = graph.getView().getPoint(graph.getView().getState(cellAtPos));
-	        popupMenu.show(graphComponent , (int)pos.getX(), (int)pos.getY());
+	        //mxPoint pos = graph.getView().getPoint(graph.getView().getState(target));
+	        //popupMenu.show(graphComponent , (int)pos.getX(), (int)pos.getY());
+	        popupMenu.show(graphComponent, 100, 100);
 	        
 	        graph.getModel().remove(cellAtPos);
-			callback.updateGraph();
-			callback.setLastProcessedGraph(getGraphTypeName());
 		}
 		
+	}
+	
+	private void createSpecificEdge(EObject src, EObject trg, EReference eRef) {
+		if(eRef.getUpperBound() == 1 && src.eIsSet(eRef)) {
+			//delete edge from src to old trg
+			EMFManipulationUtils.deleteEdge(src, (EObject) src.eGet(eRef), eRef);
+			EMFManipulationUtils.createEdge(src, trg, eRef);
+		}
+		else if(eRef.isContainment() && trg.eContainmentFeature() != null) {
+			
+			EMFManipulationUtils.deleteEdge(trg.eContainmentFeature().eContainer(), trg, eRef);
+			EMFManipulationUtils.createEdge(src, trg, eRef);
+		}
+		else {
+			EMFManipulationUtils.createEdge(src, trg, eRef);
+		}
+		
+		callback.updateGraph(UpdateGraphType.ALL);
 	}
 	
 	/*not needed if only one edge type available*/
