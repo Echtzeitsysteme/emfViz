@@ -12,6 +12,8 @@ public abstract class ModelLoaderThread extends Thread {
 	protected CallbackHandler callbackHandler;
 	protected Set<ITGGMatch> matches = new HashSet<> ();
 	protected boolean restart = false;
+	protected String translateButtonTitleTmp;
+	protected String translateButtonTitle = "Next Step";
 	
 	public ModelLoaderThread() {
 		callbackHandler = CallbackHandler.getInstance();
@@ -20,11 +22,15 @@ public abstract class ModelLoaderThread extends Thread {
 	@Override
 	public void run() {
 		while (true) {
+			translateButtonTitleTmp = translateButtonTitle;
+			
 			initialize();	
 			startProcess();
 			
 			matches = new HashSet<> ();
 			callbackHandler.setMatches(matches);
+			
+			translateButtonTitleTmp = "Start Translation";
 			
 			try {
 				sleep(Integer.MAX_VALUE);
@@ -34,15 +40,6 @@ public abstract class ModelLoaderThread extends Thread {
 		}
 		
 		//System.out.println("Thread " + getId() + " is not alive anymore!");
-	}
-	
-	/*
-	 * Wakes up the thread and continues the translation process
-	 */
-	public void wakeUp() {
-		System.out.println("Hey thread " + getId() + " wake up!");
-		
-		interrupt();
 	}
 	
 	/*
@@ -56,4 +53,16 @@ public abstract class ModelLoaderThread extends Thread {
 	protected abstract void startProcess();	
 	
 	
+	/*
+	 * Wakes up the thread and continues the translation process
+	 */
+	public void wakeUp() {
+		System.out.println("Hey thread " + getId() + " wake up!");
+		
+		interrupt();
+	}
+	
+	public String getNewTranslateButtonTitle() {
+		return translateButtonTitleTmp;
+	}
 }

@@ -2,40 +2,18 @@ package tggDemonstrator;
 
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 import java.util.function.Function;
 
-import org.eclipse.emf.common.util.EList;
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Group;
-import org.emoflon.ibex.common.emf.EMFEdge;
-import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
 import org.emoflon.ibex.tgg.operational.matches.ITGGMatch;
 import org.emoflon.ibex.tgg.operational.matches.ImmutableMatchContainer;
 import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGEN;
 import org.emoflon.ibex.tgg.operational.strategies.gen.MODELGENStopCriterion;
 import org.emoflon.ibex.tgg.operational.updatepolicy.IUpdatePolicy;
 
-import com.mxgraph.model.mxCell;
-import com.mxgraph.model.mxICell;
-import com.mxgraph.model.mxIGraphModel;
-import com.mxgraph.view.mxGraph;
-
-import graphVisualization.Node;
-import language.TGG;
-import language.TGGRule;
-import language.TGGRuleNode;
-import runtime.TGGRuleApplication;
 import tggDemonstrator.DataObject.Modelgeneration;
-import visualisation.CallbackHandler;
-import visualisation.DisplayHandler;
 import visualisation.TggVisualizer;
 
 
@@ -45,7 +23,6 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 	private Function<DataObject, MODELGEN> modelgen_demonstrator;
 	private MODELGEN modelgen;
 	private ModelgenThread thread;
-	
 	
 	
 	public ModelLoader_MODELGEN (Function<DataObject, MODELGEN> modelgen, String pP, String wP) {	
@@ -202,7 +179,7 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 	public Combo createComboBox(Group g) {
 		return new Combo(g, SWT.DROP_DOWN | SWT.READ_ONLY);
 	}
-
+	
 	@Override
 	public boolean isFrameSourceActive() {
 		// TODO Auto-generated method stub
@@ -214,6 +191,11 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 		// TODO Auto-generated method stub
 		return false;
 	}
+	
+	@Override
+	public String returnButtonTitle() {
+		return thread.getNewTranslateButtonTitle();
+	}
 }
 
 
@@ -221,6 +203,7 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 class ModelgenThread extends ModelLoaderThread{
 	
 	private MODELGEN modelgen;
+	protected String translateButtonTitle = "Next Step";
 	
 	public ModelgenThread(MODELGEN m) {
 		super();

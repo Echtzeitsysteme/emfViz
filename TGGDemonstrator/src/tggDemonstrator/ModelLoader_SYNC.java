@@ -180,11 +180,17 @@ public class ModelLoader_SYNC extends TGGDemonstrator{
 		// TODO Auto-generated method stub
 		return true;
 	}
+	
+	@Override
+	public String returnButtonTitle() {
+		return thread.getNewTranslateButtonTitle();
+	}
 }
 
 class SYNCThread extends ModelLoaderThread{
 	
 	private SYNC sync;
+	protected String translateButtonTitle = "Translate";
 	
 	public SYNCThread(SYNC sync) {
 		super();

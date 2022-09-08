@@ -241,10 +241,12 @@ public class TggVisualizerDisplay {
 					
 					modelLoader.highlightGraph((TggVisualizer)visSrc, (TggVisualizer)visTrg);
 					
-					if (modelLoader instanceof ModelLoader_MODELGEN) {
+					/*if (modelLoader instanceof ModelLoader_MODELGEN) {
 						translateButton.setText("Next Step");
-					}
+					}*/
 				}
+				
+				translateButton.setText(modelLoader.returnButtonTitle());
 				
 				lastHiglightedRuleIndex = -1;
 			}

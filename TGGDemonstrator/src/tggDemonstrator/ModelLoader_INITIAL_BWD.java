@@ -190,12 +190,18 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 		// TODO Auto-generated method stub
 		return true;
 	}
+	
+	@Override
+	public String returnButtonTitle() {
+		return thread.getNewTranslateButtonTitle();
+	}
 
 }
 
 class BWDThread extends ModelLoaderThread{
 	
 	private INITIAL_BWD bwd;
+	protected String translateButtonTitle = "Translate Backward";
 	
 	
 	public BWDThread (INITIAL_BWD bwd) {

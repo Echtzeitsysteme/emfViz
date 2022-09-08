@@ -194,6 +194,11 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 		// TODO Auto-generated method stub
 		return false;
 	}
+	
+	@Override
+	public String returnButtonTitle() {
+		return thread.getNewTranslateButtonTitle();
+	}
 
 }
 
@@ -201,6 +206,7 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 class FWDThread extends ModelLoaderThread{
 	
 	private INITIAL_FWD fwd;
+	protected String translateButtonTitle = "Translate Forward";
 	
 	public FWDThread (INITIAL_FWD fwd) {
 		super();
