@@ -1,13 +1,21 @@
 package tggDemonstrator;
 
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.Resource;
-
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Group;
 import org.emoflon.ibex.tgg.operational.strategies.modules.IbexExecutable;
 import org.emoflon.ibex.tgg.operational.strategies.modules.TGGResourceHandler;
 
@@ -17,14 +25,17 @@ import com.mxgraph.util.mxConstants;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxStylesheet;
 
+import graphVisualization.Edge;
 import graphVisualization.Node;
 import language.TGGRule;
+import language.TGGRuleEdge;
 import language.TGGRuleNode;
 import visualisation.CallbackHandler;
 import visualisation.DisplayHandler;
 import visualisation.TggVisualizer;
 import visualisation.UserControlArea;
 
+import org.emoflon.ibex.common.emf.EMFEdge;
 import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
 import org.emoflon.ibex.tgg.operational.matches.ITGGMatch;
 
@@ -122,6 +133,8 @@ public abstract class TGGDemonstrator implements UserControlArea{
 		List<HilightObject> temp = new LinkedList<HilightObject>();
 		List<mxICell> updateCellsCreate = new LinkedList<mxICell>();
 		List<mxICell> updateCellsContext = new LinkedList<mxICell>();
+		List<mxICell> updateEdgeCreate = new LinkedList<mxICell>();
+		List<mxICell> updateEdgeContext = new LinkedList<mxICell>();
 		
 		//first reset highlighted cells
 		resetHighlightedCells(graphSrc);
@@ -142,6 +155,7 @@ public abstract class TGGDemonstrator implements UserControlArea{
 			return;
 		
 		// match nodes from rule with nodes in selected match
+		@SuppressWarnings("restriction")
 		EList<TGGRuleNode> nodes = myRule.getNodes();
 		
 		for (TGGRuleNode n : nodes) {
@@ -154,27 +168,68 @@ public abstract class TGGDemonstrator implements UserControlArea{
 			}
 		}
 		
+		
+		// get edges
+		@SuppressWarnings("restriction")
+		EList<TGGRuleEdge> edges = myRule.getEdges();
+		HashMap<Edge, String> createdEdges = new HashMap<Edge, String>(); 
+		
+		for (TGGRuleEdge e : edges) {
+			TGGRuleEdge myEdge = e;
+			//TGGRuleNode src = myEdge.getSrcNode();
+			EObject src = (EObject)match.get(myEdge.getSrcNode().getName());
+			//TGGRuleNode trg = myEdge.getTrgNode();
+			EObject trg = (EObject)match.get(myEdge.getTrgNode().getName());
+			EReference ref = myEdge.getType();
+			
+			if (src == null || trg == null || ref == null)
+				continue;
+			
+			Edge newEdge = new Edge(src,trg,ref);
+			//createdEdges.add(newEdge);
+			
+			createdEdges.put(newEdge, e.getBindingType().getLiteral());
+		}
+		
 		// match maxCell and eObject in src graph
 		for (int i = 0; i < rootSrc.getChildAt(0).getChildCount(); i++) {
 			mxICell myCellSrc = rootSrc.getChildAt(0).getChildAt(i);
 			
-			if (!myCellSrc.isEdge()) {
+			//if (!myCellSrc.isEdge()) {
+			if (myCellSrc.isVertex()) {
 				
 				Node ref = (Node)myCellSrc.getValue();
 				
 				if (ref != null) {
 					
-					/*if (temp.contains(ref.eobj)){
-						updateCellsCreate.add(myCellSrc);
-					}*/
-					
 					for (HilightObject obj : temp) {
+						
 						if (obj.equals(ref.eobj)){
+							
 							if (obj.getBindingType()== "CREATE") {
 								updateCellsCreate.add(myCellSrc);
 							}else if(obj.getBindingType()== "CONTEXT") {
 								updateCellsContext.add(myCellSrc);
 							}
+						}
+					}
+				}
+			}
+			
+			if (myCellSrc.isEdge()) {
+				Edge refE = (Edge)myCellSrc.getValue();
+				
+				if (refE == null)
+					return;
+				
+				for (Entry<Edge, String> entry : createdEdges.entrySet()){
+					Edge key = entry.getKey();
+					
+					if (key.equals(refE)) {
+						if (entry.getValue().equals("CONTEXT")) {
+							updateEdgeContext.add(myCellSrc);
+						} else if(entry.getValue().equals("CREATE")) {
+							updateEdgeCreate.add(myCellSrc);
 						}
 					}
 				}
@@ -185,9 +240,18 @@ public abstract class TGGDemonstrator implements UserControlArea{
 		graphSrc.setCellStyle(layoutCreateCells, updateCellsCreate.toArray());
 		graphSrc.setCellStyle(layoutContextCells, updateCellsContext.toArray());
 		
+		graphSrc.setCellStyle("CreateEdge", updateEdgeCreate.toArray());
+		graphSrc.setCellStyle("ContextEdge", updateEdgeContext.toArray());
+		
+		for (mxICell c : updateEdgeCreate) {
+			String s = c.getStyle();
+		}
 		//remove all objects to fill it with new objects
 		updateCellsCreate.clear();
 		updateCellsContext.clear();
+		
+		updateEdgeCreate.clear();
+		updateEdgeContext.clear();
 		
 		// match maxCell and eObject in trg graph
 		for (int i = 0; i < rootTrg.getChildAt(0).getChildCount(); i++) {
@@ -204,20 +268,41 @@ public abstract class TGGDemonstrator implements UserControlArea{
 					}*/
 					for (HilightObject obj : temp) {
 						if (obj.equals(ref.eobj)){
-							if (obj.getBindingType() == "CREATE") {
+							if (obj.getBindingType() == "CREATE")
 								updateCellsCreate.add(myCellTrg);
-							}else if(obj.getBindingType() == "CONTEXT") {
+							else if(obj.getBindingType() == "CONTEXT")
 								updateCellsContext.add(myCellTrg);
-							}
 						}
 					}
 				}
+			}
+			
+			if (myCellTrg.isEdge()) {
+				Edge refE = (Edge)myCellTrg.getValue();
+				
+				if (refE == null)
+					return;
+
+				for (Entry<Edge, String> entry : createdEdges.entrySet()){
+					Edge key = entry.getKey();
+					
+					if (key.equals(refE)) {
+						if (entry.getValue().equals("CONTEXT")) {
+							updateEdgeContext.add(myCellTrg);
+						} else if(entry.getValue().equals("CREATE")) {
+							updateEdgeCreate.add(myCellTrg);
+						}
+					}
+				}	
 			}
 		}
 		
 		//update cells
 		graphTrg.setCellStyle(layoutCreateCells, updateCellsCreate.toArray());
 		graphTrg.setCellStyle(layoutContextCells, updateCellsContext.toArray());
+		
+		graphTrg.setCellStyle("CreateEdge", updateEdgeCreate.toArray());
+		graphTrg.setCellStyle("ContextEdge", updateEdgeContext.toArray());
 	}
 	
 	/*
@@ -233,39 +318,45 @@ public abstract class TGGDemonstrator implements UserControlArea{
 	 * Reset layout of all cells to their original one
 	 */
 	private void resetHighlightedCells(mxGraph graph) {
-		List<mxICell> resetTemp = new LinkedList<mxICell>();
+		List<mxICell> resetTempE = new LinkedList<mxICell>();
+		List<mxICell> resetTempN = new LinkedList<mxICell>();
 		mxCell root = (mxCell)graph.getModel().getRoot();
 		
 		for (int i = 0; i < root.getChildAt(0).getChildCount(); i++) {
 			mxICell myCell = root.getChildAt(0).getChildAt(i);
 			
-			if (myCell.isEdge())
-				continue;
-			
 			if (myCell.getStyle().equals("defaultNode"))
 				continue;
 			
-			resetTemp.add(myCell);
+			if (myCell.isEdge())
+				resetTempE.add(myCell);
+			
+			if(myCell.isVertex())
+				resetTempN.add(myCell);
+				
 		}
 		
-		graph.setCellStyle("defaultNode", resetTemp.toArray());
+		graph.setCellStyle("defaultEdges", resetTempE.toArray());
+		graph.setCellStyle("defaultNode", resetTempN.toArray());
 	}
 	
 	/*
 	 * Creates two different highlighting styles for create and context
 	 */
 	protected void addStyles(mxGraph graph) {
-
+		
+		//mxStylesheet stylesheet = graph.getStylesheet();
 		mxStylesheet stylesheetCreated = graph.getStylesheet();
-		Hashtable<String, Object> cellStyleCreated = new Hashtable<String, Object>();
-		cellStyleCreated.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_RECTANGLE);
-		cellStyleCreated.put(mxConstants.STYLE_OPACITY, 90);
-		cellStyleCreated.put(mxConstants.STYLE_FONTCOLOR, "#000000");
-		cellStyleCreated.put(mxConstants.STYLE_FONTSIZE, "13");
-		cellStyleCreated.put(mxConstants.STYLE_FILLCOLOR, "#76b32a");
-		cellStyleCreated.put(mxConstants.ALIGN_CENTER, "1");
-		cellStyleCreated.put(mxConstants.STYLE_OVERFLOW, "hidden");
-		stylesheetCreated.putCellStyle("CreateNode", cellStyleCreated); // Create
+		Hashtable<String, Object> cellStyleCreate = new Hashtable<String, Object>();
+		cellStyleCreate.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_RECTANGLE);
+		cellStyleCreate.put(mxConstants.STYLE_OPACITY, 90);
+		cellStyleCreate.put(mxConstants.STYLE_FONTCOLOR, "#000000");
+		cellStyleCreate.put(mxConstants.STYLE_FONTSIZE, "13");
+		cellStyleCreate.put(mxConstants.STYLE_FILLCOLOR, "#76b32a");
+		cellStyleCreate.put(mxConstants.ALIGN_CENTER, "1");
+		cellStyleCreate.put(mxConstants.STYLE_OVERFLOW, "hidden");
+		stylesheetCreated.putCellStyle("CreateNode", cellStyleCreate); // Create
+		//mxStylesheet.putCellStyle("CreateNode", cellStyleCreate); // Create
 		
 		mxStylesheet stylesheetContex = graph.getStylesheet();
 		Hashtable<String, Object> cellStyleContex = new Hashtable<String, Object>();
@@ -278,7 +369,47 @@ public abstract class TGGDemonstrator implements UserControlArea{
 		cellStyleContex.put(mxConstants.STYLE_OVERFLOW, "hidden");
 		cellStyleContex.put(mxConstants.STYLE_STROKEWIDTH, "3");
 		cellStyleContex.put(mxConstants.STYLE_STROKECOLOR, "#000000");
-		stylesheetContex.putCellStyle("ContextNode", cellStyleContex);	
+		stylesheetContex.putCellStyle("ContextNode", cellStyleContex);
+		//stylesheet.putCellStyle("ContextNode", cellStyleContex);
+		
+		mxStylesheet stylesheetEContex = graph.getStylesheet();
+		Hashtable<String, Object> edgeStyleCreate = new Hashtable<String, Object>();
+		edgeStyleCreate.put(mxConstants.STYLE_FONTCOLOR, "#000000");
+		edgeStyleCreate.put(mxConstants.STYLE_OPACITY, 90);
+		edgeStyleCreate.put(mxConstants.STYLE_FONTSIZE, "10");
+		edgeStyleCreate.put(mxConstants.STYLE_FILLCOLOR, "#FFFFFF");
+		edgeStyleCreate.put(mxConstants.ALIGN_LEFT, "1");
+		edgeStyleCreate.put(mxConstants.STYLE_OVERFLOW, "fill");
+		edgeStyleCreate.put(mxConstants.STYLE_STROKEWIDTH, "2");
+		edgeStyleCreate.put(mxConstants.STYLE_STROKECOLOR, "#76b32a");
+		stylesheetEContex.putCellStyle("CreateEdge", edgeStyleCreate);
+		
+		mxStylesheet stylesheetECreate = graph.getStylesheet();
+		Hashtable<String, Object> edgeStyleContex = new Hashtable<String, Object>();
+		edgeStyleContex.put(mxConstants.STYLE_FONTCOLOR, "#000000");
+		edgeStyleContex.put(mxConstants.STYLE_OPACITY, 90);
+		edgeStyleContex.put(mxConstants.STYLE_FONTSIZE, "10");
+		edgeStyleContex.put(mxConstants.STYLE_FILLCOLOR, "#FFFFFF");
+		edgeStyleContex.put(mxConstants.ALIGN_LEFT, "1");
+		edgeStyleContex.put(mxConstants.STYLE_OVERFLOW, "fill");
+		edgeStyleContex.put(mxConstants.STYLE_STROKEWIDTH, "2");
+		edgeStyleContex.put(mxConstants.STYLE_STROKECOLOR, "#000000");
+		//edgeStyleContex.put(mxConstants., edgeStyleContex)
+		//stylesheet.putCellStyle("ContextEdge", edgeStyleContex);
+		stylesheetECreate.putCellStyle("ContextEdge", edgeStyleContex);
+	}
+	
+	
+	//implemented methods from interface
+	
+	@Override
+	public String buttonTranslateTxt() {
+		return "Start Translation";
+	}
+	
+	@Override
+	public Combo createComboBox(Group g) {
+		return new Combo(g, SWT.DROP_DOWN | SWT.READ_ONLY);
 	}
 	
 	

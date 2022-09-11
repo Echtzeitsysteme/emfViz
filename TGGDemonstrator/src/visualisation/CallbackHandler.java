@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Display;
 import org.emoflon.ibex.tgg.operational.matches.ITGGMatch;
@@ -20,6 +21,7 @@ public class CallbackHandler {
 	private Set<ITGGMatch> matches = new HashSet<> ();
 	private ITGGMatch selectedMatch;
 	private Combo combo = null;
+	private Button button = null;
 	private VisContentAdapter srcContentAdapter = null;
 	private VisContentAdapter trgContentAdapter = null;
 	private String lastProcessedGraph = "SRC";
@@ -122,6 +124,32 @@ public class CallbackHandler {
 	
 	public ITGGMatch getSelectedMatch() {
 		return selectedMatch;
+	}
+	
+	/*
+	 * Register translate model button to keep it in sync
+	 */
+	public Button registerTranslateButton(Button button) {
+		if (this.button != null)
+			return this.button;
+		
+		this.button = button;
+		
+		return this.button;
+	}
+	
+	/*
+	 * Updates title of the translate button
+	 */
+	public void setButtonTitle(String title) {
+		if (button == null)
+			return;
+		
+		Display.getDefault().asyncExec(new Runnable() {
+		    public void run() {
+		    	button.setText(title);
+		    }
+		});
 	}
 	
 	//-------------------------- VisContentAdapter -------------------------------	

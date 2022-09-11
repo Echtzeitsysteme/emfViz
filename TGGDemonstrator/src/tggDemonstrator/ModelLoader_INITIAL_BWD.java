@@ -151,6 +151,8 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 		highlightingGraphAlgorithm(visSrc, visTrg, "CreateNode","ContextNode");
 	}
 	
+	// Implemented methods from interface
+	
 	/*
 	 * Continues backward translation of the target model
 	 */
@@ -167,17 +169,6 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 			System.out.println(e);
 		}
 	}
-	
-	@Override
-	public String buttonTranslateTxt() {
-		// TODO Auto-generated method stub
-		return "Translate Backward";
-	}
-
-	@Override
-	public Combo createComboBox(Group g) {
-		return new Combo(g, SWT.DROP_DOWN | SWT.READ_ONLY);
-	}
 
 	@Override
 	public boolean isFrameSourceActive() {
@@ -190,24 +181,19 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 		// TODO Auto-generated method stub
 		return true;
 	}
-	
-	@Override
-	public String returnButtonTitle() {
-		return thread.getNewTranslateButtonTitle();
-	}
-
 }
 
 class BWDThread extends ModelLoaderThread{
 	
 	private INITIAL_BWD bwd;
-	protected String translateButtonTitle = "Translate Backward";
 	
 	
 	public BWDThread (INITIAL_BWD bwd) {
 		super();
 		
 		this.bwd = bwd;
+		
+		translateButtonTitle = "Translate Backward";
 	}
 
 	@Override
@@ -233,6 +219,7 @@ class BWDThread extends ModelLoaderThread{
 					
 					
 					match = callbackHandler.getSelectedMatch();
+					
 					if(match == null) {
 						//if no match is selected then just use the next match
 						match = matchContainer.getNext();

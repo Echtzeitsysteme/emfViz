@@ -135,10 +135,6 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 		
 		loadingOption = LoadingOption.NewModel;
 		
-		// create empty models  -- falsches vorgehen! --> boolean im constructor im modelgen zur unterscheidung zw. load und createResource
-		
-		
-		
 		// set basic stop criterion
 		MODELGENStopCriterion stop = new MODELGENStopCriterion(modelgen.getTGG());
 		modelgen.setStopCriterion(stop);
@@ -153,13 +149,7 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 		highlightingGraphAlgorithm(visSrc, visTrg, "CreateNode","ContextNode");
 	}
 	
-	@Override
-	public String buttonTranslateTxt() {
-		if (loadingOption == loadingOption.NewModel)
-			return "New Model";
-		else
-			return "Next Step";
-	}
+	// Implemented methods from interface
 
 	@Override
 	public void buttonTranslateFunction() {
@@ -176,11 +166,6 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 	}
 	
 	@Override
-	public Combo createComboBox(Group g) {
-		return new Combo(g, SWT.DROP_DOWN | SWT.READ_ONLY);
-	}
-	
-	@Override
 	public boolean isFrameSourceActive() {
 		// TODO Auto-generated method stub
 		return false;
@@ -191,11 +176,6 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 		// TODO Auto-generated method stub
 		return false;
 	}
-	
-	@Override
-	public String returnButtonTitle() {
-		return thread.getNewTranslateButtonTitle();
-	}
 }
 
 
@@ -203,12 +183,13 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 class ModelgenThread extends ModelLoaderThread{
 	
 	private MODELGEN modelgen;
-	protected String translateButtonTitle = "Next Step";
 	
 	public ModelgenThread(MODELGEN m) {
 		super();
 		
 		this.modelgen = m;
+		
+		translateButtonTitle = "Next Step";
 
 	}
 

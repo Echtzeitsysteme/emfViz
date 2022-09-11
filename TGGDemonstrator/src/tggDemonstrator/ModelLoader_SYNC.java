@@ -144,6 +144,9 @@ public class ModelLoader_SYNC extends TGGDemonstrator{
 		return "Translate";
 	}
 
+	
+	// Implemented methods from interface
+	
 	/*
 	 * Continues graph sync function 
 	 */
@@ -160,14 +163,7 @@ public class ModelLoader_SYNC extends TGGDemonstrator{
 			System.out.println(e);
 		}
 	}
-
-
-	@Override
-	public Combo createComboBox(Group g) {
-		return new Combo(g, SWT.DROP_DOWN | SWT.READ_ONLY);
-	}
-
-
+	
 	@Override
 	public boolean isFrameSourceActive() {
 		// TODO Auto-generated method stub
@@ -180,22 +176,18 @@ public class ModelLoader_SYNC extends TGGDemonstrator{
 		// TODO Auto-generated method stub
 		return true;
 	}
-	
-	@Override
-	public String returnButtonTitle() {
-		return thread.getNewTranslateButtonTitle();
-	}
 }
 
 class SYNCThread extends ModelLoaderThread{
 	
 	private SYNC sync;
-	protected String translateButtonTitle = "Translate";
 	
 	public SYNCThread(SYNC sync) {
 		super();
 		
 		this.sync = sync;
+		
+		translateButtonTitle = "Translate";
 	}
 
 	@Override
