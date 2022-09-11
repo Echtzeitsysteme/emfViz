@@ -13,8 +13,6 @@ public interface UserControlArea {
 	
 	public void buttonTranslateFunction();
 	
-	public String returnButtonTitle();
-	
 	public Combo createComboBox(Group g);
 	
 	public boolean isFrameSourceActive();

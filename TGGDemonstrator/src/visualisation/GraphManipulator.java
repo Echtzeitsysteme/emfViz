@@ -80,10 +80,10 @@ public class GraphManipulator {
 	public GraphManipulator(TggVisualizer vis, Display display, InstanceDiagrammLoader loader, TGGDemonstrator modelLoader, boolean isSource, GraphType type) {
 
 		this.vis = vis;
-		this.display = display; //aus vis?
+		this.display = display;
 		this.resource = loader.getInstanceModel();
 		this.loader = loader;
-		this.modelLoader = modelLoader; //aus vis?
+		this.modelLoader = modelLoader;
 		this.isSource = isSource;
 		this.type = type;
 		
@@ -371,9 +371,8 @@ public class GraphManipulator {
 				}
 			}
 	        graphComponent.add(popupMenu);
-	        //mxPoint pos = graph.getView().getPoint(graph.getView().getState(target));
-	        //popupMenu.show(graphComponent , (int)pos.getX(), (int)pos.getY());
-	        popupMenu.show(graphComponent, 100, 100);
+	        mxPoint pos = graph.getView().getPoint(graph.getView().getState(source));
+	        popupMenu.show(graphComponent, (int)pos.getX(), (int)pos.getY());
 	        
 	        graph.getModel().remove(cellAtPos);
 		}
@@ -478,8 +477,7 @@ public class GraphManipulator {
 			    callback.updateGraph();
 			    callback.setLastProcessedGraph(getGraphTypeName());
 			}
-			});
-		
+		});
 	}
 	
 	private void setAttributes() {
@@ -530,7 +528,8 @@ public class GraphManipulator {
 				else {
 					Text txt = new Text(composite, SWT.BORDER | SWT.TRAIL);
 					txt.setLayoutData(new GridData(SWT.FILL, SWT.None, true, false));
-					if(attr.getDefaultValueLiteral() != null) txt.setText(nodeInModel.eGet(attr).toString());
+					if (nodeInModel.eGet(attr) != null)
+						txt.setText(nodeInModel.eGet(attr).toString());
 					txtMap.put(attr, txt);
 				}
 				//verify that input is of correct type for the attribute

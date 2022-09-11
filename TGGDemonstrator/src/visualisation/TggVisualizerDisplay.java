@@ -17,6 +17,8 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 
+import com.mxgraph.view.mxGraph;
+
 import graphVisualization.InstanceDiagrammLoader;
 import graphVisualization.Visualizer;
 import tggDemonstrator.ModelLoader_MODELGEN;
@@ -157,19 +159,7 @@ public class TggVisualizerDisplay {
 		
 		buttonGroupStandard.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,false));
 		buttonGroupStandard.setText("Standard Functionalities");
-		buttonGroupStandard.setLayout(new GridLayout(3, true));
-		
-		//button to go back to start window --> not working proper
-		Button backButton = new Button(buttonGroupStandard, SWT.PUSH);
-		backButton.setText("Back");
-		
-		backButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-            public void widgetSelected(SelectionEvent evt) {
-				//handler.openTggLoadModelDisplay();
-			}
-		});
-		
+		buttonGroupStandard.setLayout(new GridLayout(3, true));	
 
 		Button resetHighlighButton = new Button(buttonGroupStandard, SWT.PUSH);
 		resetHighlighButton.setText("Reset Highlighting");
@@ -183,7 +173,9 @@ public class TggVisualizerDisplay {
 			}
 		});
 		
-		// TODO: add an reset button?
+		// TODO: add a reset model button?
+		// TODO: add a back to start window button
+		// TODO: add a model save button
 		
 		/*model generation functionalities (depending on strategy)*/
 		Group buttonGroupModelGeneration = new Group(comp, SWT.None);
@@ -194,6 +186,8 @@ public class TggVisualizerDisplay {
 		
 		Button translateButton = new Button(buttonGroupModelGeneration, SWT.PUSH);
 		translateButton.setText(modelLoader.buttonTranslateTxt());
+		
+		callbackHandler.registerTranslateButton(translateButton);
 		
 		// Combo box to select the next match that will be performed after pressing the translate button
 		Combo combo = modelLoader.createComboBox(buttonGroupModelGeneration);
@@ -241,14 +235,22 @@ public class TggVisualizerDisplay {
 					
 					modelLoader.highlightGraph((TggVisualizer)visSrc, (TggVisualizer)visTrg);
 					
-					/*if (modelLoader instanceof ModelLoader_MODELGEN) {
-						translateButton.setText("Next Step");
-					}*/
 				}
 				
-				translateButton.setText(modelLoader.returnButtonTitle());
-				
 				lastHiglightedRuleIndex = -1;
+				
+				/*mxGraph graphSrc = visSrc.getGraph();
+				mxGraph graphTrg = visTrg.getGraph();
+				graphSrc.refresh();
+				graphTrg.refresh();*/
+				
+				callbackHandler.updateGraph();
+				
+				frameSrc.revalidate();
+				frameTrg.revalidate();
+				
+				frameSrc.repaint();
+				frameTrg.repaint();
 			}
 		});
 	}

@@ -153,15 +153,14 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 		highlightingGraphAlgorithm(visSrc, visTrg, "CreateNode","ContextNode");
 	}
 	
+	// Implemented methods from interface
+	
 	/*
 	 * Continues forward translation of the source model
 	 */
 	@Override
 	public void buttonTranslateFunction() {
 		//next step functionalities
-		
-		System.out.println("Button Next Rule is clicked...");
-		
 		try {
 			
 			thread.wakeUp();
@@ -169,18 +168,6 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 		}catch(Exception e) {
 			System.out.println(e);
 		}
-	}
-	
-
-	@Override
-	public String buttonTranslateTxt() {
-		return "Translate Forward";
-	}
-
-
-	@Override
-	public Combo createComboBox(Group g) {
-		return new Combo(g, SWT.DROP_DOWN | SWT.READ_ONLY);
 	}
 
 	@Override
@@ -194,24 +181,19 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 		// TODO Auto-generated method stub
 		return false;
 	}
-	
-	@Override
-	public String returnButtonTitle() {
-		return thread.getNewTranslateButtonTitle();
-	}
-
 }
 
 
 class FWDThread extends ModelLoaderThread{
 	
 	private INITIAL_FWD fwd;
-	protected String translateButtonTitle = "Translate Forward";
 	
 	public FWDThread (INITIAL_FWD fwd) {
 		super();
 		
 		this.fwd = fwd;
+		
+		translateButtonTitle = "Translate Forward";
 	}
 
 	@Override
@@ -223,6 +205,7 @@ class FWDThread extends ModelLoaderThread{
 				ITGGMatch match = null;
 				
 				callbackHandler.updateGraph();
+				
 				try {
 					
 					matches = matchContainer.getMatches();
@@ -231,7 +214,6 @@ class FWDThread extends ModelLoaderThread{
 					
 					System.out.println("Thread " + getId() + " sleeps for a very long time!");
 					sleep(Long.MAX_VALUE);
-
 					
 				} catch (InterruptedException e) {
 					
