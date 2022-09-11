@@ -321,6 +321,7 @@ public class GraphManipulator {
 						edgeItem.addActionListener(new ActionListener() {
 							@Override
 							public void actionPerformed(ActionEvent e) {
+								graph.getModel().remove(cellAtPos);
 								createSpecificEdge(src, trg, eRef);
 							}
 						});
@@ -332,6 +333,7 @@ public class GraphManipulator {
 					edgeItem.addActionListener(new ActionListener() {
 						@Override
 						public void actionPerformed(ActionEvent e) {
+							graph.getModel().remove(cellAtPos);
 							createSpecificEdge(src, trg, eRef);
 						}
 					});
@@ -340,8 +342,8 @@ public class GraphManipulator {
 			graphComponent.add(popupMenu);
 			mxPoint pos = graph.getView().getPoint(graph.getView().getState(source));
 			popupMenu.show(graphComponent, (int) pos.getX(), (int) pos.getY());
-
-			graph.getModel().remove(cellAtPos);
+			
+			
 		}
 
 	}
@@ -352,7 +354,7 @@ public class GraphManipulator {
 			EMFManipulationUtils.deleteEdge(src, (EObject) src.eGet(eRef), eRef);
 			EMFManipulationUtils.createEdge(src, trg, eRef);
 		} else if (eRef.isContainment() && trg.eContainmentFeature() != null) {
-
+			//delete edge from old source to target; NOT FUNCTIONAL YET
 			EMFManipulationUtils.deleteEdge(trg.eContainmentFeature().eContainer(), trg, eRef);
 			EMFManipulationUtils.createEdge(src, trg, eRef);
 		} else {
