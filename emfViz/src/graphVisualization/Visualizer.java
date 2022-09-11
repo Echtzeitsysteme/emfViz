@@ -147,7 +147,6 @@ public class Visualizer {
 	}
 	
 	protected void insertNewNodeIntoGraph(Node node, double x, double y) {
-		System.out.println("NEW NODE IN GRAPH");
 		dataLoader.nodes.add(node);
 		graph.insertVertex(graph.getDefaultParent(), String.valueOf(node.hashCode()), node, x, y, defaultNodeWidth,
 				defaultNodeHeight, node.styleCategory);

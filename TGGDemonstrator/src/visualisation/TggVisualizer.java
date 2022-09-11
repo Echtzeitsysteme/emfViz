@@ -52,26 +52,7 @@ public class TggVisualizer extends Visualizer{
 		
 		graphComponent = new mxGraphComponent(graph);
 		graph.setAllowDanglingEdges(false);
-		/*graph.getModel().addListener(mxEvent.CHANGE, (sender, evt) -> {
-			System.out.println(evt.getName() + " ---- " + evt);
-			var changes = evt.getProperty("changes");
-			if(changes instanceof Iterable<?> it) {
-				for(var change : it) {
-					if(change instanceof mxChildChange childChange) {
-						var child = childChange.getChild();
-						if(child instanceof mxCell cell) {
-							if(cell.isEdge()) {
-								if(!(cell.getValue() instanceof Edge))
-									System.out.println("Detected new edge without value: " + cell);
-								else {
-									System.out.println("Detected new edge: " + cell);
-								}
-							}
-						}
-					}
-				}				
-			}
-		});*/
+
 		frame.add(graphComponent);
 	}
 

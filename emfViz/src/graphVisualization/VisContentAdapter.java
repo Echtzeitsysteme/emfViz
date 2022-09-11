@@ -189,7 +189,7 @@ public class VisContentAdapter extends EContentAdapter {
 		EReference ref = (EReference) notification.getFeature();
 		if (ref.isContainment()) {
 			// if reference is a containment then the both the edge and the target node are new
-			if(isNew(notification.getNewValue()))
+			//if(isNew(notification.getNewValue()))
 				vis.insertNodeIntoGraph(new Node((EObject) notification.getNewValue()));
 			vis.insertEdgeIntoGraph(new Edge((EObject) notification.getNotifier(), (EObject) notification.getNewValue(), ref));
 		} else {
@@ -221,8 +221,8 @@ public class VisContentAdapter extends EContentAdapter {
 	}
 
 	private void handleRemoveAdapterNotification(Notification notification) {
-		/*if (isDeleted(notification.getOldValue()))
-			vis.removeNodeInGraph(new Node((EObject) notification.getNotifier()));*/
+		if (isDeleted(notification.getOldValue()))
+			vis.removeNodeInGraph(new Node((EObject) notification.getNotifier()));
 		
 	}
 
@@ -236,7 +236,12 @@ public class VisContentAdapter extends EContentAdapter {
 		}
 
 		if (notification.getFeature() instanceof EAttribute attr) {
-			throw new UnsupportedOperationException("Attribute changes are not yet implemented");
+			/*if(notification.getOldValue().equals(notification.getNewValue())) {
+				vis.removeNodeInGraph(new Node((EObject) notification.getNotifier()));
+				vis.insertNodeIntoGraph(new Node((EObject) notification.getNotifier()));
+			}*/
+			return;
+			//throw new UnsupportedOperationException("Attribute changes are not yet implemented");
 		}
 
 		throw new UnsupportedOperationException(
