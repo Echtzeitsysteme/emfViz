@@ -140,6 +140,13 @@ public class DisplayHandler {
 		return manipTrg;
 	}
 	
+	public TggVisualizer getSrcTggVisualizer() {
+		return visSrc;
+	}
+	public TggVisualizer getTrgTggVisualizer() {
+		return visTrg;
+	}
+	
 	public void openTggLoadModelDisplay() {
 		resetShell();
 		

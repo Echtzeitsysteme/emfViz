@@ -5,19 +5,23 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.emoflon.ibex.tgg.operational.matches.ITGGMatch;
 
 import graphVisualization.VisContentAdapter;
 import graphVisualization.Visualizer;
+import tggDemonstrator.TGGDemonstrator;
 
 public class CallbackHandler {
 	
 	
 	private static CallbackHandler instance;
 	
+	private TGGDemonstrator demon;
 	private Set<ITGGMatch> matches = new HashSet<> ();
 	private ITGGMatch selectedMatch;
 	private Combo combo = null;
@@ -25,6 +29,7 @@ public class CallbackHandler {
 	private VisContentAdapter srcContentAdapter = null;
 	private VisContentAdapter trgContentAdapter = null;
 	private String lastProcessedGraph = "SRC";
+	private Boolean translationIsDone = false;
 	
 	private CallbackHandler() {
 	}
@@ -41,6 +46,14 @@ public class CallbackHandler {
 	 * This section of the CallbackHandler provides functions 
 	 * to keep the visualization (select next step) and the model generation (execute selected step) in sync 
 	 */
+	
+	public TGGDemonstrator getTGGDemonstratorInstance(TGGDemonstrator demon) {
+		if (this.demon == null)
+			this.demon = demon;
+		
+		return this.demon;
+	}
+	
 	
 	
 	public void setMatches(Set<ITGGMatch> matches) {
@@ -73,7 +86,9 @@ public class CallbackHandler {
 		    }
 		});
 	}
-	
+	/*
+	 * Use index number of the selected item from the combo box to get the selected match
+	 */
 	public void setSelectedMatch(int selectionNo) {
 		
 		int indexList = 0;
@@ -90,6 +105,7 @@ public class CallbackHandler {
 	}
 	
 	/**
+	 * Set the selected match
 	 * 
 	 * @param match
 	 */
@@ -122,6 +138,10 @@ public class CallbackHandler {
 		return this.combo;
 	}
 	
+	
+	/*
+	 * Returns the selected Match
+	 */
 	public ITGGMatch getSelectedMatch() {
 		return selectedMatch;
 	}
@@ -150,6 +170,19 @@ public class CallbackHandler {
 		    	button.setText(title);
 		    }
 		});
+	}
+	
+	/*
+	 * Is used by the Thread Class to say that the translation process is done!
+	 */
+	public void setTranslationIsDone(Boolean done) {
+		translationIsDone = done;
+	}
+	/*
+	 * Returns whether the translation process is finished or not
+	 */
+	public Boolean getTranslationIsDone() {
+		return translationIsDone;
 	}
 	
 	//-------------------------- VisContentAdapter -------------------------------	

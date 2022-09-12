@@ -189,7 +189,7 @@ public class VisContentAdapter extends EContentAdapter {
 		EReference ref = (EReference) notification.getFeature();
 		if (ref.isContainment()) {
 			// if reference is a containment then the both the edge and the target node are new
-			//if(isNew(notification.getNewValue()))
+			if(isNew(notification.getNewValue())) //JL ADDED
 				vis.insertNodeIntoGraph(new Node((EObject) notification.getNewValue()));
 			vis.insertEdgeIntoGraph(new Edge((EObject) notification.getNotifier(), (EObject) notification.getNewValue(), ref));
 		} else {
@@ -208,7 +208,7 @@ public class VisContentAdapter extends EContentAdapter {
 		// if the node was removed from the resource but will be readded later -> don't
 		// remove it
 		if (notification.getFeature() == null) {
-			if (isDeleted(notification.getOldValue()))
+			//if (isDeleted(notification.getOldValue()))
 				vis.removeNodeInGraph(new Node((EObject) notification.getOldValue()));
 			return;
 		}

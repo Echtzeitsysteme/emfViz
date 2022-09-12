@@ -61,7 +61,8 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 		String pathProjectTemp = pathProject;
 		
 		//ERROR check
-		if (!pathTrg.equals(" ") || !pathTrg.equals(""))
+		if (pathTrg.isBlank())
+			return;
 			
 		if (pathProjectTemp.equals(" ") || pathProjectTemp.equals("")) {
 			pathProjectTemp = projectPath + "/instances/";

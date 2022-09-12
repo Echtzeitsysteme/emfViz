@@ -66,7 +66,7 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 		String pathProjectTemp = pathProject;
 		
 		//ERROR check
-		if (!pathSrc.equals(" ") || !pathSrc.equals(""))
+		if (pathSrc.isBlank())
 			return;
 			
 		if (pathProjectTemp.equals(" ") || pathProjectTemp.equals("")) {

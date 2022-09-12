@@ -409,5 +409,9 @@ public class Visualizer {
 	public mxGraph getGraph() {
 		return graph;
 	}
+	
+	public mxGraphComponent getGraphComponent() {
+		return graphComponent;
+	}
 
 }

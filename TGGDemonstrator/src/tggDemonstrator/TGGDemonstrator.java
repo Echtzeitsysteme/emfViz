@@ -67,6 +67,8 @@ public abstract class TGGDemonstrator implements UserControlArea{
 		workspacePath = wP;
 		
 		callbackHandler = CallbackHandler.getInstance();
+		
+		callbackHandler.getTGGDemonstratorInstance(this);
 	}
 	
 	/*
@@ -472,6 +474,13 @@ public abstract class TGGDemonstrator implements UserControlArea{
 	 */
 	public LoadingOption getLoadingOption() {
 		return loadingOption;
+	}
+	
+	/*
+	 * Returns DisplayHandler
+	 */
+	public DisplayHandler getDisplayHandler() {
+		return graphVisualizer;
 	}
 }
 

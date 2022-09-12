@@ -48,7 +48,7 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 		// TODO Auto-generated method stub
 		String pathProjectTemp = pathProject;
 		
-		if (pathSrc.equals("") || pathTrg.equals(" "))
+		if (pathSrc.isBlank() || pathTrg.isBlank())
 			return;		
 			
 		if (pathProjectTemp.equals("") || pathProjectTemp.equals(" "))

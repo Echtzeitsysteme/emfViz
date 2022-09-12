@@ -24,8 +24,9 @@ public abstract class ModelLoaderThread extends Thread {
 		initialize();
 		
 		while (true) {
-			callbackHandler.setButtonTitle("Start Translation Process"); //process 
 			
+			callbackHandler.setButtonTitle("Start Translation Process"); //process 
+			callbackHandler.setTranslationIsDone(false);
 
 			try {
 				//Thread sleeps until translate button with title "Start Translation" is pressed for the first time
@@ -41,9 +42,12 @@ public abstract class ModelLoaderThread extends Thread {
 				matches = new HashSet<> ();
 				callbackHandler.setMatches(matches);
 				
-			//	callbackHandler.setButtonTitle("Start Translation Process");
+				callbackHandler.setButtonTitle("Start Translation Process");
+				
+				callbackHandler.getTGGDemonstratorInstance(null).removeGraphHighlighting(callbackHandler.getTGGDemonstratorInstance(null).getDisplayHandler().getTrgTggVisualizer());
+				callbackHandler.getTGGDemonstratorInstance(null).removeGraphHighlighting(callbackHandler.getTGGDemonstratorInstance(null).getDisplayHandler().getSrcTggVisualizer());
 
-				callbackHandler.updateGraph();
+				//callbackHandler.updateGraph();
 			}
 		}
 	}

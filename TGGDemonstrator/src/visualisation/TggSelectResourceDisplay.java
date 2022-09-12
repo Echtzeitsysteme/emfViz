@@ -70,6 +70,10 @@ public class TggSelectResourceDisplay {
 		composite.setLayout(new GridLayout());
 		
 		//create groups
+		Group projectGroup = new Group(composite, SWT.None);
+		projectGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));	
+		projectGroup.setLayout(new GridLayout(2, false));
+		
 		Group srcGroup = new Group(composite, SWT.None);
 		srcGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		srcGroup.setLayout(new GridLayout(2, false));
@@ -86,9 +90,28 @@ public class TggSelectResourceDisplay {
 		protocolGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));	
 		protocolGroup.setLayout(new GridLayout(2, false));
 		
-		Group projectGroup = new Group(composite, SWT.None);
-		projectGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));	
-		projectGroup.setLayout(new GridLayout(2, false));
+		// create widgets for project location
+		Label projectLabel = new Label(projectGroup, SWT.NONE);
+		projectLabel.setText("Select project location (optional):");
+		
+		Button projectButton = new Button(projectGroup, SWT.PUSH);
+		projectButton.setText("Location");
+		projectButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+		
+		Text projectTxt = new Text(projectGroup, SWT.NONE);
+		
+		GridData gridDataProject = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gridDataProject.widthHint = 300;
+		
+		projectTxt.setLayoutData(gridDataProject);
+		
+		projectButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent pSelectionEvent) {
+				projectTxt.setText(openDirectoryDialog());
+			}
+		});
+		
 		
 		//create widgets for source location
 		Label srcLabel = new Label(srcGroup, SWT.NONE);
@@ -178,28 +201,6 @@ public class TggSelectResourceDisplay {
 			}
 		});
 		
-		// create widgets for project location
-		Label projectLabel = new Label(projectGroup, SWT.NONE);
-		projectLabel.setText("Select project location (optional):");
-		
-		Button projectButton = new Button(projectGroup, SWT.PUSH);
-		projectButton.setText("Location");
-		projectButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
-		
-		Text projectTxt = new Text(projectGroup, SWT.NONE);
-		
-		GridData gridDataProject = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gridDataProject.widthHint = 300;
-		
-		projectTxt.setLayoutData(gridDataProject);
-		
-		projectButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent pSelectionEvent) {
-				projectTxt.setText(openDirectoryDialog());
-			}
-		});
-		
 		//control buttons / composite - back and forward(next)
 		Composite compositeCtrl = new Composite(shell, SWT.EMBEDDED);
 		compositeCtrl.setVisible(true);
@@ -231,7 +232,7 @@ public class TggSelectResourceDisplay {
 		
 		if (modelLoader instanceof ModelLoader_INITIAL_BWD)
 			srcLabel.setText("Select your source xmi (optional):");
-		else if (modelLoader instanceof ModelLoader_INITIAL_BWD)
+		else if (modelLoader instanceof ModelLoader_INITIAL_FWD)
 			trgLabel.setText("Select your target xmi (optional):");
 			
 		

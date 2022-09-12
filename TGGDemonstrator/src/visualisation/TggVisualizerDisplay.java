@@ -229,7 +229,7 @@ public class TggVisualizerDisplay {
 		translateButton.addSelectionListener(new SelectionAdapter() {
 			@Override
             public void widgetSelected(SelectionEvent evt) {
-				System.out.println("translate button is pressed!");
+				//System.out.println("translate button is pressed!");
 				
 				if (combo != null) {
 					callbackHandler.setSelectedMatch(combo.getSelectionIndex());
@@ -243,13 +243,19 @@ public class TggVisualizerDisplay {
 				lastHiglightedRuleIndex = -1;
 					
 				// a dirty try to fix frame update bugs
-				callbackHandler.updateGraph();
+				/*callbackHandler.updateGraph();
+				
+				visSrc.getGraph().refresh();
+				visSrc.getGraphComponent().refresh();
+				
+				visTrg.getGraph().refresh();
+				visTrg.getGraphComponent().refresh();
 				
 				frameSrc.revalidate();
 				frameTrg.revalidate();
 				
 				frameSrc.repaint();
-				frameTrg.repaint();
+				frameTrg.repaint();*/
 			}
 		});
 	}
