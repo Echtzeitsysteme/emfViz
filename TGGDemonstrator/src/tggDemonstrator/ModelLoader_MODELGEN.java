@@ -144,6 +144,15 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 		
 	}
 	
+	public void saveModels() {
+		try {
+			modelgen.saveModels();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	@Override
 	public void highlightGraph(TggVisualizer visSrc, TggVisualizer visTrg) {
 		/*

@@ -134,6 +134,16 @@ public class ModelLoader_SYNC extends TGGDemonstrator{
 	}
 	
 	@Override
+	public  void saveModels() {
+		try {
+			sync.saveModels();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	@Override
 	public void highlightGraph(TggVisualizer visSrc, TggVisualizer visTrg) {
 		/*
 		 * Possibility of new implementation for further adjustments 
@@ -184,7 +194,7 @@ class SYNCThread extends ModelLoaderThread{
 		
 		this.sync = sync;
 		
-		translateButtonTitle = "Translate";
+		translateButtonTitle = "Next Step";
 	}
 
 	@Override

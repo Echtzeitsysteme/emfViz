@@ -67,7 +67,7 @@ public class TggLoadModelDisplay {
 		defaultButton.setText("Default");
 		
 		Button newModeltButton = new Button(modelGroup, SWT.RADIO);
-		newModeltButton.setText("New Model");
+		newModeltButton.setText("New Models");
 		
 		Button modelLocationButton = new Button(modelGroup, SWT.RADIO);
 		modelLocationButton.setText("Select Model");
@@ -106,7 +106,7 @@ public class TggLoadModelDisplay {
 			
 			break;
 			
-		case "New Model":
+		case "New Models":
 			System.out.println("selected loading option: " + text );
 			
 			//generate a new model

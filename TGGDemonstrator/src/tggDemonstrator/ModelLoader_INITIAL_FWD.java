@@ -149,6 +149,16 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 	}
 	
 	@Override
+	public  void saveModels() {
+		try {
+			fwd.saveModels();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	@Override
 	public void highlightGraph(TggVisualizer visSrc, TggVisualizer visTrg) {
 		/*
 		 * Possibility of new implementation for further adjustments 
@@ -196,7 +206,7 @@ class FWDThread extends ModelLoaderThread{
 		
 		this.fwd = fwd;
 		
-		translateButtonTitle = "Translate Forward";
+		translateButtonTitle = "Next Step";
 	}
 
 	@Override

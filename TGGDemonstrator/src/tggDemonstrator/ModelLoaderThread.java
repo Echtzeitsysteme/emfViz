@@ -46,8 +46,6 @@ public abstract class ModelLoaderThread extends Thread {
 				
 				callbackHandler.getTGGDemonstratorInstance(null).removeGraphHighlighting(callbackHandler.getTGGDemonstratorInstance(null).getDisplayHandler().getTrgTggVisualizer());
 				callbackHandler.getTGGDemonstratorInstance(null).removeGraphHighlighting(callbackHandler.getTGGDemonstratorInstance(null).getDisplayHandler().getSrcTggVisualizer());
-
-				//callbackHandler.updateGraph();
 			}
 		}
 	}

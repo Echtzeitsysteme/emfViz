@@ -148,6 +148,16 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 	}
 	
 	@Override
+	public void saveModels() {
+		try {
+			bwd.saveModels();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	@Override
 	public void highlightGraph(TggVisualizer visSrc, TggVisualizer visTrg) {
 		/*
 		 * Possibility of new implementation for further adjustments 
@@ -197,7 +207,7 @@ class BWDThread extends ModelLoaderThread{
 		
 		this.bwd = bwd;
 		
-		translateButtonTitle = "Translate Backward";
+		translateButtonTitle = "Next Step";
 	}
 
 	@Override
@@ -230,7 +240,7 @@ class BWDThread extends ModelLoaderThread{
 					}
 				}
 				
-				System.out.println("FWD_Match: " + match.getRuleName());
+				System.out.println("BWD_Match: " + match.getRuleName());
 				
 				return match;			
 			}

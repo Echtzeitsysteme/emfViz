@@ -161,7 +161,7 @@ public class TggVisualizerDisplay {
 		// TODO: add a model save button
 		
 		
-		/*
+		
 		Group buttonGroupStandard = new Group(comp, SWT.None);
 		
 		buttonGroupStandard.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,false));
@@ -169,16 +169,15 @@ public class TggVisualizerDisplay {
 		buttonGroupStandard.setLayout(new GridLayout(3, true));	
 
 		Button resetHighlighButton = new Button(buttonGroupStandard, SWT.PUSH);
-		resetHighlighButton.setText("Reset Highlighting");
+		resetHighlighButton.setText("Save Models");
 		
 		resetHighlighButton.addSelectionListener(new SelectionAdapter() {
 			@Override
             public void widgetSelected(SelectionEvent evt) {
 				//modelLoader.highlightGraph((TggVisualizer)visSrc, (TggVisualizer)visTrg);
-				modelLoader.removeGraphHighlighting((TggVisualizer)visSrc);
-				modelLoader.removeGraphHighlighting((TggVisualizer)visTrg);
+				modelLoader.saveModels();
 			}
-		});*/
+		});
 		
 		/*model generation functionalities (depending on strategy)*/
 		Group buttonGroupModelGeneration = new Group(comp, SWT.None);

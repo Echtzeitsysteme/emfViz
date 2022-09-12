@@ -99,6 +99,11 @@ public abstract class TGGDemonstrator implements UserControlArea{
 	public abstract void createResourcesFromPath(String pathSrc, String pathTrg,  String pathCorr, String pathProtocol, String pathProject);
 	
 	/*
+	 * Save Models
+	 */
+	public abstract void saveModels();
+	
+	/*
 	 * Starts the ModelLoader in a new thread
 	 */
 	protected abstract void initThread();
