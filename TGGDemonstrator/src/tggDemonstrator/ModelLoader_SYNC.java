@@ -135,15 +135,12 @@ public class ModelLoader_SYNC extends TGGDemonstrator{
 	
 	@Override
 	public void highlightGraph(TggVisualizer visSrc, TggVisualizer visTrg) {
-		highlightingGraphAlgorithm(visSrc, visTrg, "CreateNode","ContextNode");
+		/*
+		 * Possibility of new implementation for further adjustments 
+		*/
+		highlightingGraphAlgorithm(visSrc, visTrg);
 	}
-
-
-	@Override
-	public String buttonTranslateTxt() {
-		return "Translate";
-	}
-
+	
 	
 	// Implemented methods from interface
 	

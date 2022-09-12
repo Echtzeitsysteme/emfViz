@@ -155,6 +155,13 @@ public class TggVisualizerDisplay {
 	/*initialize all buttons for the main display*/
 	private void initButtons(Composite comp) {
 		
+		//at the moment we have no buttons word the "Standard functionalities" area
+		// TODO: add a reset model button?
+		// TODO: add a back to start window button
+		// TODO: add a model save button
+		
+		
+		/*
 		Group buttonGroupStandard = new Group(comp, SWT.None);
 		
 		buttonGroupStandard.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,false));
@@ -171,18 +178,14 @@ public class TggVisualizerDisplay {
 				modelLoader.removeGraphHighlighting((TggVisualizer)visSrc);
 				modelLoader.removeGraphHighlighting((TggVisualizer)visTrg);
 			}
-		});
-		
-		// TODO: add a reset model button?
-		// TODO: add a back to start window button
-		// TODO: add a model save button
+		});*/
 		
 		/*model generation functionalities (depending on strategy)*/
 		Group buttonGroupModelGeneration = new Group(comp, SWT.None);
 		
 		buttonGroupModelGeneration.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,true));
-		buttonGroupModelGeneration.setText("Model Generation");
-		buttonGroupModelGeneration.setLayout(new GridLayout(3, true));
+		buttonGroupModelGeneration.setText("Model Generation and Translation");
+		buttonGroupModelGeneration.setLayout(new GridLayout(2, true));
 		
 		Button translateButton = new Button(buttonGroupModelGeneration, SWT.PUSH);
 		translateButton.setText(modelLoader.buttonTranslateTxt());
@@ -194,7 +197,7 @@ public class TggVisualizerDisplay {
 		
 		if (combo != null) {
 			GridData comboGridData = new GridData(GridData.FILL_HORIZONTAL);
-			comboGridData.horizontalSpan = 2;
+			//comboGridData.horizontalSpan = 2;
 			
 			combo.setLayoutData(comboGridData);
 			
@@ -204,7 +207,7 @@ public class TggVisualizerDisplay {
 			
 			combo.addListener(SWT.Selection, new Listener() {
 				public void handleEvent(Event e) {
-					System.out.println(" ComboBox Selection Listener: " + e.widget);
+					//System.out.println(" ComboBox Selection Listener: " + e.widget);
 					
 					//if the same match selected again the highlighting will be removed
 					int index = combo.getSelectionIndex();
@@ -238,12 +241,8 @@ public class TggVisualizerDisplay {
 				}
 				
 				lastHiglightedRuleIndex = -1;
-				
-				/*mxGraph graphSrc = visSrc.getGraph();
-				mxGraph graphTrg = visTrg.getGraph();
-				graphSrc.refresh();
-				graphTrg.refresh();*/
-				
+					
+				// a dirty try to fix frame update bugs
 				callbackHandler.updateGraph();
 				
 				frameSrc.revalidate();

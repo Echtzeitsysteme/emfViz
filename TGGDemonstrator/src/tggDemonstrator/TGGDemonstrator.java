@@ -110,17 +110,17 @@ public abstract class TGGDemonstrator implements UserControlArea{
 	public abstract void highlightGraph(TggVisualizer visSrc, TggVisualizer visTrg);
 	
 	/*
-	 * Highlights the graph:
+	 * Highlights node and edge in source and target graph:
 	 * 		- Created: Green
 	 * 		- Context: Black
 	 */
-	protected void highlightingGraphAlgorithm (TggVisualizer visSrc, TggVisualizer visTrg, String layoutCreateCells, String layoutContextCells) {
+	protected void highlightingGraphAlgorithm (TggVisualizer visSrc, TggVisualizer visTrg) {
 		//check whether a match for highlighting exists or not
 		ITGGMatch match = callbackHandler.getSelectedMatch();
 		if (match == null)
 			return;
 		
-		//initialize source and target graph
+		//Initialize source and target graph
 		mxGraph graphSrc = visSrc.getGraph();	
 		mxCell rootSrc = (mxCell)graphSrc.getModel().getRoot();
 		
@@ -130,17 +130,16 @@ public abstract class TGGDemonstrator implements UserControlArea{
 		addStyles(graphSrc);
 		addStyles(graphTrg);
 		
-		List<HilightObject> temp = new LinkedList<HilightObject>();
 		List<mxICell> updateCellsCreate = new LinkedList<mxICell>();
 		List<mxICell> updateCellsContext = new LinkedList<mxICell>();
 		List<mxICell> updateEdgeCreate = new LinkedList<mxICell>();
 		List<mxICell> updateEdgeContext = new LinkedList<mxICell>();
 		
-		//first reset highlighted cells
+		//First reset highlighted cells
 		resetHighlightedCells(graphSrc);
 		resetHighlightedCells(graphTrg);
 		
-		// find selected rule
+		// Find selected rule
 		TGGRule myRule = null;
 		for (TGGRule rule : options.tgg.flattenedTGG().getRules()) {
 			
@@ -150,22 +149,23 @@ public abstract class TGGDemonstrator implements UserControlArea{
 			}	
 		}
 		
-		// will only be continued if the rule was found
+		// Will only be continued if the rule was found
 		if (myRule == null)
 			return;
 		
-		// match nodes from rule with nodes in selected match
+		// Match nodes from rule with nodes in selected match
 		@SuppressWarnings("restriction")
 		EList<TGGRuleNode> nodes = myRule.getNodes();
+		HashMap<Node, String> createdNodes = new HashMap<Node, String>(); 
 		
 		for (TGGRuleNode n : nodes) {
 			
-			Object o = match.get(n.getName());
+			EObject myNode = (EObject)match.get(n.getName());
 			
-			if(o != null) {
-				HilightObject myHilightObject = new HilightObject(o, n.getBindingType().getLiteral());
-				temp.add(myHilightObject);
-			}
+			if (myNode == null)
+				continue;
+			Node newNode = new Node(myNode);
+			createdNodes.put(newNode, n.getBindingType().getLiteral());
 		}
 		
 		
@@ -185,9 +185,7 @@ public abstract class TGGDemonstrator implements UserControlArea{
 			if (src == null || trg == null || ref == null)
 				continue;
 			
-			Edge newEdge = new Edge(src,trg,ref);
-			//createdEdges.add(newEdge);
-			
+			Edge newEdge = new Edge(src,trg,ref);	
 			createdEdges.put(newEdge, e.getBindingType().getLiteral());
 		}
 		
@@ -195,28 +193,35 @@ public abstract class TGGDemonstrator implements UserControlArea{
 		for (int i = 0; i < rootSrc.getChildAt(0).getChildCount(); i++) {
 			mxICell myCellSrc = rootSrc.getChildAt(0).getChildAt(i);
 			
-			//if (!myCellSrc.isEdge()) {
+			//Match mxCell to Node and assign it to update array
 			if (myCellSrc.isVertex()) {
 				
-				Node ref = (Node)myCellSrc.getValue();
+				Node refN = (Node)myCellSrc.getValue();
 				
-				if (ref != null) {
+				if (refN != null) {
 					
-					for (HilightObject obj : temp) {
+					for (Entry<Node, String> entry : createdNodes.entrySet()){
 						
-						if (obj.equals(ref.eobj)){
-							
-							if (obj.getBindingType()== "CREATE") {
-								updateCellsCreate.add(myCellSrc);
-							}else if(obj.getBindingType()== "CONTEXT") {
+						Node key = entry.getKey();
+						
+						if (key.equals(refN)) {
+							if (entry.getValue().equals("CONTEXT")) {
 								updateCellsContext.add(myCellSrc);
+							} else if(entry.getValue().equals("CREATE")) {
+								updateCellsCreate.add(myCellSrc);
 							}
 						}
 					}
 				}
 			}
 			
+			//Match mxCell to Edge and assign it to update array
 			if (myCellSrc.isEdge()) {
+				
+				//just a short fix for a ClassPathException - because sometimes the value of getValue() is a String (makes no sense)
+				if (!(myCellSrc.getValue() instanceof Edge))
+					continue;
+				
 				Edge refE = (Edge)myCellSrc.getValue();
 				
 				if (refE == null)
@@ -237,15 +242,12 @@ public abstract class TGGDemonstrator implements UserControlArea{
 		}
 		
 		//update cells
-		graphSrc.setCellStyle(layoutCreateCells, updateCellsCreate.toArray());
-		graphSrc.setCellStyle(layoutContextCells, updateCellsContext.toArray());
+		graphSrc.setCellStyle("CreateNode", updateCellsCreate.toArray());
+		graphSrc.setCellStyle("ContextNode", updateCellsContext.toArray());
 		
 		graphSrc.setCellStyle("CreateEdge", updateEdgeCreate.toArray());
 		graphSrc.setCellStyle("ContextEdge", updateEdgeContext.toArray());
 		
-		for (mxICell c : updateEdgeCreate) {
-			String s = c.getStyle();
-		}
 		//remove all objects to fill it with new objects
 		updateCellsCreate.clear();
 		updateCellsContext.clear();
@@ -257,27 +259,34 @@ public abstract class TGGDemonstrator implements UserControlArea{
 		for (int i = 0; i < rootTrg.getChildAt(0).getChildCount(); i++) {
 			mxICell myCellTrg = rootTrg.getChildAt(0).getChildAt(i);
 			
-			if (!myCellTrg.isEdge()) {
+			//Match mxCell to Node and assign it to update array
+			if (myCellTrg.isVertex()) {
+			
+				Node refN = (Node)myCellTrg.getValue();
 				
-				Node ref = (Node)myCellTrg.getValue();
-				
-				if (ref != null) {
+				if (refN != null) {
 					
-					/*if (temp.contains(ref.eobj)){
-						updateCellsCreate.add(myCellTrg);
-					}*/
-					for (HilightObject obj : temp) {
-						if (obj.equals(ref.eobj)){
-							if (obj.getBindingType() == "CREATE")
-								updateCellsCreate.add(myCellTrg);
-							else if(obj.getBindingType() == "CONTEXT")
+					for (Entry<Node, String> entry : createdNodes.entrySet()){
+						
+						Node key = entry.getKey();
+						
+						if (key.equals(refN)) {
+							if (entry.getValue().equals("CONTEXT")) {
 								updateCellsContext.add(myCellTrg);
+							} else if(entry.getValue().equals("CREATE")) {
+								updateCellsCreate.add(myCellTrg);
+							}
 						}
 					}
 				}
 			}
 			
+			//Match mxCell to Edge and assign it to update array
 			if (myCellTrg.isEdge()) {
+				
+				if (!(myCellTrg.getValue() instanceof Edge))
+					continue;
+				
 				Edge refE = (Edge)myCellTrg.getValue();
 				
 				if (refE == null)
@@ -298,8 +307,8 @@ public abstract class TGGDemonstrator implements UserControlArea{
 		}
 		
 		//update cells
-		graphTrg.setCellStyle(layoutCreateCells, updateCellsCreate.toArray());
-		graphTrg.setCellStyle(layoutContextCells, updateCellsContext.toArray());
+		graphTrg.setCellStyle("CreateNode", updateCellsCreate.toArray());
+		graphTrg.setCellStyle("ContextNode", updateCellsContext.toArray());
 		
 		graphTrg.setCellStyle("CreateEdge", updateEdgeCreate.toArray());
 		graphTrg.setCellStyle("ContextEdge", updateEdgeContext.toArray());
@@ -325,7 +334,7 @@ public abstract class TGGDemonstrator implements UserControlArea{
 		for (int i = 0; i < root.getChildAt(0).getChildCount(); i++) {
 			mxICell myCell = root.getChildAt(0).getChildAt(i);
 			
-			if (myCell.getStyle().equals("defaultNode"))
+			if (myCell.getStyle().equals("defaultNode") || myCell.getStyle().equals("defaultEdges") )
 				continue;
 			
 			if (myCell.isEdge())
@@ -341,11 +350,10 @@ public abstract class TGGDemonstrator implements UserControlArea{
 	}
 	
 	/*
-	 * Creates two different highlighting styles for create and context
+	 * Creates two different highlighting styles (create and context) for edges and nodes
 	 */
 	protected void addStyles(mxGraph graph) {
 		
-		//mxStylesheet stylesheet = graph.getStylesheet();
 		mxStylesheet stylesheetCreated = graph.getStylesheet();
 		Hashtable<String, Object> cellStyleCreate = new Hashtable<String, Object>();
 		cellStyleCreate.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_RECTANGLE);
@@ -356,7 +364,6 @@ public abstract class TGGDemonstrator implements UserControlArea{
 		cellStyleCreate.put(mxConstants.ALIGN_CENTER, "1");
 		cellStyleCreate.put(mxConstants.STYLE_OVERFLOW, "hidden");
 		stylesheetCreated.putCellStyle("CreateNode", cellStyleCreate); // Create
-		//mxStylesheet.putCellStyle("CreateNode", cellStyleCreate); // Create
 		
 		mxStylesheet stylesheetContex = graph.getStylesheet();
 		Hashtable<String, Object> cellStyleContex = new Hashtable<String, Object>();
@@ -370,7 +377,6 @@ public abstract class TGGDemonstrator implements UserControlArea{
 		cellStyleContex.put(mxConstants.STYLE_STROKEWIDTH, "3");
 		cellStyleContex.put(mxConstants.STYLE_STROKECOLOR, "#000000");
 		stylesheetContex.putCellStyle("ContextNode", cellStyleContex);
-		//stylesheet.putCellStyle("ContextNode", cellStyleContex);
 		
 		mxStylesheet stylesheetEContex = graph.getStylesheet();
 		Hashtable<String, Object> edgeStyleCreate = new Hashtable<String, Object>();
@@ -394,8 +400,6 @@ public abstract class TGGDemonstrator implements UserControlArea{
 		edgeStyleContex.put(mxConstants.STYLE_OVERFLOW, "fill");
 		edgeStyleContex.put(mxConstants.STYLE_STROKEWIDTH, "2");
 		edgeStyleContex.put(mxConstants.STYLE_STROKECOLOR, "#000000");
-		//edgeStyleContex.put(mxConstants., edgeStyleContex)
-		//stylesheet.putCellStyle("ContextEdge", edgeStyleContex);
 		stylesheetECreate.putCellStyle("ContextEdge", edgeStyleContex);
 	}
 	
@@ -404,7 +408,7 @@ public abstract class TGGDemonstrator implements UserControlArea{
 	
 	@Override
 	public String buttonTranslateTxt() {
-		return "Start Translation";
+		return "Start Translation Process";
 	}
 	
 	@Override
@@ -468,34 +472,6 @@ public abstract class TGGDemonstrator implements UserControlArea{
 	 */
 	public LoadingOption getLoadingOption() {
 		return loadingOption;
-	}
-
-}
-
-/*
- * Class for storing all relevant parameters required by the higlightGraph method
- */
-class HilightObject {
-	
-	private Object o;
-	private String bindingType;  //CREATE; CONTEXT
-	
-	public HilightObject(Object o, String s) {
-		this.o = o;
-		this.bindingType = s;
-	}
-	
-	public Object getObject() {
-		return o;
-	}
-	
-	public String getBindingType() {
-		return bindingType;
-	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		return this.o.equals(obj);
 	}
 }
 

@@ -24,7 +24,7 @@ public abstract class ModelLoaderThread extends Thread {
 		initialize();
 		
 		while (true) {
-			callbackHandler.setButtonTitle("Start Translation");
+			callbackHandler.setButtonTitle("Start Translation Process"); //process 
 			
 
 			try {
@@ -41,13 +41,11 @@ public abstract class ModelLoaderThread extends Thread {
 				matches = new HashSet<> ();
 				callbackHandler.setMatches(matches);
 				
-				callbackHandler.setButtonTitle("Start Translation");
-				
+			//	callbackHandler.setButtonTitle("Start Translation Process");
+
 				callbackHandler.updateGraph();
 			}
 		}
-		
-		//System.out.println("Thread " + getId() + " is not alive anymore!");
 	}
 	
 	/*

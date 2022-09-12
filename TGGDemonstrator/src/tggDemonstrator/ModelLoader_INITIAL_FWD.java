@@ -150,7 +150,10 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 	
 	@Override
 	public void highlightGraph(TggVisualizer visSrc, TggVisualizer visTrg) {
-		highlightingGraphAlgorithm(visSrc, visTrg, "CreateNode","ContextNode");
+		/*
+		 * Possibility of new implementation for further adjustments 
+		*/
+		highlightingGraphAlgorithm(visSrc, visTrg);
 	}
 	
 	// Implemented methods from interface
