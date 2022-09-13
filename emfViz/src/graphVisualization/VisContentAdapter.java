@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
@@ -26,6 +27,8 @@ public class VisContentAdapter extends EContentAdapter {
 	
 	private int xPos;
 	private int yPos;
+	
+	private final static Logger logger = Logger.getRootLogger();
 
 	public VisContentAdapter(Resource r, Visualizer vis) {
 		this.vis = vis;
@@ -40,7 +43,7 @@ public class VisContentAdapter extends EContentAdapter {
 	public void notifyChanged(Notification notification) {
 		super.notifyChanged(notification);
 		notifications.add(notification);
-		System.out.println(notification);
+		logger.info(notification);
 
 		preProcessNotification(notification);
 //		vis.runLayout();

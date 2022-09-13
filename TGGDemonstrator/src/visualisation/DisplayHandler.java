@@ -205,8 +205,8 @@ public class DisplayHandler {
 		visSrc.init();
 		visTrg.init();
 		
-		manipSrc = new GraphManipulator(visSrc, display, dataSrc, modelLoader, true, GraphManipulator.GraphType.SRC);
-		manipTrg = new GraphManipulator(visTrg, display, dataTrg, modelLoader, false, GraphManipulator.GraphType.TRG);
+		manipSrc = new GraphManipulator(visSrc, display, dataSrc, modelLoader, GraphManipulator.GraphType.SRC);
+		manipTrg = new GraphManipulator(visTrg, display, dataTrg, modelLoader, GraphManipulator.GraphType.TRG);
 		
 		manipSrc.initialize();
 		manipTrg.initialize();

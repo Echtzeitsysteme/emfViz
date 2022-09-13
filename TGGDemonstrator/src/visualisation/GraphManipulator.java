@@ -50,6 +50,10 @@ import tggDemonstrator.ModelLoader_INITIAL_FWD;
 import tggDemonstrator.ModelLoader_SYNC;
 import tggDemonstrator.TGGDemonstrator;
 
+/**
+ * Implements all changes a user can make in a graph, like adding and deleting elements.
+ *
+ */
 public class GraphManipulator {
 
 	public enum GraphType {
@@ -76,17 +80,18 @@ public class GraphManipulator {
 	private mxCell cellAtPos;
 	private mxGraph graph;
 
-	private boolean isSource;
 	private boolean preventRemovingEdge = false;
 
+	/**
+	 * Implements all changes a user can make in a graph, like adding and deleting elements.
+	 */
 	public GraphManipulator(TggVisualizer vis, Display display, InstanceDiagrammLoader loader,
-			TGGDemonstrator modelLoader, boolean isSource, GraphType type) {
+			TGGDemonstrator modelLoader, GraphType type) {
 
 		this.display = display;
 		this.resource = loader.getInstanceModel();
 		this.loader = loader;
 		this.modelLoader = modelLoader;
-		this.isSource = isSource;
 		this.type = type;
 
 		graph = vis.getGraph();
@@ -94,32 +99,38 @@ public class GraphManipulator {
 		callback = CallbackHandler.getInstance();
 
 	}
-
+	
+	/**
+	 * Activates functionalities. Right click on background or element for interaction.
+	 */
 	public void initialize() {
 		graphComponent.getGraphControl().addMouseListener(new MouseAdapter() {
 
 			public void mouseReleased(MouseEvent e) {
+				//cell that was clicked
 				cellAtPos = (mxCell) graphComponent.getCellAt(e.getX(), e.getY());
-
+				
+				//BUTTON3 = right button
 				if (e.getButton() == MouseEvent.BUTTON3) {
 					if (cellAtPos != null) {
 						if (cellAtPos.isVertex()) {
+							//select delete or show attributes
 							actionOnNode(e.getX(), e.getY());
 
 						} else {
-							if (modelLoader instanceof ModelLoader_INITIAL_FWD && isSource
-									|| modelLoader instanceof ModelLoader_INITIAL_BWD && !isSource
+							if (modelLoader instanceof ModelLoader_INITIAL_FWD && type.equals(GraphType.SRC)
+									|| modelLoader instanceof ModelLoader_INITIAL_BWD && type.equals(GraphType.TRG)
 									|| modelLoader instanceof ModelLoader_SYNC) {
-
+								//delete edge but only if allowed on the frame
 								actionOnEdge(e.getX(), e.getY());
 							}
 
 						}
 					} else {
-						if (modelLoader instanceof ModelLoader_INITIAL_FWD && isSource
-								|| modelLoader instanceof ModelLoader_INITIAL_BWD && !isSource
+						if (modelLoader instanceof ModelLoader_INITIAL_FWD && type.equals(GraphType.SRC)
+								|| modelLoader instanceof ModelLoader_INITIAL_BWD && type.equals(GraphType.TRG)
 								|| modelLoader instanceof ModelLoader_SYNC) {
-
+							//add node but only if allowed on the frame
 							actionOnFrame(e.getX(), e.getY());
 							callback.setPositionForNewNode(e.getX(), e.getY());
 						}
@@ -130,7 +141,8 @@ public class GraphManipulator {
 			}
 
 		});
-
+		
+		/*check for newly inserted edges*/
 		graph.getModel().addListener(mxEvent.CHANGE, (sender, evt) -> {
 			// System.out.println(evt.getName() + " ---- " + evt);
 			var changes = evt.getProperty("changes");
@@ -141,7 +153,7 @@ public class GraphManipulator {
 						if (child instanceof mxCell cell) {
 							if (cell.isEdge()) {
 								if (!(cell.getValue() instanceof Edge)) {
-									System.out.println("Detected new edge without value: " + cell);
+									//System.out.println("Detected new edge without value: " + cell);
 									cellAtPos = cell;
 									if(!preventRemovingEdge) {
 										addEdge();
@@ -149,7 +161,7 @@ public class GraphManipulator {
 									preventRemovingEdge = !preventRemovingEdge;
 
 								} else {
-									System.out.println("Detected new edge: " + cell);
+									//System.out.println("Detected new edge: " + cell);
 								}
 							}
 						}
@@ -159,6 +171,7 @@ public class GraphManipulator {
 		});
 	}
 
+	/*find match of a cell between graph and resource*/
 	private void findMatchInModel(mxCell comp) {
 		if (comp.isVertex()) {
 			for (Node node : loader.nodes) {
@@ -176,7 +189,8 @@ public class GraphManipulator {
 		}
 
 	}
-
+	
+	/*select delete edge or show attributes*/
 	private void actionOnNode(int x, int y) {
 		final PopupMenu popupmenu = new PopupMenu("On Node");
 		MenuItem attr = new MenuItem("Show Attributes");
@@ -184,8 +198,8 @@ public class GraphManipulator {
 
 		popupmenu.add(attr);
 
-		if (modelLoader instanceof ModelLoader_INITIAL_FWD && isSource
-				|| modelLoader instanceof ModelLoader_INITIAL_BWD && !isSource
+		if (modelLoader instanceof ModelLoader_INITIAL_FWD && type.equals(GraphType.SRC)
+				|| modelLoader instanceof ModelLoader_INITIAL_BWD && type.equals(GraphType.TRG)
 				|| modelLoader instanceof ModelLoader_SYNC) {
 
 			MenuItem delete = new MenuItem("Delete");
@@ -211,11 +225,12 @@ public class GraphManipulator {
 
 	}
 
+	/*select delete edge*/
 	private void actionOnEdge(int x, int y) {
 		final PopupMenu popupmenu = new PopupMenu("On Edge");
 
-		if (modelLoader instanceof ModelLoader_INITIAL_FWD && isSource
-				|| modelLoader instanceof ModelLoader_INITIAL_BWD && !isSource
+		if (modelLoader instanceof ModelLoader_INITIAL_FWD && type.equals(GraphType.SRC)
+				|| modelLoader instanceof ModelLoader_INITIAL_BWD && type.equals(GraphType.TRG)
 				|| modelLoader instanceof ModelLoader_SYNC) {
 
 			MenuItem delete = new MenuItem("Delete");
@@ -234,13 +249,15 @@ public class GraphManipulator {
 		popupmenu.show(graphComponent, x, y);
 
 	}
-
+	
+	/*select type and add new node*/
 	private void actionOnFrame(int x, int y) {
 		PopupMenu popupMenu = new PopupMenu("On Frame");
 
 		List<EClassImpl> classes = new ArrayList<EClassImpl>();
 
-		if (isSource) {
+		//find all possible classes of source or target model
+		if (type.equals(GraphType.SRC)) {
 			for (EObject obj : modelLoader.getOptions().tgg.tgg().getSrc().get(0).eContents()) {
 				if (obj instanceof EClassImpl) {
 					EClassImpl node = (EClassImpl) obj;
@@ -260,6 +277,7 @@ public class GraphManipulator {
 			}
 		}
 
+		//show classes for selection
 		for (EClassImpl cl : classes) {
 
 			MenuItem classItem = new MenuItem(cl.getName());
@@ -277,6 +295,7 @@ public class GraphManipulator {
 
 	}
 
+	/*remove node in resource*/
 	private void removeNode() {
 		findMatchInModel(cellAtPos);
 		if (nodeInModel != null) {
@@ -288,6 +307,7 @@ public class GraphManipulator {
 
 	}
 
+	/*remove edge in resource*/
 	private void removeEdge() {
 		findMatchInModel(cellAtPos);
 		if (edgeInModel != null) {
@@ -298,6 +318,7 @@ public class GraphManipulator {
 
 	}
 
+	/*add edge to resource*/
 	private void addEdge() {
 
 		if (cellAtPos != null) {
@@ -305,6 +326,7 @@ public class GraphManipulator {
 			mxCell source = (mxCell) graph.getModel().getTerminal(cellAtPos, true);
 			mxCell target = (mxCell) graph.getModel().getTerminal(cellAtPos, false);
 			
+			//remove edge in graph because it will be added with the visualization update 
 			graph.getModel().remove(cellAtPos);
 
 			findMatchInModel(source);
@@ -317,9 +339,10 @@ public class GraphManipulator {
 			EList<EClass> superclasses = trg.eClass().getEAllSuperTypes();
 			PopupMenu popupMenu = new PopupMenu("Edge type");
 
+			//search for possible types of edges between the source and target node
 			for (EReference eRef : edges) {
 
-				// type of edge could be an abstract superclass
+				// type of edge could belong to an abstract superclass
 				for (EClass eClass : superclasses) {
 					if (eClass.getName().equals(eRef.getEType().getName())) {
 						MenuItem edgeItem = new MenuItem(eRef.getName());
@@ -354,6 +377,7 @@ public class GraphManipulator {
 
 	}
 
+	/*distinguish different cases of inserted edges*/
 	private void createSpecificEdge(EObject src, EObject trg, EReference eRef) {
 		if (eRef.getUpperBound() == 1 && src.eIsSet(eRef)) {
 			// delete edge from src to old trg
@@ -370,7 +394,8 @@ public class GraphManipulator {
 		callback.updateGraph();
 		callback.setLastProcessedGraph(getGraphTypeName());
 	}
-
+	
+	/*add a node to the resource*/
 	private void addNode(EClass cl) {
 		newObj = EcoreUtil.create(cl);
 		resource.getContents().add(newObj);
@@ -378,6 +403,7 @@ public class GraphManipulator {
 		callback.setLastProcessedGraph(getGraphTypeName());
 	}
 
+	/*switch thread for showing attribute window*/
 	private void setAttributesExec() {
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
@@ -389,6 +415,7 @@ public class GraphManipulator {
 
 	}
 
+	/*show current values of attributes and save changes to them*/
 	private void setAttributes() {
 
 		findMatchInModel(cellAtPos);
@@ -417,6 +444,7 @@ public class GraphManipulator {
 				Label labelValue = new Label(composite, SWT.None);
 				labelValue.setText(attr.getEAttributeType().getInstanceTypeName());
 
+				//enums need a dropdown menu with possible values
 				if (attr.getEType() instanceof EEnum) {
 					EEnum eenum = (EEnum) attr.getEType();
 					int len = eenum.getELiterals().size();
@@ -452,6 +480,7 @@ public class GraphManipulator {
 			nextBT.setText("Done");
 			nextBT.setAlignment(SWT.CENTER);
 
+			//changes are set in resource when button "Done" is clicked
 			nextBT.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent pSelectionEvent) {
@@ -460,6 +489,8 @@ public class GraphManipulator {
 						setAttributesInModel();
 						shellAttr.close();
 					} catch (Exception e) {
+						//error occurs when type of input is incorrect for the attribute
+						//text box turns red
 						for (EAttribute attr : txtMap.keySet()) {
 							if (attr.equals(errorAttr)) {
 								txtMap.get(attr).setBackground(display.getSystemColor(SWT.COLOR_RED));
@@ -479,34 +510,38 @@ public class GraphManipulator {
 
 	}
 
+	/*set new values of attributes in the resource*/
 	private void setAttributesInModel() throws Exception {
 		for (EAttribute attr : txtMap.keySet()) {
-			//System.out.println(attr.getName() + " (" + attr.getEAttributeType().getInstanceTypeName() + ") = "
-					//+ txtMap.get(attr).getText());
 			errorAttr = attr;
 			EDataType type = attr.getEAttributeType();
 			String input = txtMap.get(attr).getText();
-			// Wird nicht gesetzt??
 			nodeInModel.eSet(attr, createFromString(type, input));
 		}
 		for (EAttribute attr : enumMap.keySet()) {
-			//System.out.println(attr.getName() + " (" + attr.getEAttributeType().getInstanceTypeName() + ") = "
-					//+ enumMap.get(attr).getText());
 			EDataType type = attr.getEAttributeType();
 			String input = enumMap.get(attr).getText();
-			// Wird nicht gesetzt?? //get instance?
 			nodeInModel.eSet(attr, createFromString(type, input));
 		}
 	}
 
+	/*converts user input in instance of the given EDataType*/
 	private Object createFromString(EDataType eDataType, String literal) throws Exception {
 		return eDataType.getEPackage().getEFactoryInstance().createFromString(eDataType, literal);
 	}
 
+	/**
+	 * 
+	 * @return the type of resource the graph visualizes (source or target)
+	 */
 	public GraphType getGraphType() {
 		return type;
 	}
 
+	/**
+	 * 
+	 * @return the name of the graph type (SRC or TRG)
+	 */
 	public String getGraphTypeName() {
 		return type.name();
 	}
