@@ -4,6 +4,9 @@ package tggDemonstrator;
 import java.io.IOException;
 import java.util.function.Function;
 
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Group;
@@ -28,8 +31,11 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 	public ModelLoader_MODELGEN (Function<DataObject, MODELGEN> modelgen, String pP, String wP) {	
 		super(pP, wP);
 		
-		System.out.println("Initialize ModelLoader_MODELGEN");
+		logger.info("Initialize ModelLoader_MODELGEN");
 		modelgen_demonstrator = modelgen;
+		
+		/*BasicConfigurator.configure();
+		Logger.getRootLogger().setLevel(Level.INFO);*/
 		
 		startVisualisation(this);
 	}
@@ -40,7 +46,7 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 		thread.setName("Modelgen Thread");
 		thread.start();
 		
-		System.out.println("Model generation process is running on thread " + thread.getId());
+		logger.info("Model generation process is running on thread " + thread.getId());
 	}
 	
 	@Override
@@ -117,12 +123,7 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 	}
 
 	@Override
-	public void generateNewModel() {
-		// TODO Auto-generated method stub
-		
-		System.out.println("Current thread is " + Thread.currentThread().getId());
-		
-		
+	public void generateNewModel() {	
 		DataObject data = new DataObject(projectPath + "/instances/src.xmi", projectPath + "/instances/trg.xmi", projectPath + "/instances/corr.xmi", projectPath + "/instances/protocol.xmi", Modelgeneration.NEW_MODEL);
 		
 		modelgen = modelgen_demonstrator.apply(data);
@@ -146,9 +147,10 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 	
 	public void saveModels() {
 		try {
+			logger.info("Models are saved at" + projectPath);
+			
 			modelgen.saveModels();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -167,7 +169,8 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 	public void buttonTranslateFunction() {
 		//next step functionalities
 		
-		System.out.println("Button Next Rule is clicked...");
+		logger.info("Button Next Rule is clicked...");
+		//System.out.println("Button Next Rule is clicked...");
 		
 		try {
 			thread.wakeUp();
@@ -202,7 +205,6 @@ class ModelgenThread extends ModelLoaderThread{
 		this.modelgen = m;
 		
 		translateButtonTitle = "Next Step";
-
 	}
 
 	@Override
@@ -221,7 +223,8 @@ class ModelgenThread extends ModelLoaderThread{
 					
 					callbackHandler.setMatches(matches);
 					
-					System.out.println("Thread " + getId() + " sleeps for a very long time!");
+					logger.info("Thread " + getId() + " sleeps for a very long time!");
+					
 					sleep(Long.MAX_VALUE);
 
 					
@@ -229,13 +232,12 @@ class ModelgenThread extends ModelLoaderThread{
 					
 					
 					match = callbackHandler.getSelectedMatch();
+					//if no match is selected then just use the next match
 					if(match == null) {
-						//if no match is selected then just use the next match
 						match = matchContainer.getNext();
 					}
 				}
-				
-				System.out.println("MODELGEN_Match: " + match.getRuleName());
+				logger.info("MODELGEN_Match: " + match.getRuleName() + " is applied");
 				
 				return match;			
 			}
@@ -245,7 +247,7 @@ class ModelgenThread extends ModelLoaderThread{
 	@Override
 	protected void startProcess() {
 		try {
-			System.out.println("------- run ------");
+			logger.info("------- run ------");
 			modelgen.run();
 		} catch (IOException e) {
 			e.printStackTrace();

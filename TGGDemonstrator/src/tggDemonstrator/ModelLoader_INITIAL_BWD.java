@@ -38,7 +38,7 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 	public ModelLoader_INITIAL_BWD (Function<DataObject, INITIAL_BWD> bwd, String pP, String wP) {
 		super(pP, wP);
 		
-		System.out.println("Initialize ModelLoader_INITIAL_BWD");
+		logger.info("Initialize ModelLoader_INITIAL_BWD");
 		bwd_Demonstrator = bwd;
 		
 		startVisualisation(this);
@@ -51,7 +51,7 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 		thread.setName("INITIAL_BWD Thread");
 		thread.start();
 		
-		System.out.println("Model translation process is running on thread " + thread.getId());
+		logger.info("Model translation process is running on thread " + thread.getId());
 	}
 	
 	
@@ -152,8 +152,8 @@ public class ModelLoader_INITIAL_BWD extends TGGDemonstrator{
 		try {
 			bwd.saveModels();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			logger.error("IOException: an error occured while model is saving!", e);
 		}
 	}
 	

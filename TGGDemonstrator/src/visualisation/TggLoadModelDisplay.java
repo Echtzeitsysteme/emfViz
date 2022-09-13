@@ -20,8 +20,6 @@ import tggDemonstrator.TGGDemonstrator;
 
 public class TggLoadModelDisplay {
 
-	
-	
 	private DisplayHandler handler;
 	private TGGDemonstrator modelLoader;
 	private Display display;
@@ -30,9 +28,8 @@ public class TggLoadModelDisplay {
 	private final int shellSizeX;
 	private final int shellSizeY;
 	
+	
 	public TggLoadModelDisplay(DisplayHandler handler, TGGDemonstrator modelLoader, Display display, Shell shell) {
-		//super(modelLoader);
-		// TODO Auto-generated constructor stub
 		this.handler = handler;
 		this.modelLoader = modelLoader;
 		this.display = display;
@@ -59,18 +56,18 @@ public class TggLoadModelDisplay {
 		composite.setLayout(new GridLayout());	
 		
 		Group modelGroup = new Group(composite, SWT.None);
-		modelGroup.setText("Select your model location:");
+		modelGroup.setText("Select model location:");
 		modelGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		modelGroup.setLayout(new GridLayout());
 		
 		Button defaultButton = new Button(modelGroup, SWT.RADIO);
-		defaultButton.setText("Default");
+		defaultButton.setText("Default Models");
 		
 		Button newModeltButton = new Button(modelGroup, SWT.RADIO);
 		newModeltButton.setText("New Models");
 		
 		Button modelLocationButton = new Button(modelGroup, SWT.RADIO);
-		modelLocationButton.setText("Select Model");
+		modelLocationButton.setText("Select Models");
 		
 		Button nextButton = new Button(composite, SWT.PUSH);
 		nextButton.setText("Next");
@@ -92,14 +89,12 @@ public class TggLoadModelDisplay {
 	}
 	
 	/*
-	 * choose between different model loading options and execute selected choice
-	 * hint - IbexOptions are available after the specific loading model function from ModelLoader is called
+	 * Choose between different model loading options and execute selected choice
+	 * Hint - IbexOptions are available after the specific loading model function from ModelLoader is called
 	*/
 	private void modelLoadingOptionSelection(String text) {
 		switch (text) {
-		case "Default":
-			System.out.println("selected loading option: " + text );
-			
+		case "Default Models":
 			modelLoader.loadFromDefault();
 		
 			handler.openTggVisualizerDisplay();
@@ -107,18 +102,13 @@ public class TggLoadModelDisplay {
 			break;
 			
 		case "New Models":
-			System.out.println("selected loading option: " + text );
-			
-			//generate a new model
 			modelLoader.generateNewModel();	
 			
 			handler.openTggVisualizerDisplay();;
 			
 			break;
 			
-		case "Select Model":
-			System.out.println("selected loading option: " + text );
-			
+		case "Select Models":
 			handler.openTggResourceSelectionDisplay();
 			
 			break;

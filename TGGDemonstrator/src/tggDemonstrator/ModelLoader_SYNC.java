@@ -24,7 +24,7 @@ public class ModelLoader_SYNC extends TGGDemonstrator{
 	public ModelLoader_SYNC(Function<DataObject, SYNC> sync, String pP, String wP) {
 		super(pP, wP);
 				
-		System.out.println("Initialize ModelLoader_SYNC");
+		logger.info("Initialize ModelLoader_SYNC");
 		sync_demonstrator	= sync;
 		
 		startVisualisation(this);	
@@ -36,7 +36,7 @@ public class ModelLoader_SYNC extends TGGDemonstrator{
 		thread.setName("SYNC Thread");
 		thread.start();
 		
-		System.out.println("Model translation process is running on thread " + thread.getId());
+		logger.info("Model translation process is running on thread " + thread.getId());
 	}
 	
 	@Override
@@ -136,6 +136,8 @@ public class ModelLoader_SYNC extends TGGDemonstrator{
 	@Override
 	public  void saveModels() {
 		try {
+			logger.info("Models are saved at" + projectPath);
+			
 			sync.saveModels();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -160,8 +162,7 @@ public class ModelLoader_SYNC extends TGGDemonstrator{
 	@Override
 	public void buttonTranslateFunction() {
 		//next step functionalities
-		System.out.println("Button Next Rule is clicked...");
-		
+		logger.info("Button Next Rule is clicked...");
 		try {
 			
 			thread.wakeUp();

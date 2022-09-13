@@ -3,6 +3,7 @@ package tggDemonstrator;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.emoflon.ibex.tgg.operational.matches.ITGGMatch;
 
 import visualisation.CallbackHandler;
@@ -13,6 +14,8 @@ public abstract class ModelLoaderThread extends Thread {
 	protected Set<ITGGMatch> matches = new HashSet<> ();
 	protected boolean restart = false;
 	protected String translateButtonTitle = "Start Translation";
+	//protected final static Logger logger = Logger.getRootLogger();
+	protected final static Logger logger = Logger.getLogger(TGGDemonstrator.class);
 	
 	public ModelLoaderThread() {
 		callbackHandler = CallbackHandler.getInstance();
@@ -20,7 +23,6 @@ public abstract class ModelLoaderThread extends Thread {
 	
 	@Override
 	public void run() {
-		
 		initialize();
 		
 		while (true) {
@@ -65,7 +67,7 @@ public abstract class ModelLoaderThread extends Thread {
 	 * Wakes up the thread and continues the translation process
 	 */
 	public void wakeUp() {
-		System.out.println("Hey thread " + getId() + " wake up!");
+		logger.info("Hey thread " + getId() + " wake up!");
 		
 		interrupt();
 	}

@@ -168,13 +168,12 @@ public class TggVisualizerDisplay {
 		buttonGroupStandard.setText("Standard Functionalities");
 		buttonGroupStandard.setLayout(new GridLayout(3, true));	
 
-		Button resetHighlighButton = new Button(buttonGroupStandard, SWT.PUSH);
-		resetHighlighButton.setText("Save Models");
+		Button saveButton = new Button(buttonGroupStandard, SWT.PUSH);
+		saveButton.setText("Save Models");
 		
-		resetHighlighButton.addSelectionListener(new SelectionAdapter() {
+		saveButton.addSelectionListener(new SelectionAdapter() {
 			@Override
             public void widgetSelected(SelectionEvent evt) {
-				//modelLoader.highlightGraph((TggVisualizer)visSrc, (TggVisualizer)visTrg);
 				modelLoader.saveModels();
 			}
 		});

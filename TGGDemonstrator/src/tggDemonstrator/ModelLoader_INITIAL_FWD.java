@@ -44,7 +44,7 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 		// TODO Auto-generated constructor stub
 		super(pP, wP);
 		
-		System.out.println("Initialize ModelLoader_INITIAL_FWD");
+		logger.info("Initialize ModelLoader_INITIAL_FWD");
 		fwd_demonstrator = fwd;
 		
 		startVisualisation(this);
@@ -56,7 +56,7 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 		thread.setName("INITIAL_FWD Thread");
 		thread.start();
 		
-		System.out.println("Model translation process is running on thread " + thread.getId());
+		logger.info("Model translation process is running on thread " + thread.getId());
 	}
 	
 	
@@ -153,8 +153,8 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 		try {
 			fwd.saveModels();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			logger.error("IOException: an error occured while model is saving!", e);
 		}
 	}
 	
@@ -175,9 +175,9 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 	public void buttonTranslateFunction() {
 		//next step functionalities
 		try {
+			logger.info("Button Next Rule is clicked...");
 			
-			thread.wakeUp();
-			
+			thread.wakeUp();		
 		}catch(Exception e) {
 			System.out.println(e);
 		}
@@ -225,7 +225,8 @@ class FWDThread extends ModelLoaderThread{
 					
 					callbackHandler.setMatches(matches);
 					
-					System.out.println("Thread " + getId() + " sleeps for a very long time!");
+					
+					logger.info("Thread " + getId() + " sleeps for a very long time!");
 					sleep(Long.MAX_VALUE);
 					
 				} catch (InterruptedException e) {
@@ -238,7 +239,7 @@ class FWDThread extends ModelLoaderThread{
 					}
 				}
 				
-				System.out.println("FWD_Match: " + match.getRuleName());
+				logger.info("FWD_Match: " + match.getRuleName());
 				
 				return match;			
 			}
@@ -249,7 +250,7 @@ class FWDThread extends ModelLoaderThread{
 	@Override
 	protected void startProcess() {
 		try {
-			System.out.println("------- Forward ------");
+			logger.info("------- Forward ------");
 			fwd.forward();
 		} catch (IOException e) {
 			e.printStackTrace();

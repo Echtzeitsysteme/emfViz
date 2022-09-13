@@ -1,12 +1,10 @@
 package tggDemonstrator;
 
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.emf.common.util.EList;
@@ -35,9 +33,11 @@ import visualisation.DisplayHandler;
 import visualisation.TggVisualizer;
 import visualisation.UserControlArea;
 
-import org.emoflon.ibex.common.emf.EMFEdge;
 import org.emoflon.ibex.tgg.operational.defaults.IbexOptions;
 import org.emoflon.ibex.tgg.operational.matches.ITGGMatch;
+
+import org.apache.log4j.Logger;
+
 
 public abstract class TGGDemonstrator implements UserControlArea{
 	
@@ -56,6 +56,8 @@ public abstract class TGGDemonstrator implements UserControlArea{
 	protected DisplayHandler graphVisualizer;
 	
 	protected CallbackHandler callbackHandler;
+	
+	protected final static Logger logger = Logger.getRootLogger();
 	
 	/*
 	 * Class constructor
@@ -100,6 +102,8 @@ public abstract class TGGDemonstrator implements UserControlArea{
 	
 	/*
 	 * Save Models
+	 * At the moment, save model is only supported at the default location.
+	 * Default location is: 'projectPath/instances/'
 	 */
 	public abstract void saveModels();
 	
