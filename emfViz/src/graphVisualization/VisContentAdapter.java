@@ -208,7 +208,7 @@ public class VisContentAdapter extends EContentAdapter {
 		// if the node was removed from the resource but will be readded later -> don't
 		// remove it
 		if (notification.getFeature() == null) {
-			//if (isDeleted(notification.getOldValue()))
+			if (isDeleted(notification.getOldValue()))
 				vis.removeNodeInGraph(new Node((EObject) notification.getOldValue()));
 			return;
 		}
@@ -221,8 +221,11 @@ public class VisContentAdapter extends EContentAdapter {
 	}
 
 	private void handleRemoveAdapterNotification(Notification notification) {
+		if(notification.getOldValue() instanceof EContentAdapter) {
+			return;
+		}
 		if (isDeleted(notification.getOldValue()))
-			vis.removeNodeInGraph(new Node((EObject) notification.getNotifier()));
+			vis.removeNodeInGraph(new Node((EObject) notification.getOldValue()));
 		
 	}
 

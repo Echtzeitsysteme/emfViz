@@ -77,6 +77,7 @@ public class GraphManipulator {
 	private mxGraph graph;
 
 	private boolean isSource;
+	private boolean preventRemovingEdge = false;
 
 	public GraphManipulator(TggVisualizer vis, Display display, InstanceDiagrammLoader loader,
 			TGGDemonstrator modelLoader, boolean isSource, GraphType type) {
@@ -142,7 +143,10 @@ public class GraphManipulator {
 								if (!(cell.getValue() instanceof Edge)) {
 									System.out.println("Detected new edge without value: " + cell);
 									cellAtPos = cell;
-									addEdge();
+									if(!preventRemovingEdge) {
+										addEdge();
+									}
+									preventRemovingEdge = !preventRemovingEdge;
 
 								} else {
 									System.out.println("Detected new edge: " + cell);
@@ -300,6 +304,8 @@ public class GraphManipulator {
 
 			mxCell source = (mxCell) graph.getModel().getTerminal(cellAtPos, true);
 			mxCell target = (mxCell) graph.getModel().getTerminal(cellAtPos, false);
+			
+			graph.getModel().remove(cellAtPos);
 
 			findMatchInModel(source);
 			EObject src = nodeInModel;
@@ -321,7 +327,7 @@ public class GraphManipulator {
 						edgeItem.addActionListener(new ActionListener() {
 							@Override
 							public void actionPerformed(ActionEvent e) {
-								graph.getModel().remove(cellAtPos);
+								
 								createSpecificEdge(src, trg, eRef);
 							}
 						});
@@ -333,7 +339,7 @@ public class GraphManipulator {
 					edgeItem.addActionListener(new ActionListener() {
 						@Override
 						public void actionPerformed(ActionEvent e) {
-							graph.getModel().remove(cellAtPos);
+							
 							createSpecificEdge(src, trg, eRef);
 						}
 					});
