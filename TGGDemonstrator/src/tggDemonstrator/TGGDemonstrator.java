@@ -165,7 +165,6 @@ public abstract class TGGDemonstrator implements UserControlArea{
 			return;
 		
 		// Match nodes from rule with nodes in selected match
-		@SuppressWarnings("restriction")
 		EList<TGGRuleNode> nodes = myRule.getNodes();
 		HashMap<Node, String> createdNodes = new HashMap<Node, String>(); 
 		
@@ -181,7 +180,6 @@ public abstract class TGGDemonstrator implements UserControlArea{
 		
 		
 		// get edges
-		@SuppressWarnings("restriction")
 		EList<TGGRuleEdge> edges = myRule.getEdges();
 		HashMap<Edge, String> createdEdges = new HashMap<Edge, String>(); 
 		
@@ -323,6 +321,9 @@ public abstract class TGGDemonstrator implements UserControlArea{
 		
 		graphTrg.setCellStyle("CreateEdge", updateEdgeCreate.toArray());
 		graphTrg.setCellStyle("ContextEdge", updateEdgeContext.toArray());
+		
+		graphVisualizer.getTrgTggVisualizer().updateGraph();
+		graphVisualizer.getSrcTggVisualizer().updateGraph();
 	}
 	
 	/*
@@ -358,6 +359,9 @@ public abstract class TGGDemonstrator implements UserControlArea{
 		
 		graph.setCellStyle("defaultEdges", resetTempE.toArray());
 		graph.setCellStyle("defaultNode", resetTempN.toArray());
+		
+		graphVisualizer.getTrgTggVisualizer().updateGraph();
+		graphVisualizer.getSrcTggVisualizer().updateGraph();
 	}
 	
 	/*

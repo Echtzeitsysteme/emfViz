@@ -14,7 +14,6 @@ public abstract class ModelLoaderThread extends Thread {
 	protected Set<ITGGMatch> matches = new HashSet<> ();
 	protected boolean restart = false;
 	protected String translateButtonTitle = "Start Translation";
-	//protected final static Logger logger = Logger.getRootLogger();
 	protected final static Logger logger = Logger.getLogger(TGGDemonstrator.class);
 	
 	public ModelLoaderThread() {
@@ -37,7 +36,6 @@ public abstract class ModelLoaderThread extends Thread {
 				
 				callbackHandler.setButtonTitle(translateButtonTitle);
 				
-				//initialize();	
 				startProcess();
 				
 				//no more matches -> return empty HashSet 
@@ -45,6 +43,8 @@ public abstract class ModelLoaderThread extends Thread {
 				callbackHandler.setMatches(matches);
 				
 				callbackHandler.setButtonTitle("Start Translation Process");
+				
+				callbackHandler.updateGraph();
 				
 				callbackHandler.getTGGDemonstratorInstance(null).removeGraphHighlighting(callbackHandler.getTGGDemonstratorInstance(null).getDisplayHandler().getTrgTggVisualizer());
 				callbackHandler.getTGGDemonstratorInstance(null).removeGraphHighlighting(callbackHandler.getTGGDemonstratorInstance(null).getDisplayHandler().getSrcTggVisualizer());

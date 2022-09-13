@@ -34,9 +34,6 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 		logger.info("Initialize ModelLoader_MODELGEN");
 		modelgen_demonstrator = modelgen;
 		
-		/*BasicConfigurator.configure();
-		Logger.getRootLogger().setLevel(Level.INFO);*/
-		
 		startVisualisation(this);
 	}
 	
@@ -51,21 +48,20 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 	
 	@Override
 	public void createResourcesFromPath(String pathSrc, String pathTrg, String pathCorr, String pathProtocol, String pathProject) {
-		// TODO Auto-generated method stub
 		String pathProjectTemp = pathProject;
 		
 		if (pathSrc.isBlank() || pathTrg.isBlank())
 			return;		
 			
-		if (pathProjectTemp.equals("") || pathProjectTemp.equals(" "))
+		if (pathProjectTemp.isBlank())
 			pathProjectTemp = projectPath + "/instances/";
 
 		
-		if (pathCorr.equals("") || pathCorr.equals(" "))
+		if (pathCorr.isBlank())
 			pathCorr = pathProjectTemp + "corr.xmi";
 	
 		
-		if (pathProtocol.equals("") || pathProtocol.equals(" "))
+		if (pathProtocol.isBlank())
 			pathProtocol = pathProjectTemp + "protocol.xmi";
 	
 		
@@ -75,6 +71,7 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 				pathProtocol, 
 				Modelgeneration.LOAD_MODEL);
 		
+		//Call MODELGEN_Demonstrator constructor
 		modelgen = modelgen_demonstrator.apply(data);
 		
 		options = modelgen.getOptions();
@@ -103,6 +100,7 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 				projectPath + "/instances/protocol.xmi", 
 				Modelgeneration.LOAD_MODEL);
 		
+		//Call MODELGEN_Demonstrator constructor
 		modelgen = modelgen_demonstrator.apply(data);
 		
 		options = modelgen.getOptions();
@@ -124,8 +122,13 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 
 	@Override
 	public void generateNewModel() {	
-		DataObject data = new DataObject(projectPath + "/instances/src.xmi", projectPath + "/instances/trg.xmi", projectPath + "/instances/corr.xmi", projectPath + "/instances/protocol.xmi", Modelgeneration.NEW_MODEL);
+		DataObject data = new DataObject(projectPath + "/instances/src.xmi", 
+				projectPath + "/instances/trg.xmi", 
+				projectPath + "/instances/corr.xmi", 
+				projectPath + "/instances/protocol.xmi", 
+				Modelgeneration.NEW_MODEL);
 		
+		//Call MODELGEN_Demonstrator constructor
 		modelgen = modelgen_demonstrator.apply(data);
 		
 		options = modelgen.getOptions();
@@ -147,11 +150,11 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 	
 	public void saveModels() {
 		try {
-			logger.info("Models are saved at" + projectPath);
+			logger.info("Models are saved at " + projectPath);
 			
 			modelgen.saveModels();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("IOException: an error occured while model is saving!", e);
 		}
 	}
 	
@@ -170,7 +173,6 @@ public class ModelLoader_MODELGEN extends TGGDemonstrator {
 		//next step functionalities
 		
 		logger.info("Button Next Rule is clicked...");
-		//System.out.println("Button Next Rule is clicked...");
 		
 		try {
 			thread.wakeUp();

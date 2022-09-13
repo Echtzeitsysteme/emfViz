@@ -62,5 +62,10 @@ public class TggVisualizer extends Visualizer{
 	public mxGraphComponent getGraphComponent() {
 		return graphComponent;
 	}
+	
+	public void updateGraph() {
+		graph.refresh();
+		graphComponent.refresh();
+	}
 
 }

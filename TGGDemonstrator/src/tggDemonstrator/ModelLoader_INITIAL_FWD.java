@@ -69,19 +69,19 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 		if (pathSrc.isBlank())
 			return;
 			
-		if (pathProjectTemp.equals(" ") || pathProjectTemp.equals("")) {
+		if (pathProjectTemp.isBlank()) {
 			pathProjectTemp = projectPath + "/instances/";
 		}
 		
-		if (pathTrg.equals("") || pathTrg.equals("")) {
+		if (pathTrg.isBlank()) {
 			pathTrg = pathProjectTemp + "trg.xmi";
 		}
 		
-		if (pathCorr.equals(" ") || pathCorr.equals("")) {
+		if (pathCorr.isBlank()) {
 			pathCorr = pathProjectTemp + "corr.xmi";
 		}
 		
-		if (pathProtocol.equals(" ") || pathProtocol.equals("")) {
+		if (pathProtocol.isBlank()) {
 			pathProtocol = pathProjectTemp + "protocol.xmi";
 		}
 		
@@ -91,6 +91,7 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 				pathProtocol,
 				Modelgeneration.LOAD_MODEL);
 		
+		//Call INITIAL_FWD constructor
 		fwd = fwd_demonstrator.apply(data);
 		
 		options = fwd.getOptions();
@@ -113,6 +114,7 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 				projectPath + "/instances/protocol.xmi", 
 				Modelgeneration.LOAD_MODEL);
 		
+		//Call INITIAL_FWD constructor
 		fwd = fwd_demonstrator.apply(data);
 		
 		options = fwd.getOptions();
@@ -135,6 +137,7 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 				projectPath + "/instances/protocol.xmi", 
 				Modelgeneration.NEW_MODEL);
 		
+		//Call INITIAL_FWD constructor
 		fwd = fwd_demonstrator.apply(data);
 				
 		options = fwd.getOptions();
@@ -151,9 +154,10 @@ public class ModelLoader_INITIAL_FWD extends TGGDemonstrator{
 	@Override
 	public  void saveModels() {
 		try {
+			logger.info("Models are saved at " + projectPath);
+			
 			fwd.saveModels();
 		} catch (IOException e) {
-			e.printStackTrace();
 			logger.error("IOException: an error occured while model is saving!", e);
 		}
 	}

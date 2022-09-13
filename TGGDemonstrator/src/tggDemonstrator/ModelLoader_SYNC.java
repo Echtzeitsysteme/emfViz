@@ -75,6 +75,7 @@ public class ModelLoader_SYNC extends TGGDemonstrator{
 				pathProtocol,
 				loadingTypeTmp);
 		
+		//Call SYNC_Demonstrator constructor
 		sync = sync_demonstrator.apply(data);
 		
 		options = sync.getOptions();
@@ -97,6 +98,7 @@ public class ModelLoader_SYNC extends TGGDemonstrator{
 				projectPath + "/instances/protocol.xmi", 
 				Modelgeneration.LOAD_MODEL);
 		
+		//Call SYNC_Demonstrator constructor
 		sync = sync_demonstrator.apply(data);
 		
 		options = sync.getOptions();
@@ -119,6 +121,7 @@ public class ModelLoader_SYNC extends TGGDemonstrator{
 				projectPath + "/instances/protocol.xmi", 
 				Modelgeneration.NEW_MODEL);
 		
+		//Call SYNC_Demonstrator constructor
 		sync = sync_demonstrator.apply(data);
 				
 		options = sync.getOptions();
@@ -136,12 +139,11 @@ public class ModelLoader_SYNC extends TGGDemonstrator{
 	@Override
 	public  void saveModels() {
 		try {
-			logger.info("Models are saved at" + projectPath);
+			logger.info("Models are saved at " + projectPath);
 			
 			sync.saveModels();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("IOException: an error occured while model is saving!", e);
 		}
 	}
 	
